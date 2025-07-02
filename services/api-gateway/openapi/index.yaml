@@ -1,0 +1,58 @@
+openapi: 3.0.3
+info:
+  title: Abyss API Gateway
+  description: Central API gateway for Abyss Central microservices
+  version: 1.0.0
+  contact:
+    name: VOID Software Company
+    email: support@void-software.com
+  license:
+    name: Proprietary
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Development server
+  - url: https://api.abyss-central.com/api/v1
+    description: Production server
+tags:
+  - name: Health
+    description: Health check endpoints
+  - name: Services
+    description: Service discovery and management
+  - name: Proxy
+    description: Service proxy endpoints
+paths:
+  /health:
+    $ref: './paths/health.yaml#/paths/~1health'
+  /health/live:
+    $ref: './paths/health.yaml#/paths/~1health~1live'
+  /health/ready:
+    $ref: './paths/health.yaml#/paths/~1health~1ready'
+  /health/services:
+    $ref: './paths/health.yaml#/paths/~1health~1services'
+  /services:
+    $ref: './paths/services.yaml#/paths/~1services'
+  /services/{serviceName}/status:
+    $ref: './paths/services.yaml#/paths/~1services~1{serviceName}~1status'
+  /services/{serviceName}/metrics:
+    $ref: './paths/services.yaml#/paths/~1services~1{serviceName}~1metrics'
+  # Proxy paths for each service
+  /auth/{proxy+}:
+    $ref: './paths/proxy.yaml#/paths/~1auth~1{proxy+}'
+  /inventory/{proxy+}:
+    $ref: './paths/proxy.yaml#/paths/~1inventory~1{proxy+}'
+  /orders/{proxy+}:
+    $ref: './paths/proxy.yaml#/paths/~1orders~1{proxy+}'
+  /analytics/{proxy+}:
+    $ref: './paths/proxy.yaml#/paths/~1analytics~1{proxy+}'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    $ref: './components/parameters.yaml#/components/parameters'
+  schemas:
+    $ref: './components/schemas/index.yaml#/components/schemas'
+  responses:
+    $ref: './components/responses.yaml#/components/responses'

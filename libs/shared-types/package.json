@@ -1,0 +1,24 @@
+{
+  "name": "@template/shared-types",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Shared TypeScript type definitions for Enterprise SaaS Template",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "npx tsc",
+    "dev": "npx tsc --watch",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/**/*.ts"
+  },
+  "files": [
+    "dist/**/*"
+  ],
+  "devDependencies": {
+    "typescript": "^5.3.2"
+  },
+  "publishConfig": {
+    "access": "restricted"
+  }
+}

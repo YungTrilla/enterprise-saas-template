@@ -1,0 +1,247 @@
+paths:
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Register a new user
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/auth.yaml#/components/schemas/UserRegistration'
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '../components/schemas/auth.yaml#/components/schemas/AuthResponse'
+        '400':
+          $ref: '../components/responses.yaml#/components/responses/BadRequest'
+        '409':
+          $ref: '../components/responses.yaml#/components/responses/Conflict'
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: User login
+      operationId: loginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/auth.yaml#/components/schemas/LoginCredentials'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '../components/schemas/auth.yaml#/components/schemas/AuthResponse'
+        '401':
+          $ref: '../components/responses.yaml#/components/responses/Unauthorized'
+        '429':
+          $ref: '../components/responses.yaml#/components/responses/TooManyRequests'
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: User logout
+      operationId: logoutUser
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Logged out successfully
+        '401':
+          $ref: '../components/responses.yaml#/components/responses/Unauthorized'
+  /auth/refresh:
+    post:
+      tags:
+        - Authentication
+      summary: Refresh access token
+      operationId: refreshToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refreshToken
+              properties:
+                refreshToken:
+                  type: string
+                  description: Refresh token
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '../components/schemas/auth.yaml#/components/schemas/TokenResponse'
+        '401':
+          $ref: '../components/responses.yaml#/components/responses/Unauthorized'
+  /auth/verify-email:
+    post:
+      tags:
+        - Authentication
+      summary: Verify email address
+      operationId: verifyEmail
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - token
+              properties:
+                token:
+                  type: string
+                  description: Email verification token
+      responses:
+        '200':
+          description: Email verified successfully
+        '400':
+          $ref: '../components/responses.yaml#/components/responses/BadRequest'
+  /auth/forgot-password:
+    post:
+      tags:
+        - Authentication
+      summary: Request password reset
+      operationId: forgotPassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        '200':
+          description: Password reset email sent
+        '404':
+          $ref: '../components/responses.yaml#/components/responses/NotFound'
+  /auth/reset-password:
+    post:
+      tags:
+        - Authentication
+      summary: Reset password with token
+      operationId: resetPassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - token
+                - newPassword
+              properties:
+                token:
+                  type: string
+                  description: Password reset token
+                newPassword:
+                  type: string
+                  format: password
+                  minLength: 8
+      responses:
+        '200':
+          description: Password reset successfully
+        '400':
+          $ref: '../components/responses.yaml#/components/responses/BadRequest'
+  /auth/change-password:
+    post:
+      tags:
+        - Authentication
+      summary: Change user password
+      operationId: changePassword
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - currentPassword
+                - newPassword
+              properties:
+                currentPassword:
+                  type: string
+                  format: password
+                newPassword:
+                  type: string
+                  format: password
+                  minLength: 8
+      responses:
+        '200':
+          description: Password changed successfully
+        '401':
+          $ref: '../components/responses.yaml#/components/responses/Unauthorized'
+  /auth/mfa/enable:
+    post:
+      tags:
+        - Authentication
+      summary: Enable two-factor authentication
+      operationId: enableMFA
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: MFA setup initiated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  secret:
+                    type: string
+                  qrCode:
+                    type: string
+                    description: Base64 encoded QR code image
+        '401':
+          $ref: '../components/responses.yaml#/components/responses/Unauthorized'
+  /auth/mfa/verify:
+    post:
+      tags:
+        - Authentication
+      summary: Verify MFA token
+      operationId: verifyMFA
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - token
+              properties:
+                token:
+                  type: string
+                  pattern: '^[0-9]{6}$'
+      responses:
+        '200':
+          description: MFA verified successfully
+        '401':
+          $ref: '../components/responses.yaml#/components/responses/Unauthorized'

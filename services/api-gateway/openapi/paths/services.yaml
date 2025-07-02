@@ -1,0 +1,82 @@
+paths:
+  /services:
+    get:
+      tags:
+        - Services
+      summary: List registered services
+      operationId: listServices
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Services retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '../components/schemas/service.yaml#/components/schemas/ServiceInfo'
+        '401':
+          $ref: '../components/responses.yaml#/components/responses/Unauthorized'
+        '403':
+          $ref: '../components/responses.yaml#/components/responses/Forbidden'
+  /services/{serviceName}/status:
+    get:
+      tags:
+        - Services
+      summary: Get service status
+      operationId: getServiceStatus
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: serviceName
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [auth, inventory, orders, analytics]
+      responses:
+        '200':
+          description: Service status retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '../components/schemas/service.yaml#/components/schemas/ServiceStatus'
+        '401':
+          $ref: '../components/responses.yaml#/components/responses/Unauthorized'
+        '404':
+          $ref: '../components/responses.yaml#/components/responses/NotFound'
+  /services/{serviceName}/metrics:
+    get:
+      tags:
+        - Services
+      summary: Get service metrics
+      operationId: getServiceMetrics
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: serviceName
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [auth, inventory, orders, analytics]
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [1h, 6h, 24h, 7d, 30d]
+            default: 24h
+      responses:
+        '200':
+          description: Service metrics retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '../components/schemas/service.yaml#/components/schemas/ServiceMetrics'
+        '401':
+          $ref: '../components/responses.yaml#/components/responses/Unauthorized'
+        '403':
+          $ref: '../components/responses.yaml#/components/responses/Forbidden'
+        '404':
+          $ref: '../components/responses.yaml#/components/responses/NotFound'

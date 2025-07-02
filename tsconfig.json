@@ -1,0 +1,78 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "declaration": true,
+    "declarationMap": true,
+    "composite": true,
+    "baseUrl": ".",
+    "paths": {
+      "@template/*": ["libs/*/src"],
+      "@apps/*": ["apps/*/src"],
+      "@services/*": ["services/*/src"]
+    }
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.jsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    ".next",
+    "coverage"
+  ],
+  "references": [
+    {
+      "path": "./apps/web"
+    },
+    {
+      "path": "./services/auth"
+    },
+    {
+      "path": "./services/notification"
+    },
+    {
+      "path": "./services/api-gateway"
+    },
+    {
+      "path": "./libs/shared-types"
+    },
+    {
+      "path": "./libs/shared-utils"
+    },
+    {
+      "path": "./libs/shared-config"
+    },
+    {
+      "path": "./libs/ui-components"
+    },
+    {
+      "path": "./libs/api-client"
+    },
+    {
+      "path": "./libs/service-bootstrap"
+    },
+    {
+      "path": "./libs/multi-tenancy"
+    },
+    {
+      "path": "./libs/plugin-system"
+    }
+  ]
+}

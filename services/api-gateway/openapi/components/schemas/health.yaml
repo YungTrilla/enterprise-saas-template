@@ -1,0 +1,66 @@
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+        version:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        uptime:
+          type: integer
+          description: Uptime in seconds
+        checks:
+          type: array
+          items:
+            $ref: '#/components/schemas/HealthCheck'
+    HealthCheck:
+      type: object
+      properties:
+        name:
+          type: string
+        status:
+          type: string
+          enum: [pass, warn, fail]
+        message:
+          type: string
+        lastCheck:
+          type: string
+          format: date-time
+        duration:
+          type: integer
+          description: Check duration in milliseconds
+    ServiceHealth:
+      type: object
+      properties:
+        name:
+          type: string
+        url:
+          type: string
+          format: uri
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy, unknown]
+        responseTime:
+          type: integer
+          description: Response time in milliseconds
+        lastCheck:
+          type: string
+          format: date-time
+        circuitBreaker:
+          type: object
+          properties:
+            state:
+              type: string
+              enum: [closed, open, half-open]
+            failureCount:
+              type: integer
+            successCount:
+              type: integer
+            nextAttempt:
+              type: string
+              format: date-time

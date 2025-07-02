@@ -1,0 +1,166 @@
+paths:
+  /auth/{proxy+}:
+    get:
+      tags:
+        - Proxy
+      summary: Proxy GET requests to auth service
+      operationId: proxyAuthGet
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: proxy
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Path to proxy to auth service
+      responses:
+        '200':
+          description: Successful response from auth service
+        '400':
+          $ref: '../components/responses.yaml#/components/responses/BadRequest'
+        '401':
+          $ref: '../components/responses.yaml#/components/responses/Unauthorized'
+        '403':
+          $ref: '../components/responses.yaml#/components/responses/Forbidden'
+        '404':
+          $ref: '../components/responses.yaml#/components/responses/NotFound'
+        '503':
+          $ref: '../components/responses.yaml#/components/responses/ServiceUnavailable'
+    post:
+      tags:
+        - Proxy
+      summary: Proxy POST requests to auth service
+      operationId: proxyAuthPost
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: proxy
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Successful response from auth service
+        '201':
+          description: Resource created successfully
+        '400':
+          $ref: '../components/responses.yaml#/components/responses/BadRequest'
+        '401':
+          $ref: '../components/responses.yaml#/components/responses/Unauthorized'
+        '503':
+          $ref: '../components/responses.yaml#/components/responses/ServiceUnavailable'
+    put:
+      tags:
+        - Proxy
+      summary: Proxy PUT requests to auth service
+      operationId: proxyAuthPut
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: proxy
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Successful response from auth service
+        '400':
+          $ref: '../components/responses.yaml#/components/responses/BadRequest'
+        '401':
+          $ref: '../components/responses.yaml#/components/responses/Unauthorized'
+        '503':
+          $ref: '../components/responses.yaml#/components/responses/ServiceUnavailable'
+    delete:
+      tags:
+        - Proxy
+      summary: Proxy DELETE requests to auth service
+      operationId: proxyAuthDelete
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: proxy
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Resource deleted successfully
+        '401':
+          $ref: '../components/responses.yaml#/components/responses/Unauthorized'
+        '404':
+          $ref: '../components/responses.yaml#/components/responses/NotFound'
+        '503':
+          $ref: '../components/responses.yaml#/components/responses/ServiceUnavailable'
+  /inventory/{proxy+}:
+    get:
+      tags:
+        - Proxy
+      summary: Proxy requests to inventory service
+      operationId: proxyInventory
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: proxy
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response from inventory service
+        '503':
+          $ref: '../components/responses.yaml#/components/responses/ServiceUnavailable'
+  /orders/{proxy+}:
+    get:
+      tags:
+        - Proxy
+      summary: Proxy requests to orders service
+      operationId: proxyOrders
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: proxy
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response from orders service
+        '503':
+          $ref: '../components/responses.yaml#/components/responses/ServiceUnavailable'
+  /analytics/{proxy+}:
+    get:
+      tags:
+        - Proxy
+      summary: Proxy requests to analytics service
+      operationId: proxyAnalytics
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: proxy
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response from analytics service
+        '503':
+          $ref: '../components/responses.yaml#/components/responses/ServiceUnavailable'

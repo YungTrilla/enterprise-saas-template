@@ -1,0 +1,106 @@
+components:
+  schemas:
+    ServiceInfo:
+      type: object
+      properties:
+        name:
+          type: string
+        displayName:
+          type: string
+        description:
+          type: string
+        url:
+          type: string
+          format: uri
+        version:
+          type: string
+        status:
+          type: string
+          enum: [active, inactive, maintenance]
+        endpoints:
+          type: array
+          items:
+            type: object
+            properties:
+              path:
+                type: string
+              method:
+                type: string
+                enum: [GET, POST, PUT, DELETE, PATCH]
+              description:
+                type: string
+    ServiceStatus:
+      type: object
+      properties:
+        name:
+          type: string
+        status:
+          type: string
+          enum: [online, offline, degraded]
+        health:
+          $ref: './health.yaml#/components/schemas/ServiceHealth'
+        instances:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceInstance'
+    ServiceInstance:
+      type: object
+      properties:
+        id:
+          type: string
+        host:
+          type: string
+        port:
+          type: integer
+        status:
+          type: string
+          enum: [healthy, unhealthy]
+        metadata:
+          type: object
+          additionalProperties: true
+    ServiceMetrics:
+      type: object
+      properties:
+        service:
+          type: string
+        period:
+          type: string
+        metrics:
+          type: object
+          properties:
+            requests:
+              type: object
+              properties:
+                total:
+                  type: integer
+                successful:
+                  type: integer
+                failed:
+                  type: integer
+                averageResponseTime:
+                  type: number
+                  description: Average response time in milliseconds
+            availability:
+              type: number
+              description: Service availability percentage (0-100)
+            errorRate:
+              type: number
+              description: Error rate percentage (0-100)
+            throughput:
+              type: object
+              properties:
+                current:
+                  type: number
+                  description: Current requests per second
+                peak:
+                  type: number
+                  description: Peak requests per second in period
+            circuitBreaker:
+              type: object
+              properties:
+                trips:
+                  type: integer
+                  description: Number of circuit breaker trips
+                currentState:
+                  type: string
+                  enum: [closed, open, half-open]

@@ -1,0 +1,17 @@
+components:
+  parameters:
+    ServiceNameParam:
+      name: serviceName
+      in: path
+      required: true
+      schema:
+        type: string
+        enum: [auth, inventory, orders, analytics]
+      description: Name of the microservice
+    ProxyPathParam:
+      name: proxy
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Path to proxy to the target service

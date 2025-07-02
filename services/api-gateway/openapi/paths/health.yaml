@@ -1,0 +1,107 @@
+paths:
+  /health:
+    get:
+      tags:
+        - Health
+      summary: Get overall health status
+      operationId: getHealth
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '../components/schemas/health.yaml#/components/schemas/HealthStatus'
+        '503':
+          description: Service is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '../components/schemas/health.yaml#/components/schemas/HealthStatus'
+  /health/live:
+    get:
+      tags:
+        - Health
+      summary: Liveness probe
+      operationId: getLiveness
+      responses:
+        '200':
+          description: Service is alive
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [alive]
+                  timestamp:
+                    type: string
+                    format: date-time
+        '503':
+          description: Service is not alive
+  /health/ready:
+    get:
+      tags:
+        - Health
+      summary: Readiness probe
+      operationId: getReadiness
+      responses:
+        '200':
+          description: Service is ready
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [ready]
+                  timestamp:
+                    type: string
+                    format: date-time
+        '503':
+          description: Service is not ready
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [not_ready]
+                  reasons:
+                    type: array
+                    items:
+                      type: string
+  /health/services:
+    get:
+      tags:
+        - Health
+      summary: Get health status of all services
+      operationId: getServicesHealth
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Services health status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  services:
+                    type: array
+                    items:
+                      $ref: '../components/schemas/health.yaml#/components/schemas/ServiceHealth'
+                  summary:
+                    type: object
+                    properties:
+                      healthy:
+                        type: integer
+                      unhealthy:
+                        type: integer
+                      total:
+                        type: integer
+        '401':
+          $ref: '../components/responses.yaml#/components/responses/Unauthorized'
