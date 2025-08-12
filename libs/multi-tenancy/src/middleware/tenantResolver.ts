@@ -1,9 +1,9 @@
 /**
  * Tenant Resolver Middleware
- * 
+ *
  * Resolves tenant information from request based on configured strategy:
  * - Subdomain (app.example.com)
- * - Domain (custom-domain.com)  
+ * - Domain (custom-domain.com)
  * - Header (X-Tenant-ID)
  * - Path (/tenant/:slug)
  * - Query parameter (?tenant=slug)
@@ -40,7 +40,7 @@ export function createTenantResolverMiddleware(options: TenantResolverOptions) {
     required = true,
     cache = { enabled: true, ttl: 300 },
     onTenantNotFound,
-    onError
+    onError,
   } = options;
 
   const strategies = Array.isArray(strategy) ? strategy : [strategy];
@@ -56,13 +56,13 @@ export function createTenantResolverMiddleware(options: TenantResolverOptions) {
           strategy: currentStrategy,
           headerName,
           queryParam,
-          pathPattern
+          pathPattern,
         });
 
         if (extractedIdentifier) {
           identifier = extractedIdentifier;
           tenant = await resolveTenant(storageProvider, currentStrategy, identifier, cache);
-          
+
           if (tenant) {
             break;
           }
@@ -76,18 +76,16 @@ export function createTenantResolverMiddleware(options: TenantResolverOptions) {
 
       // Handle tenant not found
       if (!tenant && required) {
-        throw new ApiError(
-          'TENANT_NOT_FOUND',
-          'Tenant not found or not accessible',
-          404,
-          { identifier, strategies: strategies.join(', ') }
-        );
+        throw new ApiError('TENANT_NOT_FOUND', 'Tenant not found or not accessible', 404, {
+          identifier,
+          strategies: strategies.join(', '),
+        });
       }
 
       // Attach tenant to request
       if (tenant) {
         req.tenant = tenant;
-        
+
         // Add tenant info to response headers for debugging (development only)
         if (process.env.NODE_ENV === 'development') {
           res.setHeader('X-Tenant-ID', tenant.id);
@@ -100,16 +98,16 @@ export function createTenantResolverMiddleware(options: TenantResolverOptions) {
       if (onError) {
         onError(error as Error, req);
       }
-      
+
       if (error instanceof ApiError) {
         return res.status(error.statusCode).json({
           success: false,
           error: {
             code: error.code,
             message: error.message,
-            details: error.details
+            details: error.details,
           },
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       }
 
@@ -180,9 +178,9 @@ export function requireTenant() {
         success: false,
         error: {
           code: 'TENANT_REQUIRED',
-          message: 'Tenant identification is required for this endpoint'
+          message: 'Tenant identification is required for this endpoint',
         },
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     }
     next();
@@ -204,9 +202,9 @@ export function checkTenantStatus(allowedStatuses: string[] = ['ACTIVE']) {
         error: {
           code: 'TENANT_INACTIVE',
           message: `Tenant is ${req.tenant.status.toLowerCase()} and cannot access this resource`,
-          details: { status: req.tenant.status, allowedStatuses }
+          details: { status: req.tenant.status, allowedStatuses },
         },
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     }
 

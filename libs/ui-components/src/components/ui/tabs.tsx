@@ -38,11 +38,7 @@ export const Tabs: React.FC<TabsProps> = ({
   return (
     <TabsContext.Provider value={{ activeTab, setActiveTab }}>
       <div
-        className={cn(
-          'w-full',
-          orientation === 'vertical' && 'flex gap-4',
-          className
-        )}
+        className={cn('w-full', orientation === 'vertical' && 'flex gap-4', className)}
         data-orientation={orientation}
       >
         {children}
@@ -69,7 +65,7 @@ export const TabsList: React.FC<TabsListProps> = ({ className, children }) => {
         'data-[orientation=vertical]:flex-col data-[orientation=vertical]:h-auto',
         className
       )}
-      role="tablist"
+      role='tablist'
     >
       {children}
     </div>
@@ -99,8 +95,8 @@ export const TabsTrigger: React.FC<TabsTriggerProps> = ({
 
   return (
     <button
-      type="button"
-      role="tab"
+      type='button'
+      role='tab'
       aria-selected={isActive}
       aria-controls={`tabpanel-${value}`}
       id={`tab-${value}`}
@@ -127,11 +123,7 @@ export interface TabsContentProps {
   children: React.ReactNode;
 }
 
-export const TabsContent: React.FC<TabsContentProps> = ({
-  value,
-  className,
-  children,
-}) => {
+export const TabsContent: React.FC<TabsContentProps> = ({ value, className, children }) => {
   const context = useContext(TabsContext);
   if (!context) {
     throw new Error('TabsContent must be used within Tabs');
@@ -144,7 +136,7 @@ export const TabsContent: React.FC<TabsContentProps> = ({
 
   return (
     <div
-      role="tabpanel"
+      role='tabpanel'
       aria-labelledby={`tab-${value}`}
       id={`tabpanel-${value}`}
       tabIndex={0}

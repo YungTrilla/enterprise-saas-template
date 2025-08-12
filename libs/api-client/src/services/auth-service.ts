@@ -103,10 +103,10 @@ export class AuthServiceClient extends BaseServiceClient {
    */
   async logout(): Promise<ApiResponse<void>> {
     const response = await this.post<void>('/auth/logout');
-    
+
     // Clear tokens after logout
     this.clearAuthTokens();
-    
+
     return response;
   }
 
@@ -200,7 +200,11 @@ export class AuthServiceClient extends BaseServiceClient {
   /**
    * Get all users with pagination
    */
-  async getUsers(page?: number, limit?: number, filters?: Record<string, any>): Promise<ApiResponse<IUser[]>> {
+  async getUsers(
+    page?: number,
+    limit?: number,
+    filters?: Record<string, any>
+  ): Promise<ApiResponse<IUser[]>> {
     return this.getPaginated<IUser>('/users', page, limit, filters);
   }
 

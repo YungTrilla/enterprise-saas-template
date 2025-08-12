@@ -15,18 +15,18 @@ paths:
             type: string
           description: Path to proxy to auth service
       responses:
-        '200':
+        "200":
           description: Successful response from auth service
-        '400':
-          $ref: '../components/responses.yaml#/components/responses/BadRequest'
-        '401':
-          $ref: '../components/responses.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: '../components/responses.yaml#/components/responses/Forbidden'
-        '404':
-          $ref: '../components/responses.yaml#/components/responses/NotFound'
-        '503':
-          $ref: '../components/responses.yaml#/components/responses/ServiceUnavailable'
+        "400":
+          $ref: "../components/responses.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "../components/responses.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "../components/responses.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "../components/responses.yaml#/components/responses/NotFound"
+        "503":
+          $ref: "../components/responses.yaml#/components/responses/ServiceUnavailable"
     post:
       tags:
         - Proxy
@@ -47,16 +47,16 @@ paths:
             schema:
               type: object
       responses:
-        '200':
+        "200":
           description: Successful response from auth service
-        '201':
+        "201":
           description: Resource created successfully
-        '400':
-          $ref: '../components/responses.yaml#/components/responses/BadRequest'
-        '401':
-          $ref: '../components/responses.yaml#/components/responses/Unauthorized'
-        '503':
-          $ref: '../components/responses.yaml#/components/responses/ServiceUnavailable'
+        "400":
+          $ref: "../components/responses.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "../components/responses.yaml#/components/responses/Unauthorized"
+        "503":
+          $ref: "../components/responses.yaml#/components/responses/ServiceUnavailable"
     put:
       tags:
         - Proxy
@@ -77,14 +77,14 @@ paths:
             schema:
               type: object
       responses:
-        '200':
+        "200":
           description: Successful response from auth service
-        '400':
-          $ref: '../components/responses.yaml#/components/responses/BadRequest'
-        '401':
-          $ref: '../components/responses.yaml#/components/responses/Unauthorized'
-        '503':
-          $ref: '../components/responses.yaml#/components/responses/ServiceUnavailable'
+        "400":
+          $ref: "../components/responses.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "../components/responses.yaml#/components/responses/Unauthorized"
+        "503":
+          $ref: "../components/responses.yaml#/components/responses/ServiceUnavailable"
     delete:
       tags:
         - Proxy
@@ -99,14 +99,14 @@ paths:
           schema:
             type: string
       responses:
-        '204':
+        "204":
           description: Resource deleted successfully
-        '401':
-          $ref: '../components/responses.yaml#/components/responses/Unauthorized'
-        '404':
-          $ref: '../components/responses.yaml#/components/responses/NotFound'
-        '503':
-          $ref: '../components/responses.yaml#/components/responses/ServiceUnavailable'
+        "401":
+          $ref: "../components/responses.yaml#/components/responses/Unauthorized"
+        "404":
+          $ref: "../components/responses.yaml#/components/responses/NotFound"
+        "503":
+          $ref: "../components/responses.yaml#/components/responses/ServiceUnavailable"
   /inventory/{proxy+}:
     get:
       tags:
@@ -122,10 +122,10 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Successful response from inventory service
-        '503':
-          $ref: '../components/responses.yaml#/components/responses/ServiceUnavailable'
+        "503":
+          $ref: "../components/responses.yaml#/components/responses/ServiceUnavailable"
   /orders/{proxy+}:
     get:
       tags:
@@ -141,10 +141,10 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Successful response from orders service
-        '503':
-          $ref: '../components/responses.yaml#/components/responses/ServiceUnavailable'
+        "503":
+          $ref: "../components/responses.yaml#/components/responses/ServiceUnavailable"
   /analytics/{proxy+}:
     get:
       tags:
@@ -160,7 +160,7 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Successful response from analytics service
-        '503':
-          $ref: '../components/responses.yaml#/components/responses/ServiceUnavailable'
+        "503":
+          $ref: "../components/responses.yaml#/components/responses/ServiceUnavailable"

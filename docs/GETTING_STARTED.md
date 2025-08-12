@@ -1,6 +1,7 @@
 # Getting Started with Enterprise SaaS Template
 
-Welcome to the Enterprise SaaS Template! This comprehensive guide will help you get up and running quickly with a production-ready SaaS application.
+Welcome to the Enterprise SaaS Template! This comprehensive guide will help you
+get up and running quickly with a production-ready SaaS application.
 
 ## 🎯 What You'll Build
 
@@ -92,6 +93,7 @@ pnpm run dev:web       # React app (port 3000)
 - **Auth Service**: http://localhost:8001
 
 Default login credentials:
+
 - Email: `admin@example.com`
 - Password: `password123`
 
@@ -147,6 +149,7 @@ enterprise-saas-template/
 ### Technology Stack
 
 **Frontend:**
+
 - React 18 with TypeScript
 - Tailwind CSS for styling
 - React Query for server state
@@ -154,6 +157,7 @@ enterprise-saas-template/
 - React Hook Form for forms
 
 **Backend:**
+
 - Node.js with Express
 - TypeScript throughout
 - PostgreSQL database
@@ -161,6 +165,7 @@ enterprise-saas-template/
 - JWT authentication
 
 **Infrastructure:**
+
 - Docker for containerization
 - GitHub Actions for CI/CD
 - OpenTelemetry for monitoring
@@ -252,7 +257,8 @@ The template uses JWT-based authentication with:
 // In your service
 import { authenticateToken, requirePermission } from '@template/shared-utils';
 
-app.get('/api/admin/users', 
+app.get(
+  '/api/admin/users',
   authenticateToken,
   requirePermission('users:read'),
   getUsersHandler
@@ -267,11 +273,11 @@ import { useAuth } from './contexts/AuthContext';
 
 function MyComponent() {
   const { user, login, logout, isAuthenticated } = useAuth();
-  
+
   if (!isAuthenticated) {
     return <LoginForm onLogin={login} />;
   }
-  
+
   return <Dashboard user={user} onLogout={logout} />;
 }
 ```
@@ -283,19 +289,21 @@ function MyComponent() {
 The template supports multiple tenant resolution strategies:
 
 ```typescript
-import { 
+import {
   createTenantResolverMiddleware,
-  TenantResolutionStrategy 
+  TenantResolutionStrategy,
 } from '@template/multi-tenancy';
 
 // Multiple strategies
-app.use(createTenantResolverMiddleware({
-  strategy: [
-    TenantResolutionStrategy.SUBDOMAIN,  // tenant.yourdomain.com
-    TenantResolutionStrategy.HEADER,     // X-Tenant-ID header
-    TenantResolutionStrategy.PATH        // /tenant/slug/...
-  ]
-}));
+app.use(
+  createTenantResolverMiddleware({
+    strategy: [
+      TenantResolutionStrategy.SUBDOMAIN, // tenant.yourdomain.com
+      TenantResolutionStrategy.HEADER, // X-Tenant-ID header
+      TenantResolutionStrategy.PATH, // /tenant/slug/...
+    ],
+  })
+);
 ```
 
 ### Tenant Context
@@ -304,11 +312,11 @@ app.use(createTenantResolverMiddleware({
 // Access tenant in your handlers
 app.get('/api/data', (req, res) => {
   const { tenant, user, canAccess } = req.tenantContext;
-  
+
   if (!canAccess('advanced_reports')) {
     return res.status(403).json({ error: 'Feature not available' });
   }
-  
+
   // Tenant-scoped data query
   const data = await getData(tenant.id);
   res.json(data);
@@ -327,13 +335,13 @@ await pluginManager.installPlugin({
   source: 'MARKETPLACE',
   identifier: 'analytics-plugin',
   version: '1.0.0',
-  autoActivate: true
+  autoActivate: true,
 });
 
 // Install from file
 await pluginManager.installPlugin({
   source: 'FILE_UPLOAD',
-  identifier: '/path/to/plugin.zip'
+  identifier: '/path/to/plugin.zip',
 });
 ```
 
@@ -371,7 +379,7 @@ logger.info('User created', {
   userId: user.id,
   email: user.email,
   tenantId: tenant.id,
-  correlationId: req.correlationId
+  correlationId: req.correlationId,
 });
 ```
 
@@ -386,10 +394,10 @@ app.get('/health', async (req, res) => {
     checks: {
       database: await checkDatabase(),
       redis: await checkRedis(),
-      dependencies: await checkDependencies()
-    }
+      dependencies: await checkDependencies(),
+    },
   };
-  
+
   res.json(health);
 });
 ```
@@ -426,15 +434,15 @@ import { UserService } from './user.service';
 
 describe('UserService', () => {
   let service: UserService;
-  
+
   beforeEach(() => {
     service = new UserService();
   });
-  
+
   it('should create user', async () => {
     const userData = { email: 'test@example.com' };
     const user = await service.createUser(userData);
-    
+
     expect(user).toBeDefined();
     expect(user.email).toBe(userData.email);
   });
@@ -454,7 +462,7 @@ describe('User Routes', () => {
       .post('/api/users')
       .send({ email: 'test@example.com' })
       .expect(201);
-    
+
     expect(response.body.data).toHaveProperty('id');
   });
 });
@@ -471,7 +479,7 @@ test('user can login and access dashboard', async ({ page }) => {
   await page.fill('[data-testid=email]', 'admin@example.com');
   await page.fill('[data-testid=password]', 'password123');
   await page.click('[data-testid=submit]');
-  
+
   await expect(page).toHaveURL('/dashboard');
   await expect(page.locator('h1')).toContainText('Dashboard');
 });
@@ -502,7 +510,7 @@ services:
     environment:
       - NODE_ENV=production
       - VITE_API_URL=https://api.yourdomain.com
-  
+
   auth-service:
     environment:
       - NODE_ENV=production
@@ -528,11 +536,11 @@ jobs:
         with:
           node-version: '18'
           cache: 'pnpm'
-      
+
       - run: pnpm install
       - run: pnpm run build
       - run: pnpm test
-      
+
       - name: Deploy to production
         run: ./scripts/deploy.sh
 ```
@@ -586,6 +594,8 @@ jobs:
 
 ## 🎉 Welcome to Enterprise SaaS!
 
-You're now ready to build amazing SaaS applications with the Enterprise SaaS Template. The template provides a solid foundation, but the real magic happens when you customize it for your specific use case.
+You're now ready to build amazing SaaS applications with the Enterprise SaaS
+Template. The template provides a solid foundation, but the real magic happens
+when you customize it for your specific use case.
 
 Happy coding! 🚀

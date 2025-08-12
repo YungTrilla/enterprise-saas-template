@@ -3,7 +3,12 @@
  */
 
 import { JwtService } from '../jwt.service';
-import { createMockAuthConfig, createMockUser, createMockSession, createCorrelationId } from '../../__tests__/utils/test-helpers';
+import {
+  createMockAuthConfig,
+  createMockUser,
+  createMockSession,
+  createCorrelationId,
+} from '../../__tests__/utils/test-helpers';
 import { EntityId } from '@template/shared-types';
 import jwt from 'jsonwebtoken';
 
@@ -56,13 +61,7 @@ describe('JwtService', () => {
       const sessionId = 'session-123' as EntityId;
       const correlationId = createCorrelationId();
 
-      const tokenPair = jwtService.generateTokenPair(
-        user,
-        [],
-        [],
-        sessionId,
-        correlationId
-      );
+      const tokenPair = jwtService.generateTokenPair(user, [], [], sessionId, correlationId);
 
       const decoded = jwt.verify(tokenPair.accessToken, mockConfig.jwt.secret) as any;
       expect(decoded.roles).toEqual([]);
@@ -99,11 +98,9 @@ describe('JwtService', () => {
     });
 
     it('should throw error for expired token', () => {
-      const expiredToken = jwt.sign(
-        { sub: 'user-123' },
-        mockConfig.jwt.secret,
-        { expiresIn: '-1s' }
-      );
+      const expiredToken = jwt.sign({ sub: 'user-123' }, mockConfig.jwt.secret, {
+        expiresIn: '-1s',
+      });
 
       expect(() => {
         jwtService.verifyAccessToken(expiredToken);
@@ -171,7 +168,9 @@ describe('JwtService', () => {
 
   describe('extractTokenFromHeader', () => {
     it('should extract token from Bearer header', () => {
-      const token = jwtService.extractTokenFromHeader('Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9');
+      const token = jwtService.extractTokenFromHeader(
+        'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9'
+      );
       expect(token).toBe('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9');
     });
 
@@ -201,11 +200,9 @@ describe('JwtService', () => {
     });
 
     it('should return true for expired token', () => {
-      const expiredToken = jwt.sign(
-        { sub: 'user-123' },
-        mockConfig.jwt.secret,
-        { expiresIn: '-1s' }
-      );
+      const expiredToken = jwt.sign({ sub: 'user-123' }, mockConfig.jwt.secret, {
+        expiresIn: '-1s',
+      });
 
       expect(jwtService.isTokenExpired(expiredToken)).toBe(true);
     });

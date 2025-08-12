@@ -16,7 +16,7 @@ import {
   IResetPasswordRequest,
   IMfaSetupResponse,
   IMfaVerifyRequest,
-  IAuthConfig
+  IAuthConfig,
 } from '../types/auth';
 import { JwtService } from './jwt.service';
 import { PasswordService } from './password.service';
@@ -57,12 +57,7 @@ export class AuthService {
       authRepository
     );
 
-    this.authMfaService = new AuthMfaService(
-      config,
-      mfaService,
-      auditService,
-      authRepository
-    );
+    this.authMfaService = new AuthMfaService(config, mfaService, auditService, authRepository);
 
     this.authAccountService = new AuthAccountService(
       config,

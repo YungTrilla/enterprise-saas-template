@@ -17,7 +17,7 @@ components:
         checks:
           type: array
           items:
-            $ref: '#/components/schemas/HealthCheck'
+            $ref: "#/components/schemas/HealthCheck"
     HealthCheck:
       type: object
       properties:

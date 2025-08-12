@@ -1,30 +1,35 @@
 # DataTable Migration Guide
 
-This guide shows how to migrate from custom table implementations to the shared DataTable component.
+This guide shows how to migrate from custom table implementations to the shared
+DataTable component.
 
 ## Before (Custom Table)
 
 ```tsx
 // apps/web/src/components/users/UserTable.tsx
-<div className="relative overflow-x-auto">
-  <table className="w-full text-sm text-left">
-    <thead className="text-xs uppercase bg-muted/50">
+<div className='relative overflow-x-auto'>
+  <table className='w-full text-sm text-left'>
+    <thead className='text-xs uppercase bg-muted/50'>
       <tr>
-        <th scope="col" className="p-4">
+        <th scope='col' className='p-4'>
           <input
-            type="checkbox"
+            type='checkbox'
             checked={isAllSelected}
-            onChange={(e) => onSelectAll(e.target.checked ? allUserIds : [])}
+            onChange={e => onSelectAll(e.target.checked ? allUserIds : [])}
           />
         </th>
-        <th scope="col" className="px-6 py-3">Name</th>
-        <th scope="col" className="px-6 py-3">Email</th>
+        <th scope='col' className='px-6 py-3'>
+          Name
+        </th>
+        <th scope='col' className='px-6 py-3'>
+          Email
+        </th>
         {/* ... more headers */}
       </tr>
     </thead>
     <tbody>
-      {users.map((user) => (
-        <tr key={user.id} className="border-b hover:bg-muted/30">
+      {users.map(user => (
+        <tr key={user.id} className='border-b hover:bg-muted/30'>
           {/* ... table cells */}
         </tr>
       ))}
@@ -36,15 +41,21 @@ This guide shows how to migrate from custom table implementations to the shared 
 ## After (Using DataTable)
 
 ```tsx
-import { DataTable, Column, Badge, Button, DropdownMenu } from '@abyss/ui-components';
+import {
+  DataTable,
+  Column,
+  Badge,
+  Button,
+  DropdownMenu,
+} from '@abyss/ui-components';
 import { Eye, Edit, MoreHorizontal } from 'lucide-react';
 
 const columns: Column<User>[] = [
   {
     id: 'name',
     header: 'Name',
-    accessor: (user) => (
-      <Link to={`/users/${user.id}`} className="hover:text-primary font-medium">
+    accessor: user => (
+      <Link to={`/users/${user.id}`} className='hover:text-primary font-medium'>
         {user.firstName} {user.lastName}
       </Link>
     ),
@@ -53,10 +64,10 @@ const columns: Column<User>[] = [
   {
     id: 'email',
     header: 'Email / Username',
-    accessor: (user) => (
+    accessor: user => (
       <div>
         <div>{user.email}</div>
-        <div className="text-xs text-muted-foreground">@{user.username}</div>
+        <div className='text-xs text-muted-foreground'>@{user.username}</div>
       </div>
     ),
     sortable: true,
@@ -64,10 +75,10 @@ const columns: Column<User>[] = [
   {
     id: 'roles',
     header: 'Role',
-    accessor: (user) => (
-      <div className="flex flex-wrap gap-1">
-        {user.roles.map((role) => (
-          <Badge key={role} variant={getRoleBadgeVariant(role)} size="sm">
+    accessor: user => (
+      <div className='flex flex-wrap gap-1'>
+        {user.roles.map(role => (
+          <Badge key={role} variant={getRoleBadgeVariant(role)} size='sm'>
             {role.replace(/_/g, ' ')}
           </Badge>
         ))}
@@ -77,8 +88,8 @@ const columns: Column<User>[] = [
   {
     id: 'status',
     header: 'Status',
-    accessor: (user) => (
-      <Badge variant={user.isActive ? 'success' : 'secondary'} size="sm">
+    accessor: user => (
+      <Badge variant={user.isActive ? 'success' : 'secondary'} size='sm'>
         {user.isActive ? 'Active' : 'Inactive'}
       </Badge>
     ),
@@ -86,46 +97,46 @@ const columns: Column<User>[] = [
   {
     id: 'actions',
     header: 'Actions',
-    accessor: (user) => (
-      <div className="flex items-center gap-2">
+    accessor: user => (
+      <div className='flex items-center gap-2'>
         <Button
-          variant="ghost"
-          size="sm"
+          variant='ghost'
+          size='sm'
           onClick={() => navigate(`/users/${user.id}`)}
         >
-          <Eye className="h-4 w-4" />
+          <Eye className='h-4 w-4' />
         </Button>
         <Button
-          variant="ghost"
-          size="sm"
+          variant='ghost'
+          size='sm'
           onClick={() => navigate(`/users/${user.id}/edit`)}
         >
-          <Edit className="h-4 w-4" />
+          <Edit className='h-4 w-4' />
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm">
-              <MoreHorizontal className="h-4 w-4" />
+            <Button variant='ghost' size='sm'>
+              <MoreHorizontal className='h-4 w-4' />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent align='end'>
             {user.isActive ? (
               <DropdownMenuItem onSelect={() => onDeactivate(user.id)}>
-                <UserX className="h-4 w-4 mr-2" />
+                <UserX className='h-4 w-4 mr-2' />
                 Deactivate
               </DropdownMenuItem>
             ) : (
               <DropdownMenuItem onSelect={() => onActivate(user.id)}>
-                <UserCheck className="h-4 w-4 mr-2" />
+                <UserCheck className='h-4 w-4 mr-2' />
                 Activate
               </DropdownMenuItem>
             )}
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onSelect={() => onDelete(user.id)}
-              className="text-destructive"
+              className='text-destructive'
             >
-              <Trash2 className="h-4 w-4 mr-2" />
+              <Trash2 className='h-4 w-4 mr-2' />
               Delete
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -148,17 +159,17 @@ export const UserTable: React.FC<UserTableProps> = ({
     <DataTable
       data={users}
       columns={columns}
-      getRowId={(user) => user.id}
+      getRowId={user => user.id}
       selectable
       selectedRows={selectedUsers}
       onSelectRow={onSelectUser}
       onSelectAll={onSelectAll}
       searchable
-      searchPlaceholder="Search users..."
+      searchPlaceholder='Search users...'
       loading={isLoading}
       pageSize={10}
       stickyHeader
-      emptyMessage="No users found"
+      emptyMessage='No users found'
     />
   );
 };
@@ -167,6 +178,7 @@ export const UserTable: React.FC<UserTableProps> = ({
 ## Features
 
 ### 1. Built-in Sorting
+
 ```tsx
 {
   id: 'name',
@@ -177,24 +189,26 @@ export const UserTable: React.FC<UserTableProps> = ({
 ```
 
 ### 2. Selection Support
+
 ```tsx
 <DataTable
   selectable
   selectedRows={selectedIds}
-  onSelectRow={(id) => setSelectedIds([...selectedIds, id])}
-  onSelectAll={(ids) => setSelectedIds(ids)}
+  onSelectRow={id => setSelectedIds([...selectedIds, id])}
+  onSelectAll={ids => setSelectedIds(ids)}
 />
 ```
 
 ### 3. Search Functionality
+
 ```tsx
 <DataTable
   searchable
-  searchPlaceholder="Search by name, email..."
-  onSearch={(query) => {
+  searchPlaceholder='Search by name, email...'
+  onSearch={query => {
     // Filter your data based on search query
-    const filtered = users.filter(user => 
-      user.name.includes(query) || user.email.includes(query)
+    const filtered = users.filter(
+      user => user.name.includes(query) || user.email.includes(query)
     );
     setFilteredUsers(filtered);
   }}
@@ -202,23 +216,22 @@ export const UserTable: React.FC<UserTableProps> = ({
 ```
 
 ### 4. Loading States
+
 ```tsx
-<DataTable
-  loading={isLoading}
-  data={users}
-  columns={columns}
-/>
+<DataTable loading={isLoading} data={users} columns={columns} />
 ```
 
 ### 5. Custom Row Styling
+
 ```tsx
 <DataTable
-  rowClassName={(user) => user.isVip ? 'bg-yellow-100' : ''}
-  onRowClick={(user) => navigate(`/users/${user.id}`)}
+  rowClassName={user => (user.isVip ? 'bg-yellow-100' : '')}
+  onRowClick={user => navigate(`/users/${user.id}`)}
 />
 ```
 
 ### 6. Pagination
+
 ```tsx
 <DataTable
   data={users}
@@ -230,15 +243,14 @@ export const UserTable: React.FC<UserTableProps> = ({
 ## Advanced Usage
 
 ### Custom Column Rendering
+
 ```tsx
 const columns: Column<Order>[] = [
   {
     id: 'total',
     header: 'Total',
-    accessor: (order) => (
-      <span className="font-mono">
-        ${order.total.toFixed(2)}
-      </span>
+    accessor: order => (
+      <span className='font-mono'>${order.total.toFixed(2)}</span>
     ),
     align: 'right',
     sortable: true,
@@ -246,19 +258,20 @@ const columns: Column<Order>[] = [
   {
     id: 'status',
     header: (
-      <div className="flex items-center gap-2">
+      <div className='flex items-center gap-2'>
         <span>Status</span>
-        <Tooltip content="Order fulfillment status">
-          <Info className="h-4 w-4" />
+        <Tooltip content='Order fulfillment status'>
+          <Info className='h-4 w-4' />
         </Tooltip>
       </div>
     ),
-    accessor: (order) => <OrderStatusBadge status={order.status} />,
+    accessor: order => <OrderStatusBadge status={order.status} />,
   },
 ];
 ```
 
 ### With Filters
+
 ```tsx
 const [statusFilter, setStatusFilter] = useState('all');
 
@@ -281,7 +294,7 @@ return (
     <DataTable
       data={filteredData}
       columns={columns}
-      getRowId={(order) => order.id}
+      getRowId={order => order.id}
     />
   </>
 );

@@ -1,6 +1,7 @@
 # Enterprise SaaS Template - Code Generators
 
-This directory contains CLI tools for generating boilerplate code and scaffolding new components within the Enterprise SaaS Template.
+This directory contains CLI tools for generating boilerplate code and
+scaffolding new components within the Enterprise SaaS Template.
 
 ## 🚀 Available Generators
 
@@ -29,6 +30,7 @@ services/user-management/
 ```
 
 **Generated Features:**
+
 - Complete CRUD operations with validation
 - Health check endpoints (basic and detailed)
 - Structured error handling with correlation IDs
@@ -77,6 +79,7 @@ apps/customer-portal/
 ```
 
 **Generated Features:**
+
 - React 18 with TypeScript
 - Authentication context and protected routes
 - Responsive layout with dark mode support
@@ -93,12 +96,14 @@ apps/customer-portal/
 ### Service Generator
 
 **Best Practices:**
+
 - Use descriptive service names (e.g., `user-management`, `notification-system`)
 - Service names should be kebab-case
 - Each service should have a single responsibility
 - Follow the generated patterns for consistency
 
 **After Generation:**
+
 1. Navigate to the service directory
 2. Run `pnpm install` to install dependencies
 3. Update TODO comments in generated files
@@ -107,6 +112,7 @@ apps/customer-portal/
 6. Add the service to your deployment configuration
 
 **Customization Points:**
+
 - Update entity interfaces in the service file
 - Add specific validation rules in routes
 - Implement actual database connections
@@ -116,12 +122,14 @@ apps/customer-portal/
 ### Application Generator
 
 **Best Practices:**
+
 - Use descriptive app names (e.g., `admin-dashboard`, `customer-portal`)
 - App names should be kebab-case
 - Each app should serve a specific user type or use case
 - Leverage shared components from `@template/ui-components`
 
 **After Generation:**
+
 1. Navigate to the app directory
 2. Run `pnpm install` to install dependencies
 3. Create `.env` file based on the provided template
@@ -130,6 +138,7 @@ apps/customer-portal/
 6. Add app-specific pages and components
 
 **Customization Points:**
+
 - Update branding (logo, colors, app name)
 - Customize navigation and routes
 - Add app-specific pages and features
@@ -195,7 +204,7 @@ curl http://localhost:8005/health
 ### Applications
 
 ```bash
-# Navigate to app directory  
+# Navigate to app directory
 cd apps/your-app
 
 # Install dependencies
@@ -216,6 +225,7 @@ pnpm run test:e2e
 ### Shared Dependencies
 
 Generated code automatically includes:
+
 - `@template/shared-types` - Common TypeScript types
 - `@template/shared-config` - Configuration utilities
 - `@template/shared-utils` - Utility functions
@@ -226,6 +236,7 @@ Generated code automatically includes:
 ### Template Patterns
 
 Both generators follow established patterns:
+
 - **Naming Conventions** - Consistent kebab-case, PascalCase, camelCase usage
 - **Error Handling** - Structured error responses with correlation IDs
 - **API Standards** - RESTful endpoints with OpenAPI compatibility
@@ -244,6 +255,7 @@ Both generators follow established patterns:
 ### Template Variables
 
 Available in all generators:
+
 - `${serviceName}` - Original input name
 - `${kebabName}` - kebab-case version
 - `${pascalName}` - PascalCase version
@@ -253,8 +265,9 @@ Available in all generators:
 ### Helper Functions
 
 Available helper functions:
+
 - `toPascalCase(str)` - Convert to PascalCase
-- `toCamelCase(str)` - Convert to camelCase  
+- `toCamelCase(str)` - Convert to camelCase
 - `toKebabCase(str)` - Convert to kebab-case
 - `createDirectory(path)` - Create directory with logging
 - `writeFile(path, content)` - Write file with logging
@@ -262,6 +275,7 @@ Available helper functions:
 ## 📋 Checklist After Generation
 
 ### Services
+
 - [ ] Install dependencies (`pnpm install`)
 - [ ] Update TODO comments in generated files
 - [ ] Configure environment variables
@@ -273,6 +287,7 @@ Available helper functions:
 - [ ] Update service documentation
 
 ### Applications
+
 - [ ] Install dependencies (`pnpm install`)
 - [ ] Create and configure `.env` file
 - [ ] Update branding and navigation

@@ -25,19 +25,16 @@ export interface IValidationOptions {
 /**
  * Create validation middleware for requests
  */
-export function validateRequest(
-  schema: IValidationSchema,
-  options: IValidationOptions = {}
-) {
+export function validateRequest(schema: IValidationSchema, options: IValidationOptions = {}) {
   const defaultOptions: Joi.ValidationOptions = {
     allowUnknown: options.allowUnknown ?? false,
     stripUnknown: options.stripUnknown ?? true,
     abortEarly: options.abortEarly ?? false,
     errors: {
       wrap: {
-        label: ''
-      }
-    }
+        label: '',
+      },
+    },
   };
 
   return async (req: Request, res: Response, next: NextFunction) => {
@@ -47,12 +44,14 @@ export function validateRequest(
     if (schema.body && req.body) {
       const { error, value } = schema.body.validate(req.body, defaultOptions);
       if (error) {
-        errors.push(...error.details.map(detail => ({
-          field: detail.path.join('.'),
-          message: detail.message,
-          type: detail.type,
-          location: 'body'
-        })));
+        errors.push(
+          ...error.details.map(detail => ({
+            field: detail.path.join('.'),
+            message: detail.message,
+            type: detail.type,
+            location: 'body',
+          }))
+        );
       } else {
         req.body = value;
       }
@@ -62,12 +61,14 @@ export function validateRequest(
     if (schema.query && req.query) {
       const { error, value } = schema.query.validate(req.query, defaultOptions);
       if (error) {
-        errors.push(...error.details.map(detail => ({
-          field: detail.path.join('.'),
-          message: detail.message,
-          type: detail.type,
-          location: 'query'
-        })));
+        errors.push(
+          ...error.details.map(detail => ({
+            field: detail.path.join('.'),
+            message: detail.message,
+            type: detail.type,
+            location: 'query',
+          }))
+        );
       } else {
         req.query = value;
       }
@@ -77,12 +78,14 @@ export function validateRequest(
     if (schema.params && req.params) {
       const { error, value } = schema.params.validate(req.params, defaultOptions);
       if (error) {
-        errors.push(...error.details.map(detail => ({
-          field: detail.path.join('.'),
-          message: detail.message,
-          type: detail.type,
-          location: 'params'
-        })));
+        errors.push(
+          ...error.details.map(detail => ({
+            field: detail.path.join('.'),
+            message: detail.message,
+            type: detail.type,
+            location: 'params',
+          }))
+        );
       } else {
         req.params = value;
       }
@@ -92,15 +95,17 @@ export function validateRequest(
     if (schema.headers && req.headers) {
       const { error, value } = schema.headers.validate(req.headers, {
         ...defaultOptions,
-        allowUnknown: true // Always allow unknown headers
+        allowUnknown: true, // Always allow unknown headers
       });
       if (error) {
-        errors.push(...error.details.map(detail => ({
-          field: detail.path.join('.'),
-          message: detail.message,
-          type: detail.type,
-          location: 'headers'
-        })));
+        errors.push(
+          ...error.details.map(detail => ({
+            field: detail.path.join('.'),
+            message: detail.message,
+            type: detail.type,
+            location: 'headers',
+          }))
+        );
       }
     }
 
@@ -109,7 +114,7 @@ export function validateRequest(
         path: req.path,
         method: req.method,
         errors,
-        correlationId: req.correlationId
+        correlationId: req.correlationId,
       });
 
       return res.status(400).json({
@@ -117,10 +122,10 @@ export function validateRequest(
         error: {
           code: 'VALIDATION_ERROR',
           message: 'Request validation failed',
-          details: errors
+          details: errors,
         },
         correlationId: req.correlationId,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     }
 
@@ -143,20 +148,20 @@ export const commonSchemas = {
     page: Joi.number().integer().min(1).default(1),
     limit: Joi.number().integer().min(1).max(100).default(20),
     sort: Joi.string().pattern(/^[a-zA-Z_]+:(asc|desc)$/),
-    filter: Joi.object().unknown(true)
+    filter: Joi.object().unknown(true),
   }),
 
   // Date range
   dateRange: Joi.object({
     startDate: Joi.date().iso(),
-    endDate: Joi.date().iso().greater(Joi.ref('startDate'))
+    endDate: Joi.date().iso().greater(Joi.ref('startDate')),
   }),
 
   // Search
   search: Joi.object({
     q: Joi.string().min(1).max(100).trim(),
-    fields: Joi.array().items(Joi.string())
-  })
+    fields: Joi.array().items(Joi.string()),
+  }),
 };
 
 /**
@@ -193,11 +198,7 @@ export function sanitizeInput(input: any): any {
 /**
  * Middleware to sanitize all input
  */
-export function sanitizeMiddleware(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): void {
+export function sanitizeMiddleware(req: Request, res: Response, next: NextFunction): void {
   // Sanitize body
   if (req.body) {
     req.body = sanitizeInput(req.body);

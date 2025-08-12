@@ -36,14 +36,13 @@ export class PasswordService {
       const hashedPassword = await bcrypt.hash(password, saltRounds);
 
       this.logger.debug('Password hashed successfully', {
-        saltRounds
+        saltRounds,
       });
 
       return hashedPassword;
-
     } catch (error) {
       this.logger.error('Password hashing failed', {
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       throw new Error('Password hashing failed');
     }
@@ -52,21 +51,24 @@ export class PasswordService {
   /**
    * Verify password against hash
    */
-  async verifyPassword(password: string, hash: string, correlationId: CorrelationId): Promise<boolean> {
+  async verifyPassword(
+    password: string,
+    hash: string,
+    correlationId: CorrelationId
+  ): Promise<boolean> {
     this.logger.setCorrelationId(correlationId);
 
     try {
       const isValid = await bcrypt.compare(password, hash);
 
       this.logger.debug('Password verification completed', {
-        isValid
+        isValid,
       });
 
       return isValid;
-
     } catch (error) {
       this.logger.error('Password verification failed', {
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       return false;
     }
@@ -127,14 +129,14 @@ export class PasswordService {
       isValid,
       strength,
       score,
-      errorCount: errors.length
+      errorCount: errors.length,
     });
 
     return {
       isValid,
       errors,
       strength,
-      score
+      score,
     };
   }
 
@@ -177,13 +179,13 @@ export class PasswordService {
     const expiresAt = new Date(Date.now() + this.config.security.passwordResetExpiration);
 
     this.logger.debug('Password reset token generated', {
-      expiresAt
+      expiresAt,
     });
 
     return {
       token,
       hashedToken,
-      expiresAt
+      expiresAt,
     };
   }
 
@@ -195,7 +197,7 @@ export class PasswordService {
     if (new Date() > expiresAt) {
       this.logger.warn('Password reset token expired', {
         expiresAt,
-        now: new Date()
+        now: new Date(),
       });
       return false;
     }
@@ -205,7 +207,7 @@ export class PasswordService {
     const isValid = crypto.timingSafeEqual(Buffer.from(tokenHash), Buffer.from(hashedToken));
 
     this.logger.debug('Password reset token verification completed', {
-      isValid
+      isValid,
     });
 
     return isValid;
@@ -214,7 +216,10 @@ export class PasswordService {
   /**
    * Calculate password strength
    */
-  private calculatePasswordStrength(password: string): { strength: IPasswordValidationResult['strength']; score: number } {
+  private calculatePasswordStrength(password: string): {
+    strength: IPasswordValidationResult['strength'];
+    score: number;
+  } {
     let score = 0;
 
     // Length bonus
@@ -249,13 +254,21 @@ export class PasswordService {
    */
   private isCommonPassword(password: string): boolean {
     const commonPasswords = [
-      'password', '123456', '12345678', 'qwerty', 'abc123', 'password123',
-      'admin', 'letmein', 'welcome', 'monkey', '1234567890', 'password1'
+      'password',
+      '123456',
+      '12345678',
+      'qwerty',
+      'abc123',
+      'password123',
+      'admin',
+      'letmein',
+      'welcome',
+      'monkey',
+      '1234567890',
+      'password1',
     ];
 
-    return commonPasswords.some(common => 
-      password.toLowerCase().includes(common.toLowerCase())
-    );
+    return commonPasswords.some(common => password.toLowerCase().includes(common.toLowerCase()));
   }
 
   /**
@@ -263,7 +276,7 @@ export class PasswordService {
    */
   private hasSequentialCharacters(password: string): boolean {
     const sequences = ['abcdef', '123456', 'qwerty', 'asdfgh', 'zxcvbn'];
-    
+
     return sequences.some(seq => {
       for (let i = 0; i <= password.length - 4; i++) {
         const substring = password.toLowerCase().substring(i, i + 4);

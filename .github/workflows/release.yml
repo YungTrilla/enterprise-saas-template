@@ -1,0 +1,484 @@
+name: Release Management
+
+# Enterprise release management with semantic versioning and automated changelog
+on:
+  push:
+    branches: [main]
+    # Only trigger on merge to main with release-worthy changes
+    paths-ignore:
+      - "docs/**"
+      - "**.md"
+      - ".github/**"
+      - ".gitignore"
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: "Type of release"
+        required: true
+        default: "auto"
+        type: choice
+        options:
+          - "auto" # Determine from commits
+          - "patch" # Bug fixes (1.0.0 -> 1.0.1)
+          - "minor" # New features (1.0.0 -> 1.1.0)
+          - "major" # Breaking changes (1.0.0 -> 2.0.0)
+          - "prerelease" # Pre-release (1.0.0 -> 1.1.0-alpha.1)
+      prerelease_id:
+        description: "Pre-release identifier (alpha, beta, rc)"
+        required: false
+        default: "alpha"
+        type: choice
+        options:
+          - "alpha"
+          - "beta"
+          - "rc"
+      dry_run:
+        description: "Dry run (do not create actual release)"
+        required: false
+        default: false
+        type: boolean
+
+env:
+  NODE_VERSION: "20.x"
+  PNPM_VERSION: "8.15.0"
+
+# Release management permissions
+permissions:
+  contents: write
+  packages: write
+  actions: read
+  issues: write
+  pull-requests: read
+
+jobs:
+  # Analyze commits to determine release type
+  analyze-changes:
+    name: Analyze Changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    outputs:
+      should-release: ${{ steps.analysis.outputs.should-release }}
+      release-type: ${{ steps.analysis.outputs.release-type }}
+      current-version: ${{ steps.version.outputs.current-version }}
+      next-version: ${{ steps.analysis.outputs.next-version }}
+      changelog: ${{ steps.changelog.outputs.changelog }}
+      has-breaking: ${{ steps.analysis.outputs.has-breaking }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full history for proper changelog generation
+
+      - name: Get current version
+        id: version
+        run: |
+          # Get latest tag (current version)
+          current_version=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          echo "current-version=$current_version" >> $GITHUB_OUTPUT
+          echo "📦 Current version: $current_version"
+
+      - name: Analyze commits since last release
+        id: analysis
+        run: |
+          current_version="${{ steps.version.outputs.current-version }}"
+          release_type="${{ github.event.inputs.release_type || 'auto' }}"
+
+          echo "🔍 Analyzing commits since $current_version..."
+
+          # Get commits since last tag
+          if [[ "$current_version" != "v0.0.0" ]]; then
+            commit_range="${current_version}..HEAD"
+          else
+            # First release - analyze last 50 commits
+            commit_range="HEAD~50..HEAD"
+          fi
+
+          # Analyze commit messages for conventional commits
+          commits=$(git log --pretty=format:"%s" "$commit_range" 2>/dev/null || git log --pretty=format:"%s" -n 50)
+
+          has_breaking=false
+          has_features=false
+          has_fixes=false
+          should_release=false
+
+          echo "📋 Commit Analysis:"
+          while IFS= read -r commit; do
+            echo "  - $commit"
+            
+            # Check for breaking changes
+            if [[ "$commit" =~ ^[^:]+!: ]] || [[ "$commit" =~ BREAKING.CHANGE ]]; then
+              has_breaking=true
+              should_release=true
+            fi
+            
+            # Check for new features
+            if [[ "$commit" =~ ^feat(\(.+\))?: ]]; then
+              has_features=true
+              should_release=true
+            fi
+            
+            # Check for bug fixes
+            if [[ "$commit" =~ ^fix(\(.+\))?: ]]; then
+              has_fixes=true
+              should_release=true
+            fi
+            
+            # Other release-worthy changes
+            if [[ "$commit" =~ ^(perf|revert)(\(.+\))?: ]]; then
+              should_release=true
+            fi
+          done <<< "$commits"
+
+          # Determine release type
+          if [[ "$release_type" == "auto" ]]; then
+            if [[ "$has_breaking" == "true" ]]; then
+              release_type="major"
+            elif [[ "$has_features" == "true" ]]; then
+              release_type="minor"  
+            elif [[ "$has_fixes" == "true" ]]; then
+              release_type="patch"
+            else
+              should_release=false
+            fi
+          else
+            should_release=true
+          fi
+
+          # Calculate next version
+          current_num=$(echo "$current_version" | sed 's/^v//')
+
+          case "$release_type" in
+            "major")
+              next_version="v$(echo "$current_num" | awk -F. '{print $1+1".0.0"}')"
+              ;;
+            "minor") 
+              next_version="v$(echo "$current_num" | awk -F. '{print $1"."$2+1".0"}')"
+              ;;
+            "patch")
+              next_version="v$(echo "$current_num" | awk -F. '{print $1"."$2"."$3+1}')"
+              ;;
+            "prerelease")
+              prerelease_id="${{ github.event.inputs.prerelease_id || 'alpha' }}"
+              next_version="v$(echo "$current_num" | awk -F. '{print $1"."$2+1".0"}')-${prerelease_id}.1"
+              ;;
+          esac
+
+          echo "📊 Release Analysis Results:"
+          echo "   Breaking changes: $has_breaking"
+          echo "   New features: $has_features" 
+          echo "   Bug fixes: $has_fixes"
+          echo "   Should release: $should_release"
+          echo "   Release type: $release_type"
+          echo "   Next version: $next_version"
+
+          echo "should-release=$should_release" >> $GITHUB_OUTPUT
+          echo "release-type=$release_type" >> $GITHUB_OUTPUT
+          echo "next-version=$next_version" >> $GITHUB_OUTPUT
+          echo "has-breaking=$has_breaking" >> $GITHUB_OUTPUT
+
+      - name: Generate changelog
+        id: changelog
+        if: steps.analysis.outputs.should-release == 'true'
+        run: |
+          current_version="${{ steps.version.outputs.current-version }}"
+          next_version="${{ steps.analysis.outputs.next-version }}"
+
+          echo "📝 Generating changelog for $next_version..."
+
+          # Get commit range
+          if [[ "$current_version" != "v0.0.0" ]]; then
+            commit_range="${current_version}..HEAD"
+          else
+            commit_range="HEAD~50..HEAD"
+          fi
+
+          # Generate structured changelog
+          changelog="## $next_version\n\n"
+
+          # Breaking Changes
+          breaking_changes=$(git log --pretty=format:"- %s" "$commit_range" 2>/dev/null | grep -E "^- [^:]+!:" || true)
+          if [[ -n "$breaking_changes" ]]; then
+            changelog+="### 💥 Breaking Changes\n\n$breaking_changes\n\n"
+          fi
+
+          # Features
+          features=$(git log --pretty=format:"- %s" "$commit_range" 2>/dev/null | grep -E "^- feat(\(.+\))?: " || true)
+          if [[ -n "$features" ]]; then
+            changelog+="### ✨ New Features\n\n$features\n\n"
+          fi
+
+          # Bug Fixes
+          fixes=$(git log --pretty=format:"- %s" "$commit_range" 2>/dev/null | grep -E "^- fix(\(.+\))?: " || true)
+          if [[ -n "$fixes" ]]; then
+            changelog+="### 🐛 Bug Fixes\n\n$fixes\n\n"
+          fi
+
+          # Performance Improvements
+          perf_improvements=$(git log --pretty=format:"- %s" "$commit_range" 2>/dev/null | grep -E "^- perf(\(.+\))?: " || true)
+          if [[ -n "$perf_improvements" ]]; then
+            changelog+="### ⚡ Performance Improvements\n\n$perf_improvements\n\n"
+          fi
+
+          # Reverts
+          reverts=$(git log --pretty=format:"- %s" "$commit_range" 2>/dev/null | grep -E "^- revert(\(.+\))?: " || true)
+          if [[ -n "$reverts" ]]; then
+            changelog+="### ⏪ Reverts\n\n$reverts\n\n"
+          fi
+
+          # Other changes
+          others=$(git log --pretty=format:"- %s" "$commit_range" 2>/dev/null | grep -vE "^- (feat|fix|perf|revert|chore|docs|style|refactor|test|ci|build)(\(.+\))?: " || true)
+          if [[ -n "$others" ]]; then
+            changelog+="### 🔧 Other Changes\n\n$others\n\n"
+          fi
+
+          # Save changelog to file for use in release
+          echo -e "$changelog" > CHANGELOG_TEMP.md
+
+          # Output for GitHub Actions (escape newlines)
+          changelog_escaped=$(echo -e "$changelog" | sed ':a;N;$!ba;s/\n/\\n/g')
+          echo "changelog=$changelog_escaped" >> $GITHUB_OUTPUT
+
+  # Build release artifacts
+  build-artifacts:
+    name: Build Release Artifacts
+    runs-on: ubuntu-latest
+    needs: analyze-changes
+    if: needs.analyze-changes.outputs.should-release == 'true' && github.event.inputs.dry_run != 'true'
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build all packages
+        run: |
+          echo "🏗️ Building all packages for release..."
+          pnpm run build
+          echo "✅ Build completed"
+
+      - name: Run full test suite
+        run: |
+          echo "🧪 Running full test suite before release..."
+          pnpm run test
+          echo "✅ All tests passed"
+
+      - name: Create source archive
+        run: |
+          version="${{ needs.analyze-changes.outputs.next-version }}"
+          echo "📦 Creating source archive for $version..."
+
+          # Create clean source archive (exclude node_modules, build artifacts)
+          tar -czf "enterprise-saas-template-$version-source.tar.gz" \
+            --exclude=node_modules \
+            --exclude=dist \
+            --exclude=build \
+            --exclude=coverage \
+            --exclude=.git \
+            .
+
+          echo "✅ Source archive created"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-artifacts
+          path: |
+            enterprise-saas-template-*.tar.gz
+            CHANGELOG_TEMP.md
+          retention-days: 30
+
+  # Create GitHub release
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [analyze-changes, build-artifacts]
+    if: needs.analyze-changes.outputs.should-release == 'true' && github.event.inputs.dry_run != 'true'
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Download release artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: release-artifacts
+
+      - name: Create and push release tag
+        run: |
+          version="${{ needs.analyze-changes.outputs.next-version }}"
+          echo "🏷️ Creating release tag: $version"
+
+          # Configure Git
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+
+          # Create annotated tag
+          git tag -a "$version" -m "Release $version"
+          git push origin "$version"
+
+          echo "✅ Release tag created and pushed"
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ needs.analyze-changes.outputs.next-version }}
+          release_name: ${{ needs.analyze-changes.outputs.next-version }}
+          body: |
+            # Enterprise SaaS Template ${{ needs.analyze-changes.outputs.next-version }}
+
+            ${{ needs.analyze-changes.outputs.changelog }}
+
+            ## 📦 Installation
+
+            ```bash
+            git clone https://github.com/${{ github.repository }}.git
+            cd enterprise-saas-template
+            pnpm install
+            ```
+
+            ## 🚀 Quick Start
+
+            ```bash
+            # Start development
+            pnpm run dev
+
+            # Generate new service
+            pnpm run generate:service my-service
+
+            # Run security scan
+            ./scripts/security-scan.sh
+            ```
+
+            ## 🔒 Security
+
+            This release includes comprehensive security scanning and follows enterprise security best practices:
+            - Multi-layered vulnerability scanning
+            - Secret detection and prevention
+            - Automated dependency updates
+            - Security audit trails
+
+            ## 📋 What's Changed
+
+            See the changelog above for detailed changes in this release.
+
+            ## 🆘 Support
+
+            - [Documentation](./docs/)
+            - [Contributing Guide](./CONTRIBUTING.md)
+            - [Security Policy](./docs/SECURITY.md)
+            - [Issues](https://github.com/${{ github.repository }}/issues)
+
+            ---
+
+            **Full Changelog**: https://github.com/${{ github.repository }}/compare/${{ needs.analyze-changes.outputs.current-version }}...${{ needs.analyze-changes.outputs.next-version }}
+          draft: false
+          prerelease: ${{ contains(needs.analyze-changes.outputs.next-version, '-') }}
+
+      - name: Upload release assets
+        run: |
+          version="${{ needs.analyze-changes.outputs.next-version }}"
+          release_id=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/releases/tags/$version" \
+            | jq -r '.id')
+
+          # Upload source archive
+          if [[ -f "enterprise-saas-template-$version-source.tar.gz" ]]; then
+            echo "📤 Uploading source archive..."
+            curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Content-Type: application/gzip" \
+              --data-binary @"enterprise-saas-template-$version-source.tar.gz" \
+              "https://uploads.github.com/repos/${{ github.repository }}/releases/$release_id/assets?name=enterprise-saas-template-$version-source.tar.gz"
+          fi
+
+  # Post-release actions
+  post-release:
+    name: Post-Release Actions
+    runs-on: ubuntu-latest
+    needs: [analyze-changes, create-release]
+    if: needs.analyze-changes.outputs.should-release == 'true' && github.event.inputs.dry_run != 'true'
+    timeout-minutes: 5
+
+    steps:
+      - name: Update package versions
+        run: |
+          version="${{ needs.analyze-changes.outputs.next-version }}"
+          echo "📝 Post-release version updates for $version"
+
+          # This would typically update package.json versions
+          # Customize based on your versioning strategy
+
+      - name: Notify stakeholders
+        run: |
+          version="${{ needs.analyze-changes.outputs.next-version }}"
+          release_type="${{ needs.analyze-changes.outputs.release-type }}"
+
+          echo "📢 Notifying stakeholders of release $version"
+
+          # Customize notification logic (Slack, Teams, email, etc.)
+          echo "Release $version ($release_type) is now available!"
+
+      - name: Trigger deployment workflow
+        if: needs.analyze-changes.outputs.release-type != 'prerelease'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Trigger deployment to staging after successful release
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'deploy.yml',
+              ref: 'main',
+              inputs: {
+                environment: 'staging',
+                version: '${{ needs.analyze-changes.outputs.next-version }}'
+              }
+            });
+
+            console.log('Triggered staging deployment for ${{ needs.analyze-changes.outputs.next-version }}');
+
+  # Dry run summary (when testing)
+  dry-run-summary:
+    name: Dry Run Summary
+    runs-on: ubuntu-latest
+    needs: analyze-changes
+    if: github.event.inputs.dry_run == 'true'
+    timeout-minutes: 2
+
+    steps:
+      - name: Display dry run results
+        run: |
+          echo "🧪 DRY RUN RESULTS"
+          echo "=================="
+          echo ""
+          echo "Current version: ${{ needs.analyze-changes.outputs.current-version }}"
+          echo "Would create release: ${{ needs.analyze-changes.outputs.should-release }}"
+          echo "Release type: ${{ needs.analyze-changes.outputs.release-type }}"
+          echo "Next version: ${{ needs.analyze-changes.outputs.next-version }}"
+          echo "Has breaking changes: ${{ needs.analyze-changes.outputs.has-breaking }}"
+          echo ""
+          echo "Changelog preview:"
+          echo "${{ needs.analyze-changes.outputs.changelog }}"
+          echo ""
+          echo "✅ Dry run completed - no actual release was created"

@@ -17,12 +17,12 @@ export * from './logger';
 export * from './api-response';
 
 // Middleware utilities - export specific items to avoid conflicts
-export { 
-  notFoundHandler, 
-  errorHandler, 
-  asyncHandler, 
-  correlationIdMiddleware, 
-  requestLoggingMiddleware 
+export {
+  notFoundHandler,
+  errorHandler,
+  asyncHandler,
+  correlationIdMiddleware,
+  requestLoggingMiddleware,
 } from './middleware/error.middleware';
 
 // ========================================
@@ -35,14 +35,14 @@ export {
 export function get(obj: any, path: string, defaultValue?: any): any {
   const keys = path.split('.');
   let current = obj;
-  
+
   for (const key of keys) {
     if (current == null || typeof current !== 'object') {
       return defaultValue;
     }
     current = current[key];
   }
-  
+
   return current !== undefined ? current : defaultValue;
 }
 
@@ -52,7 +52,7 @@ export function get(obj: any, path: string, defaultValue?: any): any {
 export function set(obj: any, path: string, value: any): void {
   const keys = path.split('.');
   let current = obj;
-  
+
   for (let i = 0; i < keys.length - 1; i++) {
     const key = keys[i];
     if (!(key in current) || typeof current[key] !== 'object') {
@@ -60,7 +60,7 @@ export function set(obj: any, path: string, value: any): void {
     }
     current = current[key];
   }
-  
+
   current[keys[keys.length - 1]] = value;
 }
 
@@ -71,12 +71,12 @@ export function deepClone<T>(obj: T): T {
   if (obj === null || typeof obj !== 'object') return obj;
   if (obj instanceof Date) return new Date(obj.getTime()) as unknown as T;
   if (obj instanceof Array) return obj.map(item => deepClone(item)) as unknown as T;
-  
+
   const cloned: any = {};
   Object.keys(obj as any).forEach(key => {
     cloned[key] = deepClone((obj as any)[key]);
   });
-  
+
   return cloned;
 }
 
@@ -127,9 +127,9 @@ export function pick<T extends Record<string, any>, K extends keyof T>(
 export function deepMerge<T extends Record<string, any>>(target: T, ...sources: Partial<T>[]): T {
   if (!sources.length) return target;
   const source = sources.shift();
-  
+
   if (!source) return deepMerge(target, ...sources);
-  
+
   if (isObject(target) && isObject(source)) {
     Object.keys(source).forEach(key => {
       const sourceValue = source[key];
@@ -141,7 +141,7 @@ export function deepMerge<T extends Record<string, any>>(target: T, ...sources: 
       }
     });
   }
-  
+
   return deepMerge(target, ...sources);
 }
 
@@ -161,18 +161,18 @@ export function debounce<T extends (...args: any[]) => any>(
   immediate?: boolean
 ): (...args: Parameters<T>) => void {
   let timeout: NodeJS.Timeout | null = null;
-  
+
   return function executedFunction(...args: Parameters<T>) {
     const later = () => {
       timeout = null;
       if (!immediate) func(...args);
     };
-    
+
     const callNow = immediate && !timeout;
-    
+
     if (timeout) clearTimeout(timeout);
     timeout = setTimeout(later, wait);
-    
+
     if (callNow) func(...args);
   };
 }
@@ -185,12 +185,12 @@ export function throttle<T extends (...args: any[]) => any>(
   limit: number
 ): (...args: Parameters<T>) => void {
   let inThrottle: boolean;
-  
+
   return function executedFunction(...args: Parameters<T>) {
     if (!inThrottle) {
       func(...args);
       inThrottle = true;
-      setTimeout(() => inThrottle = false, limit);
+      setTimeout(() => (inThrottle = false), limit);
     }
   };
 }
@@ -205,7 +205,7 @@ export async function retry<T>(
   maxDelay: number = 30000
 ): Promise<T> {
   let attempt = 1;
-  
+
   while (attempt <= maxAttempts) {
     try {
       return await fn();
@@ -213,13 +213,13 @@ export async function retry<T>(
       if (attempt === maxAttempts) {
         throw error;
       }
-      
+
       const delay = Math.min(baseDelay * Math.pow(2, attempt - 1), maxDelay);
       await sleep(delay);
       attempt++;
     }
   }
-  
+
   throw new Error('Retry failed'); // This should never be reached
 }
 
@@ -243,7 +243,7 @@ export function timeout<T>(promise: Promise<T>, ms: number): Promise<T> {
     promise,
     new Promise<never>((_, reject) =>
       setTimeout(() => reject(new Error('Operation timed out')), ms)
-    )
+    ),
   ]);
 }
 
@@ -251,14 +251,17 @@ export function timeout<T>(promise: Promise<T>, ms: number): Promise<T> {
  * Group array items by key
  */
 export function groupBy<T>(array: T[], keyFn: (item: T) => string): Record<string, T[]> {
-  return array.reduce((groups, item) => {
-    const key = keyFn(item);
-    if (!groups[key]) {
-      groups[key] = [];
-    }
-    groups[key].push(item);
-    return groups;
-  }, {} as Record<string, T[]>);
+  return array.reduce(
+    (groups, item) => {
+      const key = keyFn(item);
+      if (!groups[key]) {
+        groups[key] = [];
+      }
+      groups[key].push(item);
+      return groups;
+    },
+    {} as Record<string, T[]>
+  );
 }
 
 /**
@@ -268,7 +271,7 @@ export function unique<T>(array: T[], keyFn?: (item: T) => any): T[] {
   if (!keyFn) {
     return [...new Set(array)];
   }
-  
+
   const seen = new Set();
   return array.filter(item => {
     const key = keyFn(item);
@@ -285,7 +288,7 @@ export function unique<T>(array: T[], keyFn?: (item: T) => any): T[] {
  */
 export function chunk<T>(array: T[], size: number): T[][] {
   if (size <= 0) throw new Error('Chunk size must be positive');
-  
+
   const chunks: T[][] = [];
   for (let i = 0; i < array.length; i += size) {
     chunks.push(array.slice(i, i + size));
@@ -332,9 +335,9 @@ export function range(start: number, end: number, step: number = 1): number[] {
 export function bytesToHuman(bytes: number): string {
   const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
   if (bytes === 0) return '0 Bytes';
-  
+
   const i = Math.floor(Math.log(bytes) / Math.log(1024));
-  return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+  return Math.round((bytes / Math.pow(1024, i)) * 100) / 100 + ' ' + sizes[i];
 }
 
 /**
@@ -391,8 +394,11 @@ export function isNode(): boolean {
  * Create enum from array of strings
  */
 export function createEnum<T extends string>(values: T[]): Record<T, T> {
-  return values.reduce((enum_, value) => {
-    enum_[value] = value;
-    return enum_;
-  }, {} as Record<T, T>);
+  return values.reduce(
+    (enum_, value) => {
+      enum_[value] = value;
+      return enum_;
+    },
+    {} as Record<T, T>
+  );
 }

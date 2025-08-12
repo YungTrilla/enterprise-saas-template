@@ -54,7 +54,7 @@ export class DatabaseConnectionManager {
       waitingClients: 0,
       lastHealthCheck: new Date(),
       isHealthy: false,
-      errors: []
+      errors: [],
     };
   }
 
@@ -68,55 +68,54 @@ export class DatabaseConnectionManager {
 
     const dbConfig = this.config.getDatabaseConfig();
     const retryConfig = this.config.getDatabaseRetryConfig();
-    
+
     const maxRetries = this.options.maxRetries ?? retryConfig.attempts;
     const baseDelay = this.options.retryDelay ?? retryConfig.delay;
     const useExponentialBackoff = this.options.exponentialBackoff ?? retryConfig.exponentialBackoff;
     const maxDelay = this.options.maxRetryDelay ?? retryConfig.maxDelay;
 
     let lastError: Error | null = null;
-    
+
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         // Try to create connection pool
         await this.createConnectionPool(dbConfig);
-        
+
         // Test the connection
         await this.testConnection();
-        
+
         this.isConnected = true;
         this.metrics.isHealthy = true;
         this.metrics.lastHealthCheck = new Date();
-        
+
         // Start health monitoring if enabled
         if (this.options.enableMonitoring !== false) {
           this.startHealthMonitoring();
         }
-        
+
         console.log(`Database connected successfully after ${attempt} attempt(s)`);
         return;
-        
       } catch (error) {
         lastError = error as Error;
         this.metrics.errors.push(lastError);
-        
+
         if (attempt === maxRetries) {
           this.metrics.isHealthy = false;
           throw new Error(
             `Failed to connect to database after ${maxRetries} attempts. Last error: ${lastError.message}`
           );
         }
-        
+
         // Calculate delay with exponential backoff
         const delay = useExponentialBackoff
           ? Math.min(baseDelay * Math.pow(2, attempt - 1), maxDelay)
           : baseDelay;
-        
+
         console.warn(
           `Database connection attempt ${attempt} failed: ${lastError.message}. ` +
-          `Retrying in ${delay}ms...`
+            `Retrying in ${delay}ms...`
         );
-        
+
         await this.sleep(delay);
       }
     }
@@ -128,21 +127,21 @@ export class DatabaseConnectionManager {
   private async createConnectionPool(dbConfig: any): Promise<void> {
     // This would be implemented with the actual database library (e.g., pg)
     // For now, we'll create a mock pool structure
-    
+
     this.pool = {
       config: dbConfig,
       totalCount: 0,
       idleCount: 0,
       waitingCount: 0,
-      
+
       // Mock pool methods
       connect: async () => ({
         query: async (sql: string) => ({ rows: [] }),
         release: () => {},
       }),
-      
+
       end: async () => {},
-      
+
       on: (event: string, callback: Function) => {
         if (event === 'connect' && this.events.onConnect) {
           this.events.onConnect(null);
@@ -150,9 +149,9 @@ export class DatabaseConnectionManager {
         if (event === 'error' && this.events.onError) {
           this.events.onError(new Error('Mock error'), null);
         }
-      }
+      },
     };
-    
+
     // Update metrics
     this.metrics.totalConnections = dbConfig.max;
     this.metrics.idleConnections = dbConfig.min;
@@ -165,7 +164,7 @@ export class DatabaseConnectionManager {
     if (!this.pool) {
       throw new Error('Connection pool not initialized');
     }
-    
+
     const client = await this.pool.connect();
     try {
       // Execute a simple query to test connectivity
@@ -182,10 +181,10 @@ export class DatabaseConnectionManager {
     if (this.healthCheckInterval) {
       return; // Already monitoring
     }
-    
-    const interval = this.options.healthCheckInterval ?? 
-      this.config.get('DB_CONNECTION_CHECK_INTERVAL') ?? 30000;
-    
+
+    const interval =
+      this.options.healthCheckInterval ?? this.config.get('DB_CONNECTION_CHECK_INTERVAL') ?? 30000;
+
     this.healthCheckInterval = setInterval(async () => {
       try {
         await this.checkHealth();
@@ -213,26 +212,25 @@ export class DatabaseConnectionManager {
   async checkHealth(): Promise<DatabaseHealthMetrics> {
     try {
       await this.testConnection();
-      
+
       // Update metrics
       this.metrics.lastHealthCheck = new Date();
       this.metrics.isHealthy = true;
-      
+
       // Update pool metrics if available
       if (this.pool) {
         this.metrics.totalConnections = this.pool.totalCount || 0;
         this.metrics.idleConnections = this.pool.idleCount || 0;
         this.metrics.waitingClients = this.pool.waitingCount || 0;
-        this.metrics.activeConnections = 
+        this.metrics.activeConnections =
           this.metrics.totalConnections - this.metrics.idleConnections;
       }
-      
     } catch (error) {
       this.metrics.isHealthy = false;
       this.metrics.errors.push(error as Error);
       throw error;
     }
-    
+
     return { ...this.metrics };
   }
 
@@ -250,7 +248,7 @@ export class DatabaseConnectionManager {
     if (!this.isConnected || !this.pool) {
       throw new Error('Database not connected. Call connect() first.');
     }
-    
+
     const client = await this.pool.connect();
     try {
       return await client.query(sql, params);
@@ -268,13 +266,11 @@ export class DatabaseConnectionManager {
   /**
    * Execute transaction with retry logic
    */
-  async transaction<T>(
-    callback: (client: any) => Promise<T>
-  ): Promise<T> {
+  async transaction<T>(callback: (client: any) => Promise<T>): Promise<T> {
     if (!this.isConnected || !this.pool) {
       throw new Error('Database not connected. Call connect() first.');
     }
-    
+
     const client = await this.pool.connect();
     try {
       await client.query('BEGIN');
@@ -294,12 +290,12 @@ export class DatabaseConnectionManager {
    */
   async disconnect(): Promise<void> {
     this.stopHealthMonitoring();
-    
+
     if (this.pool) {
       await this.pool.end();
       this.pool = null;
     }
-    
+
     this.isConnected = false;
     this.metrics.isHealthy = false;
     console.log('Database disconnected');
@@ -314,12 +310,11 @@ export class DatabaseConnectionManager {
       'ENOTFOUND',
       'ETIMEDOUT',
       'ECONNRESET',
-      'PROTOCOL_CONNECTION_LOST'
+      'PROTOCOL_CONNECTION_LOST',
     ];
-    
-    return connectionErrorCodes.some(code => 
-      error.message.includes(code) || 
-      (error as any).code === code
+
+    return connectionErrorCodes.some(
+      code => error.message.includes(code) || (error as any).code === code
     );
   }
 
@@ -354,13 +349,13 @@ export async function checkDatabaseHealth(): Promise<{
     if (!config.isLoaded) {
       await config.load();
     }
-    
+
     const dbManager = new DatabaseConnectionManager();
     await dbManager.connect();
-    
+
     const metrics = await dbManager.checkHealth();
     await dbManager.disconnect();
-    
+
     return {
       status: metrics.isHealthy ? 'healthy' : 'unhealthy',
       timestamp: new Date().toISOString(),
@@ -368,16 +363,16 @@ export async function checkDatabaseHealth(): Promise<{
         totalConnections: metrics.totalConnections,
         activeConnections: metrics.activeConnections,
         idleConnections: metrics.idleConnections,
-        lastHealthCheck: metrics.lastHealthCheck
-      }
+        lastHealthCheck: metrics.lastHealthCheck,
+      },
     };
   } catch (error) {
     return {
       status: 'unhealthy',
       timestamp: new Date().toISOString(),
       details: {
-        error: (error as Error).message
-      }
+        error: (error as Error).message,
+      },
     };
   }
 }
@@ -388,7 +383,7 @@ export async function checkDatabaseHealth(): Promise<{
 export function createConnectionPool(customConfig?: Partial<any>) {
   const config = ConfigManager.getInstance();
   const dbConfig = config.getDatabaseConfig();
-  
+
   return {
     ...dbConfig,
     ...customConfig,
@@ -401,6 +396,6 @@ export function createConnectionPool(customConfig?: Partial<any>) {
     },
     onRemove: (client: any) => {
       console.log('Database client removed from pool');
-    }
+    },
   };
 }

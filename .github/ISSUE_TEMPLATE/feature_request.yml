@@ -1,0 +1,279 @@
+name: ✨ Feature Request
+description: Suggest a new feature or enhancement for the Enterprise SaaS Template
+title: "[Feature]: "
+labels: ["enhancement", "needs-triage"]
+projects: ["enterprise-saas-template/1"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## ✨ Feature Request
+
+        Thank you for suggesting a new feature! Your ideas help make the Enterprise SaaS Template better.
+
+        Please provide detailed information about your feature request to help us understand and evaluate it.
+
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: Prerequisites
+      description: Please confirm you have completed the following
+      options:
+        - label: I have searched existing issues to ensure this feature hasn't been requested
+          required: true
+        - label: I have read the [Contributing Guidelines](../../CONTRIBUTING.md)
+          required: true
+        - label: I have reviewed the [Architecture Documentation](../../ARCHITECTURE.md)
+          required: true
+
+  - type: textarea
+    id: feature-summary
+    attributes:
+      label: 🎯 Feature Summary
+      description: A clear and concise description of the feature you'd like to see
+      placeholder: Provide a brief summary of the feature...
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem-statement
+    attributes:
+      label: 🔍 Problem Statement
+      description: What problem does this feature solve? What is the current limitation?
+      placeholder: |
+        Describe the problem or limitation this feature would address:
+        - What is currently difficult or impossible to do?
+        - What pain point does this solve?
+        - How does this limitation affect users?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: 💡 Proposed Solution
+      description: Describe your proposed solution in detail
+      placeholder: |
+        Provide a detailed description of how you envision this feature working:
+        - What would the user experience look like?
+        - How would developers interact with this feature?
+        - What would the API look like?
+        - How would it integrate with existing functionality?
+    validations:
+      required: true
+
+  - type: textarea
+    id: user-stories
+    attributes:
+      label: 👤 User Stories
+      description: Describe how different users would interact with this feature
+      placeholder: |
+        As a [type of user], I want [functionality] so that [benefit/value].
+
+        Examples:
+        - As a developer, I want to...
+        - As an end user, I want to...
+        - As a system administrator, I want to...
+      value: |
+        **Developer Story:**
+        As a developer, I want...
+
+        **End User Story:**
+        As an end user, I want...
+
+        **Admin Story:**
+        As a system administrator, I want...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: feature-type
+    attributes:
+      label: 🏗️ Feature Type
+      description: What type of feature is this?
+      options:
+        - "🔧 Developer Experience - Tools, CLI, development workflow"
+        - "🔐 Security - Authentication, authorization, security features"
+        - "🎨 User Interface - Frontend components, user experience"
+        - "⚡ Performance - Optimization, caching, scaling"
+        - "🔌 Integration - Third-party services, APIs, webhooks"
+        - "📊 Analytics - Monitoring, metrics, reporting"
+        - "🛠️ Infrastructure - DevOps, deployment, configuration"
+        - "📚 Documentation - Guides, tutorials, API docs"
+        - "🧪 Testing - Test frameworks, coverage, quality assurance"
+        - "🔄 Workflow - Business logic, automation, processes"
+        - "Other"
+      default: 0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 📈 Priority Level
+      description: How important is this feature?
+      options:
+        - "🔴 Critical - Essential for core functionality"
+        - "🟠 High - Important for user experience"
+        - "🟡 Medium - Nice to have, good impact"
+        - "🟢 Low - Minor improvement or convenience"
+      default: 2
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: ✅ Acceptance Criteria
+      description: What conditions must be met for this feature to be considered complete?
+      placeholder: |
+        Define clear, testable criteria:
+        - [ ] Specific functionality works as expected
+        - [ ] Performance meets requirements
+        - [ ] Security considerations addressed
+        - [ ] Documentation updated
+        - [ ] Tests implemented
+      value: |
+        - [ ] 
+        - [ ] 
+        - [ ] 
+        - [ ]
+    validations:
+      required: true
+
+  - type: textarea
+    id: technical-considerations
+    attributes:
+      label: 🔧 Technical Considerations
+      description: Technical aspects that should be considered for implementation
+      placeholder: |
+        Consider technical implications:
+        - Architecture changes required
+        - Database schema modifications
+        - API changes or additions
+        - Security implications
+        - Performance impact
+        - Backwards compatibility
+        - Dependencies or new technologies
+    validations:
+      required: false
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 🔄 Alternative Solutions
+      description: What alternative solutions have you considered?
+      placeholder: |
+        Describe alternative approaches:
+        - Other ways to solve the same problem
+        - Existing tools or libraries that could be used
+        - Workarounds that are currently possible
+        - Why this solution is preferred over alternatives
+    validations:
+      required: false
+
+  - type: textarea
+    id: business-value
+    attributes:
+      label: 💼 Business Value
+      description: What is the business impact and value of this feature?
+      placeholder: |
+        Describe the business benefits:
+        - How does this feature benefit users?
+        - What is the expected impact on adoption/usage?
+        - Does this address customer requests or market needs?
+        - How does this align with project goals?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: affected-components
+    attributes:
+      label: 🏗️ Affected Components
+      description: Which parts of the system would this feature affect?
+      multiple: true
+      options:
+        - "Authentication Service"
+        - "API Gateway"
+        - "User Interface (React)"
+        - "Database Schema"
+        - "Cache Layer (Redis)"
+        - "Email Service"
+        - "File Storage"
+        - "Background Jobs"
+        - "CI/CD Pipeline"
+        - "Documentation"
+        - "Development Tools"
+        - "Security Layer"
+        - "Monitoring/Analytics"
+        - "Third-party Integrations"
+        - "New Component/Service"
+    validations:
+      required: true
+
+  - type: textarea
+    id: mockups-examples
+    attributes:
+      label: 🎨 Mockups or Examples
+      description: Visual mockups, code examples, or references to help illustrate the feature
+      placeholder: |
+        Include any visual aids:
+        - Screenshots of similar features
+        - Wireframes or mockups
+        - Code examples
+        - Links to reference implementations
+        - API specification examples
+    validations:
+      required: false
+
+  - type: dropdown
+    id: implementation-size
+    attributes:
+      label: 📏 Implementation Size Estimate
+      description: How large do you estimate this feature implementation to be?
+      options:
+        - "🟢 Small - Few days of work, minimal changes"
+        - "🟡 Medium - 1-2 weeks of work, moderate complexity"
+        - "🟠 Large - Multiple weeks, significant changes"
+        - "🔴 Extra Large - Months of work, major architectural changes"
+        - "❓ Unknown - Need more analysis"
+      default: 4
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: breaking-changes
+    attributes:
+      label: ⚠️ Breaking Changes
+      description: Would this feature introduce breaking changes?
+      options:
+        - label: This feature may introduce breaking changes
+        - label: This feature requires API modifications
+        - label: This feature affects existing database schema
+        - label: This feature changes existing behavior
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: 📎 Additional Context
+      description: Any additional information about the feature request
+      placeholder: |
+        Add any other context:
+        - Related issues or pull requests
+        - Community feedback or requests
+        - Timeline considerations
+        - Resources or expertise you can contribute
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: 🤝 Contribution
+      description: Are you willing to help implement this feature?
+      options:
+        - label: I am willing to submit a pull request to implement this feature
+        - label: I can help with design and planning
+        - label: I can help with testing and feedback
+        - label: I can provide domain expertise or requirements

@@ -1,6 +1,7 @@
 # Getting Started with Enterprise SaaS Template
 
-Welcome to the Enterprise SaaS Template! This guide will help you set up your development environment and create your first application.
+Welcome to the Enterprise SaaS Template! This guide will help you set up your
+development environment and create your first application.
 
 ## 🚀 Quick Start
 
@@ -10,7 +11,8 @@ Before you begin, ensure you have the following installed:
 
 - **Node.js 18+** - [Download Node.js](https://nodejs.org/)
 - **pnpm 8+** - Install with `npm install -g pnpm`
-- **PostgreSQL 14+** - [Download PostgreSQL](https://www.postgresql.org/download/)
+- **PostgreSQL 14+** -
+  [Download PostgreSQL](https://www.postgresql.org/download/)
 - **Redis 6+** - [Download Redis](https://redis.io/download/)
 - **Git** - [Download Git](https://git-scm.com/)
 
@@ -47,8 +49,9 @@ nano .env.development
 ```
 
 **Required Environment Variables:**
+
 - `DATABASE_URL` - PostgreSQL connection string
-- `REDIS_URL` - Redis connection string  
+- `REDIS_URL` - Redis connection string
 - `JWT_SECRET` - Secret key for JWT tokens
 - `ENCRYPTION_KEY` - 32-character key for data encryption
 
@@ -82,10 +85,12 @@ pnpm run dev
 ### 6. Verify Installation
 
 Open your browser and navigate to:
+
 - **Web App**: http://localhost:3000
 - **API Docs**: http://localhost:8000/docs
 
 You should see the login page. Use these default credentials:
+
 - **Email**: admin@example.com
 - **Password**: Admin123!
 
@@ -93,16 +98,17 @@ You should see the login page. Use these default credentials:
 
 After starting development, you'll have these services running:
 
-| Service | Port | Description |
-|---------|------|-------------|
-| Web App | 3000 | React frontend application |
-| API Gateway | 8000 | Main API endpoint and documentation |
-| Auth Service | 8001 | Authentication and user management |
-| Notification Service | 8002 | Email, SMS, and push notifications |
+| Service              | Port | Description                         |
+| -------------------- | ---- | ----------------------------------- |
+| Web App              | 3000 | React frontend application          |
+| API Gateway          | 8000 | Main API endpoint and documentation |
+| Auth Service         | 8001 | Authentication and user management  |
+| Notification Service | 8002 | Email, SMS, and push notifications  |
 
 ## 🛠️ Development Commands
 
 ### Common Commands
+
 ```bash
 # Start development (all services)
 pnpm run dev
@@ -129,6 +135,7 @@ pnpm run typecheck
 ```
 
 ### Database Commands
+
 ```bash
 # Create new migration
 pnpm run migrate:create add_users_table
@@ -150,6 +157,7 @@ pnpm run fixtures:reset
 ```
 
 ### Security Commands
+
 ```bash
 # Run security scan
 pnpm run security:scan
@@ -197,15 +205,17 @@ my-saas-app/
 ### Branding and Theme
 
 1. **Update Application Name**:
+
    ```bash
    # Update package.json
    sed -i 's/"enterprise-saas-template"/"my-saas-app"/g' package.json
-   
+
    # Update environment variables
    sed -i 's/APP_NAME="My Enterprise SaaS"/APP_NAME="My App"/g' .env.development
    ```
 
 2. **Customize UI Theme**:
+
    ```typescript
    // apps/web/src/styles/theme.ts
    export const theme = {
@@ -213,7 +223,7 @@ my-saas-app/
        primary: '#your-primary-color',
        secondary: '#your-secondary-color',
        // ... customize colors
-     }
+     },
    };
    ```
 
@@ -310,6 +320,7 @@ pnpm run test --filter=auth-service
 ### Writing Tests
 
 Create test files alongside your source code:
+
 ```
 src/
 ├── services/
@@ -321,6 +332,7 @@ src/
 ```
 
 Example test:
+
 ```typescript
 import { describe, it, expect } from 'vitest';
 import { UserService } from './user.service';
@@ -330,9 +342,9 @@ describe('UserService', () => {
     const userService = new UserService();
     const user = await userService.create({
       email: 'test@example.com',
-      password: 'password123'
+      password: 'password123',
     });
-    
+
     expect(user.email).toBe('test@example.com');
     expect(user.password).not.toBe('password123'); // Should be hashed
   });
@@ -397,6 +409,7 @@ docker-compose up -d
 ### Example Applications
 
 Explore complete example applications:
+
 - [E-commerce SaaS](../examples/ecommerce-saas/)
 - [Project Management Tool](../examples/project-management/)
 - [CRM System](../examples/crm-system/)
@@ -406,6 +419,7 @@ Explore complete example applications:
 ### Common Issues
 
 **"Cannot connect to database"**
+
 ```bash
 # Check if PostgreSQL is running
 pg_isready -h localhost -p 5432
@@ -415,6 +429,7 @@ DATABASE_URL=postgresql://username:password@localhost:5432/dbname
 ```
 
 **"Redis connection failed"**
+
 ```bash
 # Check if Redis is running
 redis-cli ping
@@ -423,6 +438,7 @@ redis-cli ping
 ```
 
 **"Port already in use"**
+
 ```bash
 # Find process using port
 lsof -i :3000
@@ -432,6 +448,7 @@ kill -9 <PID>
 ```
 
 **"Permission denied" errors**
+
 ```bash
 # Fix file permissions
 chmod +x scripts/*.sh
@@ -456,4 +473,5 @@ chmod +x scripts/*.sh
 
 **Happy coding! 🚀**
 
-Now you're ready to build amazing enterprise SaaS applications with the Enterprise SaaS Template!
+Now you're ready to build amazing enterprise SaaS applications with the
+Enterprise SaaS Template!

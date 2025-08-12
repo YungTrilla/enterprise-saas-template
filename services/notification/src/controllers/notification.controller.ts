@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
 import { NotificationService } from '../services/notification.service';
 import { ApiResponse } from '@template/shared-utils';
-import { 
-  NotificationRequest, 
-  NotificationResponse, 
+import {
+  NotificationRequest,
+  NotificationResponse,
   BulkNotificationRequest,
-  NotificationTemplate 
+  NotificationTemplate,
 } from '../types/notification';
 
 export class NotificationController {
@@ -22,7 +22,7 @@ export class NotificationController {
     try {
       const notificationRequest: NotificationRequest = req.body;
       const notification = await this.notificationService.sendNotification(notificationRequest);
-      
+
       const response: ApiResponse<NotificationResponse> = {
         success: true,
         data: notification,
@@ -53,7 +53,7 @@ export class NotificationController {
     try {
       const bulkRequest: BulkNotificationRequest = req.body;
       const result = await this.notificationService.sendBulkNotifications(bulkRequest);
-      
+
       const response: ApiResponse<typeof result> = {
         success: true,
         data: result,
@@ -84,7 +84,7 @@ export class NotificationController {
     try {
       const { id } = req.params;
       const notification = await this.notificationService.getNotification(id);
-      
+
       if (!notification) {
         const response: ApiResponse<null> = {
           success: false,
@@ -125,14 +125,7 @@ export class NotificationController {
    */
   getNotifications = async (req: Request, res: Response) => {
     try {
-      const { 
-        page = 1, 
-        limit = 20, 
-        status, 
-        type, 
-        priority,
-        recipient 
-      } = req.query;
+      const { page = 1, limit = 20, status, type, priority, recipient } = req.query;
 
       const filters = {
         status: status as string,
@@ -176,7 +169,7 @@ export class NotificationController {
     try {
       const { id } = req.params;
       const success = await this.notificationService.cancelNotification(id);
-      
+
       if (!success) {
         const response: ApiResponse<null> = {
           success: false,
@@ -220,7 +213,7 @@ export class NotificationController {
     try {
       const { id } = req.params;
       const notification = await this.notificationService.retryNotification(id);
-      
+
       if (!notification) {
         const response: ApiResponse<null> = {
           success: false,
@@ -263,10 +256,7 @@ export class NotificationController {
   getStats = async (req: Request, res: Response) => {
     try {
       const { startDate, endDate } = req.query;
-      const stats = await this.notificationService.getStats(
-        startDate as string,
-        endDate as string
-      );
+      const stats = await this.notificationService.getStats(startDate as string, endDate as string);
 
       const response: ApiResponse<typeof stats> = {
         success: true,
@@ -295,7 +285,7 @@ export class NotificationController {
     try {
       const templateData = req.body;
       const template = await this.notificationService.createTemplate(templateData);
-      
+
       const response: ApiResponse<NotificationTemplate> = {
         success: true,
         data: template,
@@ -353,7 +343,7 @@ export class NotificationController {
     try {
       const { id } = req.params;
       const template = await this.notificationService.getTemplate(id);
-      
+
       if (!template) {
         const response: ApiResponse<null> = {
           success: false,
@@ -394,7 +384,7 @@ export class NotificationController {
       const { id } = req.params;
       const updates = req.body;
       const template = await this.notificationService.updateTemplate(id, updates);
-      
+
       if (!template) {
         const response: ApiResponse<null> = {
           success: false,
@@ -435,7 +425,7 @@ export class NotificationController {
     try {
       const { id } = req.params;
       const success = await this.notificationService.deleteTemplate(id);
-      
+
       if (!success) {
         const response: ApiResponse<null> = {
           success: false,

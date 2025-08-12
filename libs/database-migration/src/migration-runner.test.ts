@@ -54,10 +54,7 @@ export async function down(client: PoolClient): Promise<void> {
 
       const id = generateMigrationId();
       const filename = `${id}_test_migration.ts`;
-      await fs.writeFile(
-        path.join(testMigrationsPath, filename),
-        migrationContent
-      );
+      await fs.writeFile(path.join(testMigrationsPath, filename), migrationContent);
 
       const result = await runner.run('up', { dryRun: true });
 
@@ -84,10 +81,7 @@ export async function down(client: PoolClient): Promise<void> {
 
       const id = generateMigrationId();
       const filename = `${id}_error_migration.ts`;
-      await fs.writeFile(
-        path.join(testMigrationsPath, filename),
-        migrationContent
-      );
+      await fs.writeFile(path.join(testMigrationsPath, filename), migrationContent);
 
       const result = await runner.run('up', { dryRun: false });
 

@@ -7,7 +7,7 @@ import Joi from 'joi';
 export function validate(schema: Joi.Schema) {
   return (req: Request, res: Response, next: NextFunction) => {
     const { error, value } = schema.validate(req.body);
-    
+
     if (error) {
       return res.status(400).json({
         success: false,
@@ -16,14 +16,14 @@ export function validate(schema: Joi.Schema) {
           message: 'Request validation failed',
           details: error.details.map(detail => ({
             field: detail.path.join('.'),
-            message: detail.message
-          }))
+            message: detail.message,
+          })),
         },
         correlationId: (req as any).correlationId,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     }
-    
+
     req.body = value;
     next();
   };
@@ -35,7 +35,7 @@ export function validate(schema: Joi.Schema) {
 export function validateQuery(schema: Joi.Schema) {
   return (req: Request, res: Response, next: NextFunction) => {
     const { error, value } = schema.validate(req.query);
-    
+
     if (error) {
       return res.status(400).json({
         success: false,
@@ -44,14 +44,14 @@ export function validateQuery(schema: Joi.Schema) {
           message: 'Query parameter validation failed',
           details: error.details.map(detail => ({
             field: detail.path.join('.'),
-            message: detail.message
-          }))
+            message: detail.message,
+          })),
         },
         correlationId: (req as any).correlationId,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     }
-    
+
     req.query = value;
     next();
   };
@@ -63,7 +63,7 @@ export function validateQuery(schema: Joi.Schema) {
 export function validateParams(schema: Joi.Schema) {
   return (req: Request, res: Response, next: NextFunction) => {
     const { error, value } = schema.validate(req.params);
-    
+
     if (error) {
       return res.status(400).json({
         success: false,
@@ -72,14 +72,14 @@ export function validateParams(schema: Joi.Schema) {
           message: 'URL parameter validation failed',
           details: error.details.map(detail => ({
             field: detail.path.join('.'),
-            message: detail.message
-          }))
+            message: detail.message,
+          })),
         },
         correlationId: (req as any).correlationId,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     }
-    
+
     req.params = value;
     next();
   };

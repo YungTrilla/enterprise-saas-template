@@ -23,7 +23,10 @@ function toCamelCase(str) {
 }
 
 function toKebabCase(str) {
-  return str.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase().replace(/[\s_]/g, '-');
+  return str
+    .replace(/([a-z])([A-Z])/g, '$1-$2')
+    .toLowerCase()
+    .replace(/[\s_]/g, '-');
 }
 
 function createDirectory(dirPath) {
@@ -94,7 +97,7 @@ function generatePackageJson(serviceName) {
 function generateIndex(serviceName) {
   const pascalName = toPascalCase(serviceName);
   const kebabName = toKebabCase(serviceName);
-  
+
   return `/**
  * ${pascalName} Service Entry Point
  * Handles ${serviceName} operations for the platform
@@ -176,7 +179,7 @@ export { router as healthRoutes };`;
 function generateServiceRoutes(serviceName) {
   const pascalName = toPascalCase(serviceName);
   const camelName = toCamelCase(serviceName);
-  
+
   return `import { Router } from 'express';
 import { ${pascalName}Controller } from '../controllers/${serviceName}.controller';
 import { validateRequest } from '${TEMPLATE_NAME}/shared-utils';
@@ -225,7 +228,7 @@ export { router as ${serviceName}Routes };`;
 function generateController(serviceName) {
   const pascalName = toPascalCase(serviceName);
   const camelName = toCamelCase(serviceName);
-  
+
   return `import { Request, Response } from 'express';
 import { ${pascalName}Service } from '../services/${serviceName}.service';
 import { ApiResponse } from '${TEMPLATE_NAME}/shared-utils';
@@ -477,7 +480,7 @@ export class ${pascalName}Controller {
 
 function generateService(serviceName) {
   const pascalName = toPascalCase(serviceName);
-  
+
   return `import { v4 as uuidv4 } from 'uuid';
 
 // TODO: Define your entity interface
@@ -657,7 +660,7 @@ function generateTsConfig() {
 
 function generateDockerfile(serviceName) {
   const kebabName = toKebabCase(serviceName);
-  
+
   return `# Multi-stage build for ${serviceName} service
 FROM node:18-alpine AS base
 WORKDIR /app
@@ -699,7 +702,7 @@ CMD ["node", "dist/index.js"]`;
 function generateReadme(serviceName) {
   const pascalName = toPascalCase(serviceName);
   const kebabName = toKebabCase(serviceName);
-  
+
   return `# ${pascalName} Service
 
 ${pascalName} service for the Enterprise SaaS Template platform.
@@ -820,7 +823,7 @@ The service uses the shared configuration system. Override settings in your envi
 // Main function
 function createService() {
   const args = process.argv.slice(2);
-  
+
   if (args.length === 0) {
     console.error('❌ Error: Service name is required');
     console.log('Usage: node create-service.js <service-name>');
@@ -831,13 +834,13 @@ function createService() {
   const serviceName = args[0];
   const kebabName = toKebabCase(serviceName);
   const pascalName = toPascalCase(serviceName);
-  
-  console.log(\`🚀 Creating \${pascalName} Service...\`);
-  
+
+  console.log(`🚀 Creating ${pascalName} Service...`);
+
   // Create directory structure
   const serviceDir = path.join(SERVICES_DIR, kebabName);
   const srcDir = path.join(serviceDir, 'src');
-  
+
   createDirectory(serviceDir);
   createDirectory(srcDir);
   createDirectory(path.join(srcDir, 'controllers'));
@@ -852,22 +855,31 @@ function createService() {
   writeFile(path.join(serviceDir, 'tsconfig.json'), generateTsConfig());
   writeFile(path.join(serviceDir, 'Dockerfile'), generateDockerfile(serviceName));
   writeFile(path.join(serviceDir, 'README.md'), generateReadme(serviceName));
-  
+
   writeFile(path.join(srcDir, 'index.ts'), generateIndex(serviceName));
   writeFile(path.join(srcDir, 'routes', 'health.routes.ts'), generateHealthRoutes());
-  writeFile(path.join(srcDir, 'routes', \`\${serviceName}.routes.ts\`), generateServiceRoutes(serviceName));
-  writeFile(path.join(srcDir, 'controllers', \`\${serviceName}.controller.ts\`), generateController(serviceName));
-  writeFile(path.join(srcDir, 'services', \`\${serviceName}.service.ts\`), generateService(serviceName));
+  writeFile(
+    path.join(srcDir, 'routes', `${serviceName}.routes.ts`),
+    generateServiceRoutes(serviceName)
+  );
+  writeFile(
+    path.join(srcDir, 'controllers', `${serviceName}.controller.ts`),
+    generateController(serviceName)
+  );
+  writeFile(
+    path.join(srcDir, 'services', `${serviceName}.service.ts`),
+    generateService(serviceName)
+  );
 
-  console.log(\`\n✅ \${pascalName} Service created successfully!\`);
-  console.log(\`📁 Location: \${serviceDir}\`);
-  console.log(\n🔧 Next steps:\`);
-  console.log(\`1. cd \${serviceDir}\`);
-  console.log(\`2. pnpm install\`);
-  console.log(\`3. Update the TODO comments in the generated files\`);
-  console.log(\`4. Configure environment variables\`);
-  console.log(\`5. pnpm run dev\`);
-  console.log(\`\n📚 Don't forget to update the API Gateway routing to include your new service!\`);
+  console.log(`\n✅ ${pascalName} Service created successfully!`);
+  console.log(`📁 Location: ${serviceDir}`);
+  console.log(`\n🔧 Next steps:`);
+  console.log(`1. cd ${serviceDir}`);
+  console.log(`2. pnpm install`);
+  console.log(`3. Update the TODO comments in the generated files`);
+  console.log(`4. Configure environment variables`);
+  console.log(`5. pnpm run dev`);
+  console.log(`\n📚 Don't forget to update the API Gateway routing to include your new service!`);
 }
 
 // Run the generator

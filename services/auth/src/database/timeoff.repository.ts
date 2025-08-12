@@ -13,8 +13,8 @@ export class TimeOffRepository {
   }
 
   private async executeQuery<T = unknown>(
-    query: string, 
-    values: unknown[] = [], 
+    query: string,
+    values: unknown[] = [],
     correlationId?: CorrelationId
   ): Promise<T[]> {
     const client = await this.pool.connect();
@@ -22,9 +22,9 @@ export class TimeOffRepository {
       const result = await client.query(query, values);
       return result.rows;
     } catch (error) {
-      this.logger.error('Query execution failed', { 
-        error: (error as Error).message, 
-        correlationId 
+      this.logger.error('Query execution failed', {
+        error: (error as Error).message,
+        correlationId,
       });
       throw error;
     } finally {
@@ -32,7 +32,10 @@ export class TimeOffRepository {
     }
   }
 
-  async createTimeOffRequest(data: ITimeOffRequestData, correlationId?: CorrelationId): Promise<ITimeOffRequest> {
+  async createTimeOffRequest(
+    data: ITimeOffRequestData,
+    correlationId?: CorrelationId
+  ): Promise<ITimeOffRequest> {
     const query = `
       INSERT INTO time_off_requests (
         user_id, start_date, end_date, type, reason, status, created_at
@@ -40,14 +43,7 @@ export class TimeOffRepository {
       RETURNING *
     `;
 
-    const values = [
-      data.userId,
-      data.startDate,
-      data.endDate,
-      data.type,
-      data.reason,
-      data.status,
-    ];
+    const values = [data.userId, data.startDate, data.endDate, data.type, data.reason, data.status];
 
     const result = await this.executeQuery<ITimeOffRequest>(query, values, correlationId);
     return result[0];
@@ -65,7 +61,11 @@ export class TimeOffRepository {
         AND ((start_date <= $3 AND end_date >= $2))
       ORDER BY created_at DESC
     `;
-    return await this.executeQuery<ITimeOffRequest>(query, [userId, startDate, endDate], correlationId);
+    return await this.executeQuery<ITimeOffRequest>(
+      query,
+      [userId, startDate, endDate],
+      correlationId
+    );
   }
 
   async updateTimeOffStatus(
@@ -80,11 +80,18 @@ export class TimeOffRepository {
       WHERE id = $3
       RETURNING *
     `;
-    const result = await this.executeQuery<ITimeOffRequest>(query, [status, approvedBy, requestId], correlationId);
+    const result = await this.executeQuery<ITimeOffRequest>(
+      query,
+      [status, approvedBy, requestId],
+      correlationId
+    );
     return result[0];
   }
 
-  async getTimeOffRequest(requestId: string, correlationId?: CorrelationId): Promise<ITimeOffRequest | null> {
+  async getTimeOffRequest(
+    requestId: string,
+    correlationId?: CorrelationId
+  ): Promise<ITimeOffRequest | null> {
     const query = 'SELECT * FROM time_off_requests WHERE id = $1';
     const result = await this.executeQuery<ITimeOffRequest>(query, [requestId], correlationId);
     return result[0] || null;

@@ -19,7 +19,7 @@ const logFormat = winston.format.combine(
       service: service || 'auth-service',
       correlationId,
       message,
-      ...meta
+      ...meta,
     });
   })
 );
@@ -42,7 +42,7 @@ export function createLogger(context?: string): winston.Logger {
   // Use environment variable directly if config not loaded yet
   let logLevel = 'info';
   let isProd = false;
-  
+
   try {
     logLevel = getConfig('LOG_LEVEL') || 'info';
     isProd = isProduction();
@@ -51,39 +51,43 @@ export function createLogger(context?: string): winston.Logger {
     logLevel = process.env.LOG_LEVEL || 'info';
     isProd = process.env.NODE_ENV === 'production';
   }
-  
+
   const logger = winston.createLogger({
     level: logLevel,
     format: isProd ? logFormat : consoleFormat,
     defaultMeta: {
       service: 'auth-service',
-      context
+      context,
     },
     transports: [
       // Console transport for all environments
       new winston.transports.Console({
         handleExceptions: true,
-        handleRejections: true
-      })
-    ]
+        handleRejections: true,
+      }),
+    ],
   });
 
   // Add file transport in production
   if (isProduction()) {
-    logger.add(new winston.transports.File({
-      filename: 'logs/auth-service-error.log',
-      level: 'error',
-      maxsize: 10485760, // 10MB
-      maxFiles: 5,
-      tailable: true
-    }));
+    logger.add(
+      new winston.transports.File({
+        filename: 'logs/auth-service-error.log',
+        level: 'error',
+        maxsize: 10485760, // 10MB
+        maxFiles: 5,
+        tailable: true,
+      })
+    );
 
-    logger.add(new winston.transports.File({
-      filename: 'logs/auth-service-combined.log',
-      maxsize: 10485760, // 10MB
-      maxFiles: 5,
-      tailable: true
-    }));
+    logger.add(
+      new winston.transports.File({
+        filename: 'logs/auth-service-combined.log',
+        maxsize: 10485760, // 10MB
+        maxFiles: 5,
+        tailable: true,
+      })
+    );
   }
 
   return logger;
@@ -108,7 +112,7 @@ export class CorrelatedLogger {
   private addCorrelationId(meta: any = {}) {
     return {
       ...meta,
-      correlationId: this.correlationId
+      correlationId: this.correlationId,
     };
   }
 
@@ -144,10 +148,10 @@ export class SecurityLogger {
   }
 
   logAuthAttempt(
-    email: string, 
-    success: boolean, 
-    ipAddress: string, 
-    userAgent: string, 
+    email: string,
+    success: boolean,
+    ipAddress: string,
+    userAgent: string,
     correlationId: CorrelationId,
     error?: string
   ) {
@@ -158,7 +162,7 @@ export class SecurityLogger {
       userAgent,
       correlationId,
       error,
-      type: 'AUTH_ATTEMPT'
+      type: 'AUTH_ATTEMPT',
     });
   }
 
@@ -175,7 +179,7 @@ export class SecurityLogger {
       description,
       metadata,
       correlationId,
-      eventType: 'SECURITY_EVENT'
+      eventType: 'SECURITY_EVENT',
     });
   }
 
@@ -192,7 +196,7 @@ export class SecurityLogger {
       action,
       allowed,
       correlationId,
-      type: 'PERMISSION_CHECK'
+      type: 'PERMISSION_CHECK',
     });
   }
 
@@ -209,7 +213,7 @@ export class SecurityLogger {
       action,
       ipAddress,
       correlationId,
-      type: 'SESSION_ACTIVITY'
+      type: 'SESSION_ACTIVITY',
     });
   }
 }

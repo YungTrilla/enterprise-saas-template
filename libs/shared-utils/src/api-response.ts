@@ -26,7 +26,7 @@ export class ApiResponse {
     return {
       success: true,
       data,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 
@@ -36,18 +36,13 @@ export class ApiResponse {
       error: {
         code,
         message,
-        details
+        details,
       },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 
-  static paginated<T>(
-    data: T[],
-    page: number,
-    limit: number,
-    total: number
-  ): IApiResponse<T[]> {
+  static paginated<T>(data: T[], page: number, limit: number, total: number): IApiResponse<T[]> {
     return {
       success: true,
       data,
@@ -55,9 +50,9 @@ export class ApiResponse {
         page,
         limit,
         total,
-        totalPages: Math.ceil(total / limit)
+        totalPages: Math.ceil(total / limit),
       },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 }

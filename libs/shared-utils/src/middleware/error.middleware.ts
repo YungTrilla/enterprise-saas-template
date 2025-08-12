@@ -40,17 +40,17 @@ export function notFoundHandler(req: ExtendedRequest, res: Response): void {
     success: false,
     error: {
       code: 'NOT_FOUND',
-      message: `Endpoint ${req.method} ${req.path} not found`
+      message: `Endpoint ${req.method} ${req.path} not found`,
     },
     correlationId: req.correlationId,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   };
 
   logger.warn('404 Not Found', {
     method: req.method,
     path: req.path,
     url: req.url,
-    correlationId: req.correlationId
+    correlationId: req.correlationId,
   });
 
   res.status(404).json(response);
@@ -74,7 +74,7 @@ export function errorHandler(
     correlationId: req.correlationId,
     body: req.body,
     query: req.query,
-    params: req.params
+    params: req.params,
   });
 
   // Determine status code
@@ -116,7 +116,7 @@ export function errorHandler(
   } else if (isDevelopment && statusCode === 500) {
     details = {
       stack: error.stack,
-      originalError: error.message
+      originalError: error.message,
     };
   }
 
@@ -125,10 +125,10 @@ export function errorHandler(
     error: {
       code,
       message,
-      details
+      details,
     },
     correlationId: req.correlationId,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   };
 
   res.status(statusCode).json(response);
@@ -149,7 +149,11 @@ export const generateCorrelationId = genCorrId;
 /**
  * Correlation ID middleware
  */
-export function correlationIdMiddleware(req: ExtendedRequest, res: Response, next: NextFunction): void {
+export function correlationIdMiddleware(
+  req: ExtendedRequest,
+  res: Response,
+  next: NextFunction
+): void {
   req.correlationId = (req.headers['x-correlation-id'] as string) || genCorrId();
   res.setHeader('x-correlation-id', req.correlationId);
   next();
@@ -158,9 +162,13 @@ export function correlationIdMiddleware(req: ExtendedRequest, res: Response, nex
 /**
  * Request logging middleware
  */
-export function requestLoggingMiddleware(req: ExtendedRequest, res: Response, next: NextFunction): void {
+export function requestLoggingMiddleware(
+  req: ExtendedRequest,
+  res: Response,
+  next: NextFunction
+): void {
   const startTime = Date.now();
-  
+
   res.on('finish', () => {
     const duration = Date.now() - startTime;
     logger.info('Request processed', {
@@ -170,9 +178,9 @@ export function requestLoggingMiddleware(req: ExtendedRequest, res: Response, ne
       duration,
       correlationId: req.correlationId,
       ip: req.ip,
-      userAgent: req.get('User-Agent')
+      userAgent: req.get('User-Agent'),
     });
   });
-  
+
   next();
 }

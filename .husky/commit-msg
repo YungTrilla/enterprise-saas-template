@@ -1,0 +1,34 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Enterprise SaaS Template - Commit Message Validation
+# This hook validates commit message format using conventional commits
+
+echo "🔍 Validating commit message format..."
+
+# Run commitlint to validate conventional commit format
+npx --no-install commitlint --edit $1
+
+# Check if commitlint was successful
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "❌ Commit message validation failed!"
+  echo ""
+  echo "📋 Conventional commit format required:"
+  echo "   <type>[optional scope]: <description>"
+  echo ""
+  echo "🎯 Examples:"
+  echo "   feat(auth): add multi-factor authentication"
+  echo "   fix(ui): resolve mobile responsive layout issue"
+  echo "   docs: update API documentation"
+  echo "   chore(deps): update dependencies"
+  echo ""
+  echo "🔧 Valid types:"
+  echo "   feat, fix, docs, style, refactor, test, chore"
+  echo "   perf, build, ci, revert, security, deps"
+  echo ""
+  echo "💡 See: https://conventionalcommits.org/"
+  exit 1
+fi
+
+echo "✅ Commit message validation passed!"

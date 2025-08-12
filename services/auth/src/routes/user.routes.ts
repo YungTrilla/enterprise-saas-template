@@ -98,11 +98,7 @@ router.post(
 // Role Preset Routes
 
 // Get all role presets
-router.get(
-  '/role-presets',
-  authorize(['roles:read']),
-  userController.getRolePresets
-);
+router.get('/role-presets', authorize(['roles:read']), userController.getRolePresets);
 
 // Get role presets by department
 router.get(

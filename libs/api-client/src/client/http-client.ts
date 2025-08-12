@@ -1,4 +1,9 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
+import axios, {
+  AxiosInstance,
+  AxiosRequestConfig,
+  AxiosResponse,
+  InternalAxiosRequestConfig,
+} from 'axios';
 import qs from 'qs';
 import {
   ApiRequestConfig,
@@ -40,14 +45,14 @@ export class HttpClient {
         'Content-Type': 'application/json',
         'User-Agent': 'Abyss-Central-Client/1.0.0',
       },
-      paramsSerializer: (params) => qs.stringify(params, { arrayFormat: 'brackets' }),
+      paramsSerializer: params => qs.stringify(params, { arrayFormat: 'brackets' }),
     });
 
     // Default retry configuration
     this.retryConfig = {
       retries: config.retries || 3,
       retryDelay: 1000,
-      retryCondition: (error) => {
+      retryCondition: error => {
         return !error.response || (error.response.status >= 500 && error.response.status <= 599);
       },
     };
@@ -150,7 +155,7 @@ export class HttpClient {
 
         return processedConfig as InternalAxiosRequestConfig;
       },
-      (error) => Promise.reject(error)
+      error => Promise.reject(error)
     );
 
     // Response interceptor
@@ -167,7 +172,7 @@ export class HttpClient {
 
         return processedResponse;
       },
-      async (error) => {
+      async error => {
         // Handle circuit breaker
         this.recordFailure();
 
@@ -245,7 +250,7 @@ export class HttpClient {
    * Sleep utility for retry delay
    */
   private sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   /**
@@ -259,7 +264,7 @@ export class HttpClient {
 
     try {
       const response = await this.retryRequest(() => this.axiosInstance.request(config));
-      
+
       // Return structured API response
       return {
         success: true,
@@ -278,7 +283,7 @@ export class HttpClient {
    */
   private handleError(error: any, config: ApiRequestConfig): ApiError {
     const correlationId = config.correlationId || this.generateCorrelationId();
-    
+
     if (error.response) {
       // Server responded with error status
       return {
@@ -341,7 +346,11 @@ export class HttpClient {
   /**
    * PATCH request
    */
-  async patch<T = any>(url: string, data?: any, config?: ApiRequestConfig): Promise<ApiResponse<T>> {
+  async patch<T = any>(
+    url: string,
+    data?: any,
+    config?: ApiRequestConfig
+  ): Promise<ApiResponse<T>> {
     return this.request<T>({ ...config, method: 'PATCH', url, data });
   }
 

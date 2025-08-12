@@ -37,7 +37,7 @@ export class RbacPermissionService {
         action,
         correlationId
       );
-      
+
       if (existingPermission) {
         throw new Error(`Permission '${resource}:${action}' already exists`);
       }
@@ -52,7 +52,7 @@ export class RbacPermissionService {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         createdBy,
-        updatedBy: createdBy
+        updatedBy: createdBy,
       };
 
       await this.authRepository.createPermission(permission, correlationId);
@@ -61,17 +61,16 @@ export class RbacPermissionService {
         permissionId: permission.id,
         resource,
         action,
-        createdBy
+        createdBy,
       });
 
       return permission;
-
     } catch (error) {
       this.logger.error('Failed to create permission', {
         resource,
         action,
         createdBy,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       throw error;
     }
@@ -87,14 +86,13 @@ export class RbacPermissionService {
       const permissions = await this.authRepository.listPermissions(correlationId);
 
       this.logger.debug('Listed permissions', {
-        count: permissions.length
+        count: permissions.length,
       });
 
       return permissions;
-
     } catch (error) {
       this.logger.error('Failed to list permissions', {
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       throw error;
     }
@@ -117,15 +115,14 @@ export class RbacPermissionService {
 
       this.logger.debug('Retrieved permissions by resource', {
         resource,
-        count: permissions.length
+        count: permissions.length,
       });
 
       return permissions;
-
     } catch (error) {
       this.logger.error('Failed to get permissions by resource', {
         resource,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       throw error;
     }
@@ -143,11 +140,8 @@ export class RbacPermissionService {
     this.logger.setCorrelationId(correlationId);
 
     try {
-      const permission = await this.authRepository.getPermissionById(
-        permissionId,
-        correlationId
-      );
-      
+      const permission = await this.authRepository.getPermissionById(permissionId, correlationId);
+
       if (!permission) {
         throw new Error('Permission not found');
       }
@@ -157,7 +151,7 @@ export class RbacPermissionService {
         {
           ...updates,
           updatedAt: new Date().toISOString(),
-          updatedBy
+          updatedBy,
         },
         correlationId
       );
@@ -165,16 +159,15 @@ export class RbacPermissionService {
       this.logger.info('Permission updated successfully', {
         permissionId,
         updates: Object.keys(updates),
-        updatedBy
+        updatedBy,
       });
 
       return updatedPermission;
-
     } catch (error) {
       this.logger.error('Failed to update permission', {
         permissionId,
         updatedBy,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       throw error;
     }
@@ -191,11 +184,8 @@ export class RbacPermissionService {
     this.logger.setCorrelationId(correlationId);
 
     try {
-      const permission = await this.authRepository.getPermissionById(
-        permissionId,
-        correlationId
-      );
-      
+      const permission = await this.authRepository.getPermissionById(permissionId, correlationId);
+
       if (!permission) {
         throw new Error('Permission not found');
       }
@@ -205,7 +195,7 @@ export class RbacPermissionService {
         permissionId,
         correlationId
       );
-      
+
       if (assignmentCount > 0) {
         throw new Error(`Cannot delete permission that is assigned to ${assignmentCount} roles`);
       }
@@ -216,14 +206,13 @@ export class RbacPermissionService {
         permissionId,
         resource: permission.resource,
         action: permission.action,
-        deletedBy
+        deletedBy,
       });
-
     } catch (error) {
       this.logger.error('Failed to delete permission', {
         permissionId,
         deletedBy,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       throw error;
     }
@@ -257,7 +246,7 @@ export class RbacPermissionService {
           this.logger.warn('Failed to create permission', {
             resource,
             action,
-            error: (error as Error).message
+            error: (error as Error).message,
           });
         }
       }
@@ -266,17 +255,16 @@ export class RbacPermissionService {
         resource,
         createdCount: permissions.length,
         requestedCount: actions.length,
-        createdBy
+        createdBy,
       });
 
       return permissions;
-
     } catch (error) {
       this.logger.error('Failed to create resource permissions', {
         resource,
         actions,
         createdBy,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       throw error;
     }
@@ -289,19 +277,16 @@ export class RbacPermissionService {
     this.logger.setCorrelationId(correlationId);
 
     try {
-      const resources = await this.authRepository.getDistinctPermissionResources(
-        correlationId
-      );
+      const resources = await this.authRepository.getDistinctPermissionResources(correlationId);
 
       this.logger.debug('Retrieved permission resources', {
-        count: resources.length
+        count: resources.length,
       });
 
       return resources;
-
     } catch (error) {
       this.logger.error('Failed to get permission resources', {
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       throw error;
     }

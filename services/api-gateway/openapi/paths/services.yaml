@@ -8,18 +8,18 @@ paths:
       security:
         - bearerAuth: []
       responses:
-        '200':
+        "200":
           description: Services retrieved successfully
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '../components/schemas/service.yaml#/components/schemas/ServiceInfo'
-        '401':
-          $ref: '../components/responses.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: '../components/responses.yaml#/components/responses/Forbidden'
+                  $ref: "../components/schemas/service.yaml#/components/schemas/ServiceInfo"
+        "401":
+          $ref: "../components/responses.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "../components/responses.yaml#/components/responses/Forbidden"
   /services/{serviceName}/status:
     get:
       tags:
@@ -36,16 +36,16 @@ paths:
             type: string
             enum: [auth, inventory, orders, analytics]
       responses:
-        '200':
+        "200":
           description: Service status retrieved
           content:
             application/json:
               schema:
-                $ref: '../components/schemas/service.yaml#/components/schemas/ServiceStatus'
-        '401':
-          $ref: '../components/responses.yaml#/components/responses/Unauthorized'
-        '404':
-          $ref: '../components/responses.yaml#/components/responses/NotFound'
+                $ref: "../components/schemas/service.yaml#/components/schemas/ServiceStatus"
+        "401":
+          $ref: "../components/responses.yaml#/components/responses/Unauthorized"
+        "404":
+          $ref: "../components/responses.yaml#/components/responses/NotFound"
   /services/{serviceName}/metrics:
     get:
       tags:
@@ -68,15 +68,15 @@ paths:
             enum: [1h, 6h, 24h, 7d, 30d]
             default: 24h
       responses:
-        '200':
+        "200":
           description: Service metrics retrieved
           content:
             application/json:
               schema:
-                $ref: '../components/schemas/service.yaml#/components/schemas/ServiceMetrics'
-        '401':
-          $ref: '../components/responses.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: '../components/responses.yaml#/components/responses/Forbidden'
-        '404':
-          $ref: '../components/responses.yaml#/components/responses/NotFound'
+                $ref: "../components/schemas/service.yaml#/components/schemas/ServiceMetrics"
+        "401":
+          $ref: "../components/responses.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "../components/responses.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "../components/responses.yaml#/components/responses/NotFound"

@@ -1,0 +1,537 @@
+openapi: 3.0.3
+info:
+  title: "[SERVICE_NAME] API"
+  version: "1.0.0"
+  description: |
+    [DETAILED_DESCRIPTION]
+
+    This service handles:
+    - [FEATURE_1]
+    - [FEATURE_2]
+    - [FEATURE_3]
+
+    ## Base URL
+    - Production: `https://api.example.com/v1`
+    - Staging: `https://staging-api.example.com/v1`
+    - Development: `http://localhost:[PORT]/v1`
+
+    ## Rate Limiting
+    - [RATE_LIMIT_INFO]
+
+    ## Authentication
+    All endpoints require Bearer token authentication unless otherwise specified.
+
+  contact:
+    name: "[SERVICE_NAME] Team"
+    email: "[SERVICE_EMAIL]"
+    url: "https://docs.example.com/[SERVICE_NAME]"
+  license:
+    name: "MIT"
+    url: "https://opensource.org/licenses/MIT"
+  termsOfService: "https://example.com/terms"
+
+servers:
+  - url: "https://api.example.com/v1"
+    description: "Production server"
+  - url: "https://staging-api.example.com/v1"
+    description: "Staging server"
+  - url: "http://localhost:[PORT]/v1"
+    description: "Local development server"
+
+# Global security requirement
+security:
+  - bearerAuth: []
+
+# API endpoint paths
+paths:
+  /health:
+    get:
+      tags:
+        - "Health"
+      summary: "Health check"
+      description: "Check service health and status"
+      security: [] # No authentication required
+      responses:
+        "200":
+          description: "Service is healthy"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+              example:
+                status: "healthy"
+                service: "[SERVICE_NAME]"
+                version: "1.0.0"
+                timestamp: "2024-01-01T12:00:00Z"
+                uptime: 3600
+        "503":
+          description: "Service is unhealthy"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+
+  /health/detailed:
+    get:
+      tags:
+        - "Health"
+      summary: "Detailed health check"
+      description: "Comprehensive health check including dependencies"
+      security: [] # No authentication required
+      responses:
+        "200":
+          description: "Detailed health information"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DetailedHealthResponse"
+
+  # Add your service-specific endpoints here
+  # Example:
+  # /[RESOURCE]:
+  #   get:
+  #     tags:
+  #       - "[RESOURCE_TAG]"
+  #     summary: "List [RESOURCE]"
+  #     description: "Retrieve a paginated list of [RESOURCE]"
+  #     parameters:
+  #       - $ref: '#/components/parameters/PageParam'
+  #       - $ref: '#/components/parameters/LimitParam'
+  #       - $ref: '#/components/parameters/SortParam'
+  #     responses:
+  #       '200':
+  #         description: "[RESOURCE] list retrieved successfully"
+  #         content:
+  #           application/json:
+  #             schema:
+  #               $ref: '#/components/schemas/[RESOURCE]ListResponse'
+  #       '400':
+  #         $ref: '#/components/responses/ValidationError'
+  #       '401':
+  #         $ref: '#/components/responses/UnauthorizedError'
+  #       '500':
+  #         $ref: '#/components/responses/InternalServerError'
+
+components:
+  schemas:
+    # Health check schemas
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - service
+        - timestamp
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy, degraded]
+          description: "Overall service status"
+        service:
+          type: string
+          description: "Service name"
+        version:
+          type: string
+          description: "Service version"
+        timestamp:
+          type: string
+          format: date-time
+          description: "Health check timestamp"
+        uptime:
+          type: number
+          description: "Service uptime in seconds"
+
+    DetailedHealthResponse:
+      allOf:
+        - $ref: "#/components/schemas/HealthResponse"
+        - type: object
+          properties:
+            checks:
+              type: object
+              description: "Individual health check results"
+              properties:
+                database:
+                  type: string
+                  enum: [healthy, unhealthy, degraded]
+                cache:
+                  type: string
+                  enum: [healthy, unhealthy, degraded]
+                externalServices:
+                  type: object
+                  additionalProperties:
+                    type: string
+                    enum: [healthy, unhealthy, degraded]
+            memory:
+              type: object
+              properties:
+                used:
+                  type: number
+                  description: "Used memory in bytes"
+                total:
+                  type: number
+                  description: "Total memory in bytes"
+
+    # Standard API response wrapper
+    ApiResponse:
+      type: object
+      required:
+        - success
+        - meta
+      properties:
+        success:
+          type: boolean
+          description: "Indicates if the request was successful"
+        data:
+          type: object
+          description: "Response data (present on success)"
+        error:
+          $ref: "#/components/schemas/ApiError"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+
+    # Error response structure
+    ApiError:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: "Error code for programmatic handling"
+          example: "VALIDATION_ERROR"
+        message:
+          type: string
+          description: "Human-readable error message"
+          example: "Invalid input data"
+        details:
+          type: object
+          additionalProperties: true
+          description: "Additional error details"
+          example:
+            field1: "Field 1 is required"
+            field2: "Field 2 format is invalid"
+
+    # Response metadata
+    ResponseMeta:
+      type: object
+      required:
+        - timestamp
+        - requestId
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: "Response timestamp"
+          example: "2024-01-01T12:00:00Z"
+        requestId:
+          type: string
+          description: "Unique request identifier for tracing"
+          example: "req_abc123"
+        pagination:
+          $ref: "#/components/schemas/PaginationMeta"
+
+    # Pagination metadata
+    PaginationMeta:
+      type: object
+      required:
+        - page
+        - limit
+        - total
+        - totalPages
+        - hasNextPage
+        - hasPreviousPage
+      properties:
+        page:
+          type: integer
+          minimum: 1
+          description: "Current page number"
+          example: 1
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
+          description: "Number of items per page"
+          example: 20
+        total:
+          type: integer
+          minimum: 0
+          description: "Total number of items"
+          example: 150
+        totalPages:
+          type: integer
+          minimum: 0
+          description: "Total number of pages"
+          example: 8
+        hasNextPage:
+          type: boolean
+          description: "Whether there is a next page"
+          example: true
+        hasPreviousPage:
+          type: boolean
+          description: "Whether there is a previous page"
+          example: false
+
+    # Add your service-specific schemas here
+    # Example:
+    # [RESOURCE]:
+    #   type: object
+    #   required:
+    #     - id
+    #     - [REQUIRED_FIELD]
+    #   properties:
+    #     id:
+    #       type: string
+    #       format: uuid
+    #       description: "Unique identifier"
+    #       example: "550e8400-e29b-41d4-a716-446655440000"
+    #     [REQUIRED_FIELD]:
+    #       type: string
+    #       description: "[FIELD_DESCRIPTION]"
+    #       example: "[FIELD_EXAMPLE]"
+    #     createdAt:
+    #       type: string
+    #       format: date-time
+    #       description: "Creation timestamp"
+    #       example: "2024-01-01T12:00:00Z"
+    #       readOnly: true
+    #     updatedAt:
+    #       type: string
+    #       format: date-time
+    #       description: "Last update timestamp"
+    #       example: "2024-01-01T12:00:00Z"
+    #       readOnly: true
+
+  responses:
+    # Standard error responses
+    ValidationError:
+      description: "Validation error"
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ApiResponse"
+              - type: object
+                properties:
+                  success:
+                    example: false
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        example: "VALIDATION_ERROR"
+                      message:
+                        example: "Invalid input data"
+                      details:
+                        type: object
+                        example:
+                          field1: "Field is required"
+                          field2: "Field format is invalid"
+
+    UnauthorizedError:
+      description: "Authentication required"
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ApiResponse"
+              - type: object
+                properties:
+                  success:
+                    example: false
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        example: "UNAUTHORIZED"
+                      message:
+                        example: "Authentication required"
+
+    ForbiddenError:
+      description: "Insufficient permissions"
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ApiResponse"
+              - type: object
+                properties:
+                  success:
+                    example: false
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        example: "FORBIDDEN"
+                      message:
+                        example: "Insufficient permissions"
+
+    NotFoundError:
+      description: "Resource not found"
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ApiResponse"
+              - type: object
+                properties:
+                  success:
+                    example: false
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        example: "RESOURCE_NOT_FOUND"
+                      message:
+                        example: "The requested resource was not found"
+
+    ConflictError:
+      description: "Resource conflict"
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ApiResponse"
+              - type: object
+                properties:
+                  success:
+                    example: false
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        example: "RESOURCE_CONFLICT"
+                      message:
+                        example: "Resource already exists"
+
+    RateLimitError:
+      description: "Rate limit exceeded"
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ApiResponse"
+              - type: object
+                properties:
+                  success:
+                    example: false
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        example: "RATE_LIMIT_EXCEEDED"
+                      message:
+                        example: "Too many requests. Please try again later."
+
+    InternalServerError:
+      description: "Internal server error"
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ApiResponse"
+              - type: object
+                properties:
+                  success:
+                    example: false
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        example: "INTERNAL_SERVER_ERROR"
+                      message:
+                        example: "An unexpected error occurred"
+
+  parameters:
+    # Common parameters
+    PageParam:
+      name: page
+      in: query
+      description: "Page number for pagination"
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+      example: 1
+
+    LimitParam:
+      name: limit
+      in: query
+      description: "Number of items per page"
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+      example: 20
+
+    SortParam:
+      name: sort
+      in: query
+      description: "Sort field and direction (format: field:asc|desc)"
+      required: false
+      schema:
+        type: string
+        pattern: "^[a-zA-Z_][a-zA-Z0-9_]*:(asc|desc)$"
+      example: "createdAt:desc"
+
+    SearchParam:
+      name: search
+      in: query
+      description: "Search query for full-text search"
+      required: false
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 100
+      example: "search term"
+
+    # Add common path parameters
+    IdParam:
+      name: id
+      in: path
+      description: "Resource unique identifier"
+      required: true
+      schema:
+        type: string
+        format: uuid
+      example: "550e8400-e29b-41d4-a716-446655440000"
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        JWT access token for authenticated requests.
+
+        **Format**: `Bearer <token>`
+        **Expiry**: 15 minutes
+        **How to obtain**: Use `/auth/login` endpoint
+        **Refresh**: Use `/auth/refresh` endpoint with refresh token
+
+        **Example**:
+        ```
+        Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        ```
+
+# API endpoint tags for organization
+tags:
+  - name: "Health"
+    description: "Service health and status endpoints"
+  # Add your service-specific tags here
+  # - name: "[RESOURCE_TAG]"
+  #   description: "[RESOURCE_DESCRIPTION]"
+
+# External documentation
+externalDocs:
+  description: "Complete API Documentation"
+  url: "https://docs.example.com/api/[SERVICE_NAME]"
+# Template Usage Instructions:
+# 1. Replace all [PLACEHOLDER] values with actual service information
+# 2. Add service-specific paths, schemas, and responses
+# 3. Update tags and external documentation links
+# 4. Add examples for all request/response schemas
+# 5. Validate the specification using swagger-codegen or spectral
+# 6. Generate client libraries and documentation

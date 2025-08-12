@@ -44,7 +44,7 @@ export class MfaService {
       const secret = speakeasy.generateSecret({
         name: `${serviceName} (${email})`,
         issuer: serviceName,
-        length: 32
+        length: 32,
       });
 
       // Generate QR code
@@ -54,7 +54,7 @@ export class MfaService {
         issuer: serviceName,
         algorithm: 'sha1',
         digits: 6,
-        period: 30
+        period: 30,
       });
 
       const qrCodeUrl = await QRCode.toDataURL(otpauthUrl);
@@ -65,20 +65,19 @@ export class MfaService {
       this.logger.info('MFA setup generated successfully', {
         userId,
         email,
-        backupCodeCount: backupCodes.length
+        backupCodeCount: backupCodes.length,
       });
 
       return {
         secret: secret.base32,
         qrCodeUrl,
-        backupCodes
+        backupCodes,
       };
-
     } catch (error) {
       this.logger.error('Failed to generate MFA setup', {
         userId,
         email,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       throw new Error('MFA setup generation failed');
     }
@@ -103,20 +102,19 @@ export class MfaService {
         window, // Allow 1 step before/after current time
         algorithm: 'sha1',
         digits: 6,
-        step: 30
+        step: 30,
       });
 
       this.logger.debug('TOTP code verification completed', {
         verified,
-        codeLength: code.length
+        codeLength: code.length,
       });
 
       return verified;
-
     } catch (error) {
       this.logger.error('TOTP code verification failed', {
         error: (error as Error).message,
-        codeLength: code?.length
+        codeLength: code?.length,
       });
       return false;
     }
@@ -137,7 +135,7 @@ export class MfaService {
       const hashedCode = this.hashBackupCode(code);
 
       // Find matching backup code
-      const codeIndex = storedBackupCodes.findIndex(storedCode => 
+      const codeIndex = storedBackupCodes.findIndex(storedCode =>
         crypto.timingSafeEqual(Buffer.from(hashedCode), Buffer.from(storedCode))
       );
 
@@ -150,23 +148,22 @@ export class MfaService {
 
       this.logger.info('Backup code verification completed', {
         isValid,
-        remainingCodes: storedBackupCodes.length
+        remainingCodes: storedBackupCodes.length,
       });
 
       return {
         isValid,
         usedBackupCode: true,
-        remainingBackupCodes: storedBackupCodes.length
+        remainingBackupCodes: storedBackupCodes.length,
       };
-
     } catch (error) {
       this.logger.error('Backup code verification failed', {
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       return {
         isValid: false,
         usedBackupCode: true,
-        remainingBackupCodes: storedBackupCodes.length
+        remainingBackupCodes: storedBackupCodes.length,
       };
     }
   }
@@ -187,13 +184,13 @@ export class MfaService {
       this.logger.info('MFA verification successful via TOTP');
       return {
         isValid: true,
-        usedBackupCode: false
+        usedBackupCode: false,
       };
     }
 
     // If TOTP fails, try backup code
     const backupResult = this.verifyBackupCode(code, backupCodes, correlationId);
-    
+
     if (backupResult.isValid) {
       this.logger.info('MFA verification successful via backup code');
     } else {
@@ -216,7 +213,7 @@ export class MfaService {
     }
 
     this.logger.debug('Generated new backup codes', {
-      count: codes.length
+      count: codes.length,
     });
 
     return codes;
@@ -245,7 +242,7 @@ export class MfaService {
       encoding: 'base32',
       algorithm: 'sha1',
       digits: 6,
-      step: 30
+      step: 30,
     });
   }
 
@@ -285,7 +282,7 @@ export class MfaService {
     if (this.isValidTotpCodeFormat(code)) {
       return { isValid: true, type: 'TOTP' };
     }
-    
+
     if (this.isValidBackupCodeFormat(code)) {
       return { isValid: true, type: 'BACKUP' };
     }
@@ -307,13 +304,13 @@ export class MfaService {
 
     this.logger.info('Generated MFA recovery information', {
       userId,
-      expiresAt
+      expiresAt,
     });
 
     return {
       recoveryCode,
       hashedRecoveryCode,
-      expiresAt
+      expiresAt,
     };
   }
 }

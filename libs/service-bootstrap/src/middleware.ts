@@ -10,7 +10,7 @@ import { errorHandler, notFoundHandler, generateCorrelationId } from '@template/
  * Correlation ID middleware - adds correlation ID to all requests
  */
 export const correlationIdMiddleware: RequestHandler = (req, res, next) => {
-  req.correlationId = req.headers['x-correlation-id'] as string || generateCorrelationId();
+  req.correlationId = (req.headers['x-correlation-id'] as string) || generateCorrelationId();
   res.setHeader('x-correlation-id', req.correlationId);
   next();
 };
@@ -21,7 +21,7 @@ export const correlationIdMiddleware: RequestHandler = (req, res, next) => {
 export const createRequestLogger = (logger: any): RequestHandler => {
   return (req, res, next) => {
     const start = Date.now();
-    
+
     res.on('finish', () => {
       const duration = Date.now() - start;
       logger.info('Request completed', {
@@ -31,10 +31,10 @@ export const createRequestLogger = (logger: any): RequestHandler => {
         duration,
         correlationId: req.correlationId,
         userAgent: req.headers['user-agent'],
-        ip: req.ip
+        ip: req.ip,
       });
     });
-    
+
     next();
   };
 };
@@ -51,32 +51,38 @@ export function applyStandardMiddleware(
   if (config.security?.trustProxy) {
     app.set('trust proxy', true);
   }
-  
+
   if (config.security?.helmet !== false) {
     app.use(helmet());
   }
 
   // CORS
   if (config.cors?.enabled !== false) {
-    app.use(cors({
-      origin: config.cors?.origins || true,
-      credentials: config.cors?.credentials !== false,
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'x-correlation-id']
-    }));
+    app.use(
+      cors({
+        origin: config.cors?.origins || true,
+        credentials: config.cors?.credentials !== false,
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization', 'x-correlation-id'],
+      })
+    );
   }
 
   // Compression
   app.use(compression());
 
   // Body parsing
-  app.use(express.json({ 
-    limit: config.bodyParser?.jsonLimit || '10mb' 
-  }));
-  app.use(express.urlencoded({ 
-    extended: true, 
-    limit: config.bodyParser?.urlEncodedLimit || '10mb' 
-  }));
+  app.use(
+    express.json({
+      limit: config.bodyParser?.jsonLimit || '10mb',
+    })
+  );
+  app.use(
+    express.urlencoded({
+      extended: true,
+      limit: config.bodyParser?.urlEncodedLimit || '10mb',
+    })
+  );
 
   // Correlation ID
   app.use(correlationIdMiddleware);

@@ -1,6 +1,7 @@
 # @abyss/api-client
 
-Comprehensive API client library for Abyss Central service communication with built-in authentication, retry logic, circuit breaker, and security features.
+Comprehensive API client library for Abyss Central service communication with
+built-in authentication, retry logic, circuit breaker, and security features.
 
 ## Features
 
@@ -17,7 +18,8 @@ Comprehensive API client library for Abyss Central service communication with bu
 
 ## Installation
 
-This library is part of the Abyss Central monorepo and is used internally by the suite applications.
+This library is part of the Abyss Central monorepo and is used internally by the
+suite applications.
 
 ```bash
 # Install dependencies in the monorepo root
@@ -29,7 +31,10 @@ npm install
 ### Basic Service Client Usage
 
 ```typescript
-import { createAuthServiceClient, createInventoryServiceClient } from '@abyss/api-client';
+import {
+  createAuthServiceClient,
+  createInventoryServiceClient,
+} from '@abyss/api-client';
 
 // Create service clients
 const authClient = createAuthServiceClient('http://localhost:3001');
@@ -38,7 +43,7 @@ const inventoryClient = createInventoryServiceClient('http://localhost:3002');
 // Login and get user
 const loginResponse = await authClient.login({
   email: 'user@example.com',
-  password: 'password123'
+  password: 'password123',
 });
 
 // Get inventory items
@@ -48,18 +53,24 @@ const itemsResponse = await inventoryClient.getItems(1, 20);
 ### Using the Service Registry
 
 ```typescript
-import { 
-  ServiceClientRegistry, 
-  createAuthServiceClient, 
-  createInventoryServiceClient 
+import {
+  ServiceClientRegistry,
+  createAuthServiceClient,
+  createInventoryServiceClient,
 } from '@abyss/api-client';
 
 // Create and configure registry
 const registry = new ServiceClientRegistry();
 
 // Register services
-const authClient = registry.register('auth', createAuthServiceClient('http://localhost:3001'));
-const inventoryClient = registry.register('inventory', createInventoryServiceClient('http://localhost:3002'));
+const authClient = registry.register(
+  'auth',
+  createAuthServiceClient('http://localhost:3001')
+);
+const inventoryClient = registry.register(
+  'inventory',
+  createInventoryServiceClient('http://localhost:3002')
+);
 
 // Use registered services
 const auth = registry.get('auth');
@@ -80,24 +91,25 @@ import { AuthServiceClient } from '@abyss/api-client';
 const authClient = new AuthServiceClient({
   baseURL: 'http://localhost:3001',
   timeout: 30000,
-  retries: 3
+  retries: 3,
 });
 
 // Login
 const loginResult = await authClient.login({
   email: 'admin@abyss.com',
-  password: 'securePassword123'
+  password: 'securePassword123',
 });
 
 if (loginResult.success) {
   // Tokens are automatically stored in the client
   console.log('Logged in:', loginResult.data.user);
-  
+
   // Get current user
   const userResult = await authClient.getCurrentUser();
-  
+
   // Check permissions
-  const hasPermission = await authClient.checkCurrentUserPermission('inventory:read');
+  const hasPermission =
+    await authClient.checkCurrentUserPermission('inventory:read');
 }
 
 // Refresh token when needed
@@ -113,7 +125,7 @@ if (authClient.isTokenExpired() && tokens) {
 import { InventoryServiceClient } from '@abyss/api-client';
 
 const inventoryClient = new InventoryServiceClient({
-  baseURL: 'http://localhost:3002'
+  baseURL: 'http://localhost:3002',
 });
 
 // Create inventory item
@@ -123,15 +135,15 @@ const newItem = await inventoryClient.createItem({
   category: 'lighting',
   totalQuantity: 50,
   availableQuantity: 45,
-  unitPrice: 150.00,
+  unitPrice: 150.0,
   location: 'Warehouse A',
-  description: 'Professional LED Par Light with RGB colors'
+  description: 'Professional LED Par Light with RGB colors',
 });
 
 // Search items
 const searchResults = await inventoryClient.searchItems('LED', {
   category: 'lighting',
-  inStock: true
+  inStock: true,
 });
 
 // Check availability
@@ -139,7 +151,7 @@ const availability = await inventoryClient.checkAvailability({
   itemId: 'item-123',
   requestedQuantity: 5,
   startDate: '2024-01-15',
-  endDate: '2024-01-20'
+  endDate: '2024-01-20',
 });
 
 // Create reservation
@@ -149,7 +161,7 @@ if (availability.data.available) {
     quantity: 5,
     reservedFor: 'order-456',
     startDate: '2024-01-15',
-    endDate: '2024-01-20'
+    endDate: '2024-01-20',
   });
 }
 ```
@@ -169,7 +181,7 @@ try {
       code: apiError.error.code,
       message: apiError.error.message,
       correlationId: apiError.error.correlationId,
-      details: apiError.error.details
+      details: apiError.error.details,
     });
   } else {
     // Network or other error
@@ -198,7 +210,9 @@ class CustomServiceClient extends BaseServiceClient {
     return this.get<CustomData>(`/custom/${id}`);
   }
 
-  async createCustomData(data: Omit<CustomData, 'id'>): Promise<ApiResponse<CustomData>> {
+  async createCustomData(
+    data: Omit<CustomData, 'id'>
+  ): Promise<ApiResponse<CustomData>> {
     return this.post<CustomData>('/custom', data);
   }
 
@@ -266,10 +280,10 @@ import { ServiceConfig } from '@abyss/api-client';
 
 const config: ServiceConfig = {
   baseURL: 'http://localhost:3001',
-  timeout: 30000,           // Request timeout in ms
-  retries: 3,               // Number of retry attempts
+  timeout: 30000, // Request timeout in ms
+  retries: 3, // Number of retry attempts
   correlationIdHeader: 'X-Correlation-ID',
-  authHeader: 'Authorization'
+  authHeader: 'Authorization',
 };
 ```
 
@@ -303,16 +317,16 @@ Automatic fault tolerance for service failures:
 ```typescript
 // Circuit breaker states
 enum CircuitBreakerState {
-  CLOSED = 'CLOSED',     // Normal operation
-  OPEN = 'OPEN',         // Service failing, requests blocked
-  HALF_OPEN = 'HALF_OPEN' // Testing if service recovered
+  CLOSED = 'CLOSED', // Normal operation
+  OPEN = 'OPEN', // Service failing, requests blocked
+  HALF_OPEN = 'HALF_OPEN', // Testing if service recovered
 }
 
 // Configuration
 const circuitBreakerConfig = {
-  failureThreshold: 5,    // Failures before opening circuit
-  resetTimeout: 60000,    // Time to wait before testing recovery
-  monitoringPeriod: 10000 // Period for monitoring failures
+  failureThreshold: 5, // Failures before opening circuit
+  resetTimeout: 60000, // Time to wait before testing recovery
+  monitoringPeriod: 10000, // Period for monitoring failures
 };
 ```
 
@@ -347,10 +361,10 @@ mockAuth.onPost('/auth/login').reply(200, {
     user: { id: '1', email: 'test@example.com' },
     accessToken: 'mock-token',
     refreshToken: 'mock-refresh',
-    expiresAt: Date.now() + 3600000
+    expiresAt: Date.now() + 3600000,
   },
   correlationId: 'test-correlation-id',
-  timestamp: new Date().toISOString()
+  timestamp: new Date().toISOString(),
 });
 ```
 

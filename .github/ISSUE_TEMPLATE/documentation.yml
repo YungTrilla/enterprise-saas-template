@@ -1,0 +1,296 @@
+name: 📚 Documentation Improvement
+description: Suggest improvements to documentation, guides, or API references
+title: "[Docs]: "
+labels: ["documentation", "needs-triage"]
+projects: ["enterprise-saas-template/1"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 📚 Documentation Improvement
+
+        Thank you for helping improve our documentation! Clear, accurate documentation is essential for a great developer experience.
+
+        Please provide details about the documentation issue or improvement you'd like to suggest.
+
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: Prerequisites
+      description: Please confirm you have completed the following
+      options:
+        - label: I have searched existing issues for similar documentation requests
+          required: true
+        - label: I have read the current documentation thoroughly
+          required: true
+        - label: I have checked if this is covered in other documentation sections
+          required: true
+
+  - type: dropdown
+    id: documentation-type
+    attributes:
+      label: 📖 Documentation Type
+      description: What type of documentation needs improvement?
+      options:
+        - "📋 README - Project overview and quick start"
+        - "🏗️ Architecture - System design and technical overview"
+        - "🚀 Getting Started - Installation and setup guides"
+        - "🔧 Development - Developer workflows and contribution guides"
+        - "📡 API Reference - Endpoint documentation and examples"
+        - "🔒 Security - Security policies and best practices"
+        - "🐳 Deployment - Infrastructure and deployment guides"
+        - "🧪 Testing - Testing strategies and frameworks"
+        - "🔄 Workflows - CI/CD and automation documentation"
+        - "📊 Monitoring - Observability and debugging guides"
+        - "🎓 Tutorials - Step-by-step learning materials"
+        - "❓ FAQ - Frequently asked questions"
+        - "🔗 Integration - Third-party service integration guides"
+        - "Other"
+      default: 13
+    validations:
+      required: true
+
+  - type: dropdown
+    id: issue-type
+    attributes:
+      label: 🎯 Issue Type
+      description: What kind of documentation issue is this?
+      options:
+        - "❌ Missing - Documentation doesn't exist"
+        - "📝 Incomplete - Information is partial or insufficient"
+        - "🔄 Outdated - Information is no longer accurate"
+        - "❓ Unclear - Confusing or hard to understand"
+        - "🔗 Broken Links - Links are dead or incorrect"
+        - "📱 Format/Style - Formatting or presentation issues"
+        - "🌍 Translation - Language or localization issues"
+        - "📊 Examples - Missing or incorrect code examples"
+        - "🔍 Discoverability - Hard to find relevant information"
+        - "♿ Accessibility - Accessibility improvements needed"
+        - "Enhancement - General improvement suggestion"
+      default: 10
+    validations:
+      required: true
+
+  - type: textarea
+    id: current-documentation
+    attributes:
+      label: 📄 Current Documentation
+      description: Link to the current documentation or describe what currently exists
+      placeholder: |
+        Provide context about current documentation:
+        - Link to specific documentation page/section
+        - File path if it's in the repository
+        - Description of what currently exists (if anything)
+        - What you were trying to find or accomplish
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem-description
+    attributes:
+      label: 🔍 Problem Description
+      description: What is wrong with the current documentation or what is missing?
+      placeholder: |
+        Describe the documentation problem:
+        - What information is missing?
+        - What is unclear or confusing?
+        - What errors or inaccuracies did you find?
+        - How does this affect the user experience?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-improvement
+    attributes:
+      label: 💡 Proposed Improvement
+      description: How should the documentation be improved?
+      placeholder: |
+        Describe your proposed improvement:
+        - What information should be added?
+        - How should existing content be clarified?
+        - What examples would be helpful?
+        - How should the information be organized?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: target-audience
+    attributes:
+      label: 👥 Target Audience
+      description: Who is the primary audience for this documentation?
+      multiple: true
+      options:
+        - "🆕 New Users - People new to the template"
+        - "👨‍💻 Developers - Software developers and engineers"
+        - "🏢 Enterprise Users - Large organization users"
+        - "🔧 DevOps Engineers - Infrastructure and deployment teams"
+        - "🔒 Security Teams - Security professionals"
+        - "📊 Product Managers - Product and project managers"
+        - "🎓 Students/Learners - People learning the technology"
+        - "🔌 Integrators - Third-party integration developers"
+        - "🧪 QA Engineers - Testing and quality assurance teams"
+        - "📈 Decision Makers - Technical leadership and executives"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: urgency-level
+    attributes:
+      label: ⏰ Urgency Level
+      description: How urgent is this documentation improvement?
+      options:
+        - "🔴 Critical - Blocking users from using core features"
+        - "🟠 High - Causing significant confusion or errors"
+        - "🟡 Medium - Would improve user experience notably"
+        - "🟢 Low - Nice to have improvement"
+      default: 2
+    validations:
+      required: true
+
+  - type: textarea
+    id: user-impact
+    attributes:
+      label: 👤 User Impact
+      description: How does this documentation issue affect users?
+      placeholder: |
+        Describe the impact:
+        - What happens when users encounter this issue?
+        - How many users are likely affected?
+        - What workarounds are users currently using?
+        - How does this affect onboarding or productivity?
+    validations:
+      required: true
+
+  - type: textarea
+    id: content-suggestions
+    attributes:
+      label: ✍️ Content Suggestions
+      description: Do you have specific content, examples, or improvements to suggest?
+      placeholder: |
+        Provide specific suggestions:
+        - Draft text for new sections
+        - Code examples that would be helpful
+        - Diagrams or visuals that should be included
+        - Links to external resources
+        - Structure or organization suggestions
+      render: markdown
+    validations:
+      required: false
+
+  - type: textarea
+    id: examples-wanted
+    attributes:
+      label: 💻 Examples Needed
+      description: What specific examples would be helpful?
+      placeholder: |
+        Describe helpful examples:
+        - Code examples for specific use cases
+        - Configuration examples
+        - Step-by-step tutorials
+        - Real-world scenarios
+        - Common troubleshooting cases
+    validations:
+      required: false
+
+  - type: dropdown
+    id: documentation-format
+    attributes:
+      label: 📄 Preferred Format
+      description: What format would work best for this documentation?
+      multiple: true
+      options:
+        - "📝 Written Guide - Traditional documentation"
+        - "💻 Code Examples - Practical code samples"
+        - "🎥 Video Tutorial - Visual demonstration"
+        - "📊 Diagrams - Visual architecture or flow diagrams"
+        - "🧪 Interactive Demo - Hands-on examples"
+        - "❓ FAQ Format - Question and answer style"
+        - "📚 Reference - Quick lookup documentation"
+        - "🎓 Tutorial - Step-by-step learning path"
+        - "🔍 Troubleshooting - Problem-solving guide"
+    validations:
+      required: false
+
+  - type: textarea
+    id: related-documentation
+    attributes:
+      label: 🔗 Related Documentation
+      description: Are there related documentation sections that should be updated or linked?
+      placeholder: |
+        Identify related documentation:
+        - Other sections that reference this content
+        - Documentation that should link to this
+        - Similar examples in other sections
+        - Cross-references that should be added
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: accessibility-considerations
+    attributes:
+      label: ♿ Accessibility Considerations
+      description: Are there accessibility improvements needed?
+      options:
+        - label: Add alt text for images
+        - label: Improve heading structure
+        - label: Enhance color contrast
+        - label: Add screen reader friendly descriptions
+        - label: Improve keyboard navigation
+        - label: Add captions for videos
+
+  - type: textarea
+    id: research-done
+    attributes:
+      label: 🔍 Research Done
+      description: What research have you done to understand this documentation need?
+      placeholder: |
+        Describe your research:
+        - Community discussions or questions you've seen
+        - User feedback or support requests
+        - Comparison with other similar projects
+        - Analysis of current user behavior
+    validations:
+      required: false
+
+  - type: textarea
+    id: success-metrics
+    attributes:
+      label: 📊 Success Metrics
+      description: How would you measure if this documentation improvement is successful?
+      placeholder: |
+        Define success metrics:
+        - Reduced support questions on this topic
+        - Improved user onboarding time
+        - Increased feature adoption
+        - Better user satisfaction scores
+        - Fewer related bug reports
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: 📎 Additional Context
+      description: Any additional context about this documentation improvement
+      placeholder: |
+        Additional information:
+        - Screenshots of current documentation issues
+        - Links to community discussions
+        - References to other good documentation examples
+        - Timeline considerations
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: contribution-offer
+    attributes:
+      label: 🤝 Contribution Offer
+      description: How can you help with this documentation improvement?
+      options:
+        - label: I can write the documentation content
+        - label: I can provide technical review
+        - label: I can create code examples
+        - label: I can help with proofreading and editing
+        - label: I can test the documentation with users
+        - label: I can provide subject matter expertise

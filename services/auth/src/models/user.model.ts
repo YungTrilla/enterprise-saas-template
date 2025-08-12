@@ -10,17 +10,17 @@ export interface IUser extends BaseEntity, AuditableEntity {
   isActive: boolean;
   isVerified: boolean;
   lastLoginAt?: Date;
-  
+
   // Role and permissions
   roles: IUserRole[];
   permissions: string[];
-  
+
   // Employment details
   employeeId?: string;
   department?: string;
   position?: string;
   hireDate?: Date;
-  
+
   // Pay information
   payType?: PayType;
   salaryAmount?: number;
@@ -30,13 +30,13 @@ export interface IUser extends BaseEntity, AuditableEntity {
   baseSalary?: number;
   payFrequency?: PayFrequency;
   defaultHoursPerWeek?: number;
-  
+
   // Banking (encrypted/secured)
   bankAccountNumber?: string;
   routingNumber?: string;
   taxWithholdingInfo?: Record<string, any>;
   benefitsEnrollment?: Record<string, any>;
-  
+
   // Security
   mfaEnabled: boolean;
   failedLoginAttempts: number;
@@ -128,7 +128,6 @@ export enum PayFrequency {
   BIWEEKLY = 'BIWEEKLY',
   MONTHLY = 'MONTHLY',
 }
-
 
 export interface IBulkUserDeactivateInput {
   userIds: string[];

@@ -9,7 +9,12 @@ import helmet from 'helmet';
 import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import { createDatabaseConnection } from '@template/shared-config';
-import { initializeAuthConfig, getServiceInfo, getAuthDatabaseConfig, getAuthRedisConfig } from './config';
+import {
+  initializeAuthConfig,
+  getServiceInfo,
+  getAuthDatabaseConfig,
+  getAuthRedisConfig,
+} from './config';
 import { AuthService } from './services/auth.service';
 import { JwtService } from './services/jwt.service';
 import { PasswordService } from './services/password.service';
@@ -26,7 +31,7 @@ async function startServer() {
   try {
     // Initialize configuration FIRST
     const config = await initializeAuthConfig();
-    
+
     // Now create logger after config is loaded
     const logger = createLogger('server');
     logger.info('Starting Auth Service...');
@@ -36,7 +41,7 @@ async function startServer() {
       serviceName: serviceInfo.name,
       version: serviceInfo.version,
       environment: serviceInfo.environment,
-      port: serviceInfo.port
+      port: serviceInfo.port,
     });
 
     // Initialize database connection
@@ -44,7 +49,7 @@ async function startServer() {
       maxRetries: 5,
       retryDelay: 2000,
       exponentialBackoff: true,
-      enableMonitoring: true
+      enableMonitoring: true,
     });
 
     await dbManager.connect();
@@ -57,11 +62,11 @@ async function startServer() {
       // Redis client initialization would go here
       logger.info('Redis connection configured', {
         host: redisConfig.host,
-        port: redisConfig.port
+        port: redisConfig.port,
       });
     } catch (error) {
       logger.warn('Redis not available, continuing without session caching', {
-        error: (error as Error).message
+        error: (error as Error).message,
       });
     }
 
@@ -91,36 +96,40 @@ async function startServer() {
     const app = express();
 
     // Security middleware
-    app.use(helmet({
-      contentSecurityPolicy: {
-        directives: {
-          defaultSrc: ["'self'"],
-          styleSrc: ["'self'", "'unsafe-inline'"],
-          scriptSrc: ["'self'"],
-          imgSrc: ["'self'", "data:", "https:"],
+    app.use(
+      helmet({
+        contentSecurityPolicy: {
+          directives: {
+            defaultSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            scriptSrc: ["'self'"],
+            imgSrc: ["'self'", 'data:', 'https:'],
+          },
         },
-      },
-      hsts: {
-        maxAge: 31536000,
-        includeSubDomains: true,
-        preload: true
-      }
-    }));
+        hsts: {
+          maxAge: 31536000,
+          includeSubDomains: true,
+          preload: true,
+        },
+      })
+    );
 
     // CORS configuration
-    app.use(cors({
-      origin: process.env.CORS_ORIGINS?.split(',') || ['http://localhost:3000'],
-      credentials: true,
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-      allowedHeaders: [
-        'Origin',
-        'X-Requested-With',
-        'Content-Type',
-        'Accept',
-        'Authorization',
-        'X-Correlation-ID'
-      ]
-    }));
+    app.use(
+      cors({
+        origin: process.env.CORS_ORIGINS?.split(',') || ['http://localhost:3000'],
+        credentials: true,
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+        allowedHeaders: [
+          'Origin',
+          'X-Requested-With',
+          'Content-Type',
+          'Accept',
+          'Authorization',
+          'X-Correlation-ID',
+        ],
+      })
+    );
 
     // General middleware
     app.use(compression());
@@ -135,12 +144,12 @@ async function startServer() {
         success: false,
         error: {
           code: 'RATE_LIMIT_EXCEEDED',
-          message: 'Too many requests from this IP, please try again later.'
-        }
+          message: 'Too many requests from this IP, please try again later.',
+        },
       },
       standardHeaders: true,
       legacyHeaders: false,
-      skipSuccessfulRequests: config.rateLimit.skipSuccessfulRequests
+      skipSuccessfulRequests: config.rateLimit.skipSuccessfulRequests,
     });
 
     app.use('/api', limiter);
@@ -155,7 +164,7 @@ async function startServer() {
         url: req.url,
         ip: req.ip,
         userAgent: req.get('User-Agent'),
-        correlationId: req.correlationId
+        correlationId: req.correlationId,
       });
       next();
     });
@@ -172,40 +181,42 @@ async function startServer() {
         success: false,
         error: {
           code: 'NOT_FOUND',
-          message: 'Endpoint not found'
+          message: 'Endpoint not found',
         },
         correlationId: req.correlationId,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     });
 
     // Global error handler
-    app.use((error: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
-      logger.error('Unhandled error', {
-        error: error.message,
-        stack: error.stack,
-        url: req.url,
-        method: req.method,
-        correlationId: req.correlationId
-      });
+    app.use(
+      (error: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
+        logger.error('Unhandled error', {
+          error: error.message,
+          stack: error.stack,
+          url: req.url,
+          method: req.method,
+          correlationId: req.correlationId,
+        });
 
-      res.status(500).json({
-        success: false,
-        error: {
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'An unexpected error occurred'
-        },
-        correlationId: req.correlationId,
-        timestamp: new Date().toISOString()
-      });
-    });
+        res.status(500).json({
+          success: false,
+          error: {
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'An unexpected error occurred',
+          },
+          correlationId: req.correlationId,
+          timestamp: new Date().toISOString(),
+        });
+      }
+    );
 
     // Start server
     const server = app.listen(serviceInfo.port, () => {
       logger.info('Auth Service started successfully', {
         port: serviceInfo.port,
         environment: serviceInfo.environment,
-        version: serviceInfo.version
+        version: serviceInfo.version,
       });
     });
 
@@ -229,7 +240,7 @@ async function startServer() {
           process.exit(0);
         } catch (error) {
           logger.error('Error during graceful shutdown', {
-            error: (error as Error).message
+            error: (error as Error).message,
           });
           process.exit(1);
         }
@@ -247,10 +258,10 @@ async function startServer() {
     process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
     // Handle uncaught exceptions
-    process.on('uncaughtException', (error) => {
+    process.on('uncaughtException', error => {
       logger.error('Uncaught exception', {
         error: error.message,
-        stack: error.stack
+        stack: error.stack,
       });
       process.exit(1);
     });
@@ -258,15 +269,14 @@ async function startServer() {
     process.on('unhandledRejection', (reason, promise) => {
       logger.error('Unhandled rejection', {
         reason,
-        promise
+        promise,
       });
       process.exit(1);
     });
-
   } catch (error) {
     logger.error('Failed to start Auth Service', {
       error: (error as Error).message,
-      stack: (error as Error).stack
+      stack: (error as Error).stack,
     });
     process.exit(1);
   }

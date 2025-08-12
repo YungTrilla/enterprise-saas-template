@@ -47,7 +47,7 @@ program
 // Helper to get configuration
 function getConfig(options: any): IMigrationConfig {
   const databaseUrl = options.databaseUrl || process.env.DATABASE_URL;
-  
+
   if (!databaseUrl) {
     throw new Error('Database URL is required. Set DATABASE_URL or use --database-url');
   }
@@ -72,7 +72,7 @@ program
     try {
       const migrationsPath = path.resolve(options.migrationsPath);
       const filePath = await createMigrationFile(migrationsPath, name);
-      
+
       console.log(chalk.green('✔'), `Created migration: ${filePath}`);
     } catch (error) {
       console.error(chalk.red('✖'), 'Failed to create migration:', error);
@@ -95,13 +95,13 @@ program
   .option('--force', 'Force run despite conflicts')
   .action(async (options: any) => {
     const correlationId = generateCorrelationId();
-    
+
     try {
       const config = getConfig(options);
       const runner = new MigrationRunner(config);
-      
+
       console.log(chalk.blue('ℹ'), 'Running migrations...');
-      
+
       const result = await runner.run('up', {
         count: options.count,
         target: options.target,
@@ -137,13 +137,13 @@ program
   .option('--force', 'Force rollback despite conflicts')
   .action(async (options: any) => {
     const correlationId = generateCorrelationId();
-    
+
     try {
       const config = getConfig(options);
       const runner = new MigrationRunner(config);
-      
+
       console.log(chalk.blue('ℹ'), 'Rolling back migrations...');
-      
+
       const result = await runner.run('down', {
         count: options.count || 1,
         dryRun: options.dryRun,
@@ -175,15 +175,15 @@ program
   .option('-s, --schema <name>', 'Database schema')
   .action(async (options: any) => {
     const correlationId = generateCorrelationId();
-    
+
     try {
       const config = getConfig(options);
       const runner = new MigrationRunner(config);
-      
+
       const status = await runner.getStatus(correlationId);
-      
+
       console.log(chalk.blue('\n📊 Migration Status\n'));
-      
+
       // Applied migrations
       if (status.applied.length > 0) {
         console.log(chalk.green(`✔ Applied (${status.applied.length}):`));
@@ -197,9 +197,9 @@ program
       } else {
         console.log(chalk.gray('No migrations applied yet'));
       }
-      
+
       console.log();
-      
+
       // Pending migrations
       if (status.pending.length > 0) {
         console.log(chalk.yellow(`⏳ Pending (${status.pending.length}):`));
@@ -209,7 +209,7 @@ program
       } else {
         console.log(chalk.gray('No pending migrations'));
       }
-      
+
       // Conflicts
       if (status.conflicts.length > 0) {
         console.log();

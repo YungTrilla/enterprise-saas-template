@@ -9,15 +9,10 @@ export interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const Skeleton = React.forwardRef<HTMLDivElement, SkeletonProps>(
-  ({ 
-    className, 
-    variant = 'default',
-    width,
-    height,
-    animation = 'pulse',
-    style,
-    ...props 
-  }, ref) => {
+  (
+    { className, variant = 'default', width, height, animation = 'pulse', style, ...props },
+    ref
+  ) => {
     const getVariantClasses = () => {
       switch (variant) {
         case 'text':
@@ -45,12 +40,7 @@ const Skeleton = React.forwardRef<HTMLDivElement, SkeletonProps>(
     return (
       <div
         ref={ref}
-        className={cn(
-          'bg-muted',
-          getVariantClasses(),
-          getAnimationClasses(),
-          className
-        )}
+        className={cn('bg-muted', getVariantClasses(), getAnimationClasses(), className)}
         style={{
           width: width,
           height: height,
@@ -80,11 +70,7 @@ const SkeletonContainer = React.forwardRef<HTMLDivElement, SkeletonContainerProp
 
     if (count > 1 && !children) {
       return (
-        <div
-          ref={ref}
-          className={cn(spacingClasses[spacing], className)}
-          {...props}
-        >
+        <div ref={ref} className={cn(spacingClasses[spacing], className)} {...props}>
           {Array.from({ length: count }).map((_, i) => (
             <Skeleton key={i} />
           ))}
@@ -93,11 +79,7 @@ const SkeletonContainer = React.forwardRef<HTMLDivElement, SkeletonContainerProp
     }
 
     return (
-      <div
-        ref={ref}
-        className={cn(spacingClasses[spacing], className)}
-        {...props}
-      >
+      <div ref={ref} className={cn(spacingClasses[spacing], className)} {...props}>
         {children}
       </div>
     );
@@ -110,11 +92,11 @@ SkeletonContainer.displayName = 'SkeletonContainer';
 const SkeletonCard: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className, ...props }) => {
   return (
     <div className={cn('space-y-4', className)} {...props}>
-      <Skeleton variant="rectangular" height={200} />
-      <div className="space-y-2">
-        <Skeleton variant="text" width="60%" />
-        <Skeleton variant="text" width="80%" />
-        <Skeleton variant="text" width="40%" />
+      <Skeleton variant='rectangular' height={200} />
+      <div className='space-y-2'>
+        <Skeleton variant='text' width='60%' />
+        <Skeleton variant='text' width='80%' />
+        <Skeleton variant='text' width='40%' />
       </div>
     </div>
   );
@@ -125,8 +107,8 @@ const SkeletonTableRow: React.FC<{ columns?: number }> = ({ columns = 4 }) => {
   return (
     <tr>
       {Array.from({ length: columns }).map((_, i) => (
-        <td key={i} className="p-4">
-          <Skeleton variant="text" />
+        <td key={i} className='p-4'>
+          <Skeleton variant='text' />
         </td>
       ))}
     </tr>

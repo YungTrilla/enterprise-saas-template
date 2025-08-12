@@ -38,11 +38,11 @@ components:
           type: string
           enum: [online, offline, degraded]
         health:
-          $ref: './health.yaml#/components/schemas/ServiceHealth'
+          $ref: "./health.yaml#/components/schemas/ServiceHealth"
         instances:
           type: array
           items:
-            $ref: '#/components/schemas/ServiceInstance'
+            $ref: "#/components/schemas/ServiceInstance"
     ServiceInstance:
       type: object
       properties:

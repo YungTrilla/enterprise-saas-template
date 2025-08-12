@@ -4,7 +4,13 @@
  */
 
 import { EntityId, CorrelationId } from '@template/shared-types';
-import { IAuthAuditLog, AuthAuditAction, ISecurityEvent, SecurityEventType, SecuritySeverity } from '../types/auth';
+import {
+  IAuthAuditLog,
+  AuthAuditAction,
+  ISecurityEvent,
+  SecurityEventType,
+  SecuritySeverity,
+} from '../types/auth';
 import { CorrelatedLogger } from '../utils/logger';
 
 export class AuditService {
@@ -47,7 +53,7 @@ export class AuditService {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         createdBy: userId || 'system',
-        updatedBy: userId || 'system'
+        updatedBy: userId || 'system',
       };
 
       // Save to database
@@ -61,16 +67,15 @@ export class AuditService {
         resource,
         success,
         sessionId,
-        ipAddress: this.maskIpAddress(ipAddress)
+        ipAddress: this.maskIpAddress(ipAddress),
       });
-
     } catch (error) {
       this.logger.error('Failed to log auth event', {
         userId,
         action,
         resource,
         success,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       // Don't throw - audit failures shouldn't break auth flow
     }
@@ -106,7 +111,7 @@ export class AuditService {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         createdBy: userId || 'system',
-        updatedBy: userId || 'system'
+        updatedBy: userId || 'system',
       };
 
       // Save to database
@@ -119,21 +124,20 @@ export class AuditService {
         severity,
         userId,
         description,
-        ipAddress: ipAddress ? this.maskIpAddress(ipAddress) : undefined
+        ipAddress: ipAddress ? this.maskIpAddress(ipAddress) : undefined,
       });
 
       // For critical events, also trigger alerts
       if (severity === SecuritySeverity.CRITICAL) {
         await this.triggerSecurityAlert(securityEvent);
       }
-
     } catch (error) {
       this.logger.error('Failed to log security event', {
         type,
         severity,
         userId,
         description,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       // Don't throw - audit failures shouldn't break auth flow
     }
@@ -155,22 +159,21 @@ export class AuditService {
         startDate,
         endDate,
         actions,
-        limit
+        limit,
       });
 
       this.logger.debug('Retrieved user audit logs', {
         userId,
         logCount: auditLogs.length,
         startDate,
-        endDate
+        endDate,
       });
 
       return auditLogs;
-
     } catch (error) {
       this.logger.error('Failed to get user audit logs', {
         userId,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       return [];
     }
@@ -194,7 +197,7 @@ export class AuditService {
         types,
         severities,
         resolved,
-        limit
+        limit,
       });
 
       this.logger.debug('Retrieved security events', {
@@ -203,14 +206,13 @@ export class AuditService {
         endDate,
         types,
         severities,
-        resolved
+        resolved,
       });
 
       return securityEvents;
-
     } catch (error) {
       this.logger.error('Failed to get security events', {
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       return [];
     }
@@ -231,14 +233,13 @@ export class AuditService {
 
       this.logger.info('Security event resolved', {
         eventId,
-        resolvedBy
+        resolvedBy,
       });
-
     } catch (error) {
       this.logger.error('Failed to resolve security event', {
         eventId,
         resolvedBy,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       throw error;
     }
@@ -265,18 +266,17 @@ export class AuditService {
       this.logger.debug('Retrieved audit statistics', {
         startDate,
         endDate,
-        totalEvents: stats.totalEvents
+        totalEvents: stats.totalEvents,
       });
 
       return stats;
-
     } catch (error) {
       this.logger.error('Failed to get audit statistics', {
         startDate,
         endDate,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
-      
+
       // Return empty stats object
       return {
         totalEvents: 0,
@@ -285,7 +285,7 @@ export class AuditService {
         eventsByAction: {} as Record<AuthAuditAction, number>,
         securityEventsBySeverity: {} as Record<SecuritySeverity, number>,
         uniqueUsers: 0,
-        uniqueIpAddresses: 0
+        uniqueIpAddresses: 0,
       };
     }
   }
@@ -302,24 +302,28 @@ export class AuditService {
       const auditLogs = await this.getAuditLogsFromDatabase({
         startDate,
         endDate,
-        limit: 10000 // Large limit for export
+        limit: 10000, // Large limit for export
       });
 
       const securityEvents = await this.getSecurityEventsFromDatabase({
         startDate,
         endDate,
-        limit: 10000
+        limit: 10000,
       });
 
       let exportData: string;
 
       if (format === 'json') {
-        exportData = JSON.stringify({
-          exportDate: new Date().toISOString(),
-          dateRange: { startDate, endDate },
-          auditLogs,
-          securityEvents
-        }, null, 2);
+        exportData = JSON.stringify(
+          {
+            exportDate: new Date().toISOString(),
+            dateRange: { startDate, endDate },
+            auditLogs,
+            securityEvents,
+          },
+          null,
+          2
+        );
       } else {
         // CSV format implementation would go here
         exportData = this.convertToCSV(auditLogs, securityEvents);
@@ -330,17 +334,16 @@ export class AuditService {
         endDate,
         format,
         auditLogCount: auditLogs.length,
-        securityEventCount: securityEvents.length
+        securityEventCount: securityEvents.length,
       });
 
       return exportData;
-
     } catch (error) {
       this.logger.error('Failed to export audit logs', {
         startDate,
         endDate,
         format,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       throw error;
     }
@@ -377,21 +380,27 @@ export class AuditService {
       type: event.type,
       description: event.description,
       userId: event.userId,
-      ipAddress: event.ipAddress
+      ipAddress: event.ipAddress,
     });
   }
 
   private convertToCSV(auditLogs: IAuthAuditLog[], securityEvents: ISecurityEvent[]): string {
     // Basic CSV conversion - real implementation would be more robust
     const headers = 'Type,Timestamp,UserId,Action,Success,IPAddress,Description\n';
-    
-    const auditRows = auditLogs.map(log => 
-      `AUDIT,${log.createdAt},${log.userId || ''},${log.action},${log.success},${this.maskIpAddress(log.ipAddress)},${log.resource}`
-    ).join('\n');
 
-    const securityRows = securityEvents.map(event => 
-      `SECURITY,${event.createdAt},${event.userId || ''},${event.type},${!event.resolved},${this.maskIpAddress(event.ipAddress)},${event.description}`
-    ).join('\n');
+    const auditRows = auditLogs
+      .map(
+        log =>
+          `AUDIT,${log.createdAt},${log.userId || ''},${log.action},${log.success},${this.maskIpAddress(log.ipAddress)},${log.resource}`
+      )
+      .join('\n');
+
+    const securityRows = securityEvents
+      .map(
+        event =>
+          `SECURITY,${event.createdAt},${event.userId || ''},${event.type},${!event.resolved},${this.maskIpAddress(event.ipAddress)},${event.description}`
+      )
+      .join('\n');
 
     return headers + auditRows + '\n' + securityRows;
   }
@@ -460,7 +469,7 @@ export class AuditService {
       eventsByAction: {} as Record<AuthAuditAction, number>,
       securityEventsBySeverity: {} as Record<SecuritySeverity, number>,
       uniqueUsers: 0,
-      uniqueIpAddresses: 0
+      uniqueIpAddresses: 0,
     };
   }
 }

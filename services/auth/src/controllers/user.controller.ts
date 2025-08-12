@@ -25,36 +25,19 @@ export class UserController {
 
   // User Management Endpoints
 
-  createUser = async (
-    req: AuthRequest,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  createUser = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const user = await this.userService.createUser(
-        req.body,
-        req.user!.id,
-        req.correlationId
-      );
+      const user = await this.userService.createUser(req.body, req.user!.id, req.correlationId);
 
-      res.status(201).json(
-        ApiResponse.success(user, 'User created successfully')
-      );
+      res.status(201).json(ApiResponse.success(user, 'User created successfully'));
     } catch (error) {
       next(error);
     }
   };
 
-  getUser = async (
-    req: AuthRequest,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  getUser = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const user = await this.userService.getUser(
-        req.params.userId,
-        req.correlationId
-      );
+      const user = await this.userService.getUser(req.params.userId, req.correlationId);
 
       if (!user) {
         throw new ApiError('User not found', 404);
@@ -66,11 +49,7 @@ export class UserController {
     }
   };
 
-  updateUser = async (
-    req: AuthRequest,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  updateUser = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const user = await this.userService.updateUser(
         req.params.userId,
@@ -79,19 +58,13 @@ export class UserController {
         req.correlationId
       );
 
-      res.json(
-        ApiResponse.success(user, 'User updated successfully')
-      );
+      res.json(ApiResponse.success(user, 'User updated successfully'));
     } catch (error) {
       next(error);
     }
   };
 
-  listUsers = async (
-    req: AuthRequest,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  listUsers = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const {
         page = 1,
@@ -126,17 +99,9 @@ export class UserController {
     }
   };
 
-  deleteUser = async (
-    req: AuthRequest,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  deleteUser = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      await this.userService.deleteUser(
-        req.params.userId,
-        req.user!.id,
-        req.correlationId
-      );
+      await this.userService.deleteUser(req.params.userId, req.user!.id, req.correlationId);
 
       res.json(ApiResponse.success(null, 'User deleted successfully'));
     } catch (error) {
@@ -144,11 +109,7 @@ export class UserController {
     }
   };
 
-  activateUser = async (
-    req: AuthRequest,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  activateUser = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const user = await this.userService.activateUser(
         req.params.userId,
@@ -156,19 +117,13 @@ export class UserController {
         req.correlationId
       );
 
-      res.json(
-        ApiResponse.success(user, 'User activated successfully')
-      );
+      res.json(ApiResponse.success(user, 'User activated successfully'));
     } catch (error) {
       next(error);
     }
   };
 
-  deactivateUser = async (
-    req: AuthRequest,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  deactivateUser = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const user = await this.userService.deactivateUser(
         req.params.userId,
@@ -176,19 +131,13 @@ export class UserController {
         req.correlationId
       );
 
-      res.json(
-        ApiResponse.success(user, 'User deactivated successfully')
-      );
+      res.json(ApiResponse.success(user, 'User deactivated successfully'));
     } catch (error) {
       next(error);
     }
   };
 
-  assignRoles = async (
-    req: AuthRequest,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  assignRoles = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { roles } = req.body;
 
@@ -199,19 +148,13 @@ export class UserController {
         req.correlationId
       );
 
-      res.json(
-        ApiResponse.success(user, 'Roles assigned successfully')
-      );
+      res.json(ApiResponse.success(user, 'Roles assigned successfully'));
     } catch (error) {
       next(error);
     }
   };
 
-  resetPassword = async (
-    req: AuthRequest,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  resetPassword = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { newPassword } = req.body;
 
@@ -222,14 +165,11 @@ export class UserController {
         req.correlationId
       );
 
-      res.json(
-        ApiResponse.success(null, 'Password reset successfully')
-      );
+      res.json(ApiResponse.success(null, 'Password reset successfully'));
     } catch (error) {
       next(error);
     }
   };
-
 
   // Bulk Operations
 
@@ -255,11 +195,7 @@ export class UserController {
 
   // Role Preset Endpoints
 
-  getRolePresets = async (
-    req: AuthRequest,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  getRolePresets = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const presets = await this.userService.getRolePresets(req.correlationId);
 
@@ -285,5 +221,4 @@ export class UserController {
       next(error);
     }
   };
-
 }

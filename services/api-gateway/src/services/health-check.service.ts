@@ -54,7 +54,7 @@ export class HealthCheckService {
     }, this.intervalMs);
 
     this.logger.info('Started periodic health checks', {
-      intervalMs: this.intervalMs
+      intervalMs: this.intervalMs,
     });
   }
 
@@ -73,8 +73,8 @@ export class HealthCheckService {
    * Check health of all services
    */
   async checkAllServices(): Promise<void> {
-    const checks = Object.entries(this.serviceRegistry).map(
-      ([name, config]) => this.checkServiceHealth(name, config)
+    const checks = Object.entries(this.serviceRegistry).map(([name, config]) =>
+      this.checkServiceHealth(name, config)
     );
 
     await Promise.allSettled(checks);
@@ -90,13 +90,10 @@ export class HealthCheckService {
     const startTime = Date.now();
 
     try {
-      const response = await axios.get(
-        `${serviceConfig.url}${serviceConfig.healthEndpoint}`,
-        {
-          timeout: 5000,
-          validateStatus: () => true
-        }
-      );
+      const response = await axios.get(`${serviceConfig.url}${serviceConfig.healthEndpoint}`, {
+        timeout: 5000,
+        validateStatus: () => true,
+      });
 
       const responseTime = Date.now() - startTime;
       const isHealthy = response.status === 200;
@@ -106,7 +103,7 @@ export class HealthCheckService {
         status: isHealthy ? 'healthy' : 'unhealthy',
         responseTime,
         lastCheck: new Date().toISOString(),
-        details: response.data
+        details: response.data,
       };
 
       if (!isHealthy) {
@@ -114,24 +111,23 @@ export class HealthCheckService {
       }
 
       this.healthCache.set(serviceName, health);
-      
+
       this.logger.debug('Service health check completed', {
         service: serviceName,
         status: health.status,
-        responseTime
+        responseTime,
       });
 
       return health;
-
     } catch (error) {
       const responseTime = Date.now() - startTime;
-      
+
       const health: IServiceHealth = {
         name: serviceName,
         status: 'unhealthy',
         responseTime,
         lastCheck: new Date().toISOString(),
-        error: (error as Error).message
+        error: (error as Error).message,
       };
 
       this.healthCache.set(serviceName, health);
@@ -139,7 +135,7 @@ export class HealthCheckService {
       this.logger.error('Service health check failed', {
         service: serviceName,
         error: (error as Error).message,
-        responseTime
+        responseTime,
       });
 
       return health;
@@ -156,11 +152,11 @@ export class HealthCheckService {
     }
 
     const services = Array.from(this.healthCache.values());
-    
+
     // Determine overall system status
     const unhealthyCount = services.filter(s => s.status === 'unhealthy').length;
     const degradedCount = services.filter(s => s.status === 'degraded').length;
-    
+
     let systemStatus: 'healthy' | 'unhealthy' | 'degraded';
     if (unhealthyCount > services.length / 2) {
       systemStatus = 'unhealthy';
@@ -183,10 +179,10 @@ export class HealthCheckService {
         memory: {
           rss: Math.round(memoryUsage.rss / 1024 / 1024), // MB
           heapTotal: Math.round(memoryUsage.heapTotal / 1024 / 1024), // MB
-          heapUsed: Math.round(memoryUsage.heapUsed / 1024 / 1024) // MB
-        }
+          heapUsed: Math.round(memoryUsage.heapUsed / 1024 / 1024), // MB
+        },
       },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 

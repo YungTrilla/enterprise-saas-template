@@ -1,6 +1,7 @@
 # Service Bootstrap Utility
 
-A shared utility for bootstrapping Abyss Central microservices with standard configuration, middleware, health checks, and graceful shutdown handling.
+A shared utility for bootstrapping Abyss Central microservices with standard
+configuration, middleware, health checks, and graceful shutdown handling.
 
 ## Features
 
@@ -27,25 +28,28 @@ import { bootstrapService } from '@abyss/service-bootstrap';
 import { routes } from './routes';
 
 async function startServer() {
-  const { app, logger, db, start } = await bootstrapService({
-    name: 'my-service',
-    version: '1.0.0',
-    port: 3000,
-    
-    database: {
-      enabled: true,
-      connectionString: process.env.DATABASE_URL
+  const { app, logger, db, start } = await bootstrapService(
+    {
+      name: 'my-service',
+      version: '1.0.0',
+      port: 3000,
+
+      database: {
+        enabled: true,
+        connectionString: process.env.DATABASE_URL,
+      },
+
+      redis: {
+        enabled: true,
+        url: process.env.REDIS_URL,
+        optional: true, // Don't fail if Redis is unavailable
+      },
     },
-    
-    redis: {
-      enabled: true,
-      url: process.env.REDIS_URL,
-      optional: true // Don't fail if Redis is unavailable
+    (app, { logger, db, redis }) => {
+      // Setup your service routes
+      app.use('/api/v1/resources', routes);
     }
-  }, (app, { logger, db, redis }) => {
-    // Setup your service routes
-    app.use('/api/v1/resources', routes);
-  });
+  );
 
   // Start the server
   await start();
@@ -62,14 +66,14 @@ startServer().catch(console.error);
 ```typescript
 interface ServiceBootstrapConfig {
   // Required
-  name: string;              // Service name
-  version: string;           // Service version
-  port: number;              // Port to listen on
-  
+  name: string; // Service name
+  version: string; // Service version
+  port: number; // Port to listen on
+
   // Optional
-  environment?: string;      // Environment (defaults to NODE_ENV)
-  host?: string;            // Host to bind to (defaults to '0.0.0.0')
-  apiPrefix?: string;       // API prefix (defaults to '/api/v1')
+  environment?: string; // Environment (defaults to NODE_ENV)
+  host?: string; // Host to bind to (defaults to '0.0.0.0')
+  apiPrefix?: string; // API prefix (defaults to '/api/v1')
 }
 ```
 
@@ -82,19 +86,19 @@ interface ServiceBootstrapConfig {
     origins?: string[];     // Allowed origins (default: all)
     credentials?: boolean;  // Allow credentials (default: true)
   },
-  
+
   rateLimit: {
     enabled?: boolean;      // Enable rate limiting (default: true)
     windowMs?: number;      // Time window in ms (default: 15 minutes)
     maxRequests?: number;   // Max requests per window (default: 100)
     message?: string;       // Custom rate limit message
   },
-  
+
   bodyParser: {
     jsonLimit?: string;     // JSON body size limit (default: '10mb')
     urlEncodedLimit?: string; // URL-encoded limit (default: '10mb')
   },
-  
+
   security: {
     trustProxy?: boolean;   // Trust proxy headers (default: false)
     helmet?: boolean;       // Use Helmet middleware (default: true)
@@ -207,7 +211,7 @@ interface ServiceBootstrapConfig {
 await bootstrapService(config, (app, deps) => {
   // Add custom middleware before routes
   app.use(myCustomMiddleware);
-  
+
   // Setup routes
   app.use('/api/v1/users', userRoutes);
 });
@@ -223,10 +227,10 @@ const config = {
       // Check external service
       const serviceHealthy = await checkExternalService();
       return {
-        externalService: serviceHealthy ? 'healthy' : 'unhealthy'
+        externalService: serviceHealthy ? 'healthy' : 'unhealthy',
       };
-    }
-  }
+    },
+  },
 };
 ```
 
@@ -243,9 +247,9 @@ const config = {
       async () => {
         // Close WebSocket connections
         await wsServer.close();
-      }
-    ]
-  }
+      },
+    ],
+  },
 };
 ```
 
@@ -257,15 +261,15 @@ await bootstrapService(config, (app, { logger, db, redis }) => {
     try {
       // Use the database connection
       const result = await db.query('SELECT * FROM users');
-      
+
       // Use Redis for caching
       if (redis) {
         await redis.setex('users', 3600, JSON.stringify(result.rows));
       }
-      
+
       // Use the logger
       logger.info('Users fetched', { count: result.rows.length });
-      
+
       res.json(result.rows);
     } catch (error) {
       logger.error('Failed to fetch users', { error });
@@ -310,6 +314,7 @@ All errors are automatically caught and logged with:
 - Consistent error response format
 
 Example error response:
+
 ```json
 {
   "error": {
@@ -336,6 +341,7 @@ The service handles graceful shutdown automatically:
 6. Exits with appropriate code
 
 Shutdown is triggered by:
+
 - `SIGTERM` signal (Kubernetes/Docker)
 - `SIGINT` signal (Ctrl+C)
 - Uncaught exceptions
@@ -386,6 +392,7 @@ describe('My Service', () => {
 ### From Manual Express Setup
 
 Before:
+
 ```typescript
 const app = express();
 app.use(helmet());
@@ -395,6 +402,7 @@ app.use(express.json());
 ```
 
 After:
+
 ```typescript
 const { app } = await bootstrapService(config, setupRoutes);
 // Done! All middleware configured
@@ -411,7 +419,8 @@ const { app } = await bootstrapService(config, setupRoutes);
 
 ## Contributing
 
-See the main [CONTRIBUTING.md](../../CONTRIBUTING.md) for development guidelines.
+See the main [CONTRIBUTING.md](../../CONTRIBUTING.md) for development
+guidelines.
 
 ## License
 

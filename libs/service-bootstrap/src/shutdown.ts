@@ -37,7 +37,7 @@ export function setupGracefulShutdown(
       // Stop accepting new connections
       if (server) {
         await new Promise<void>((resolve, reject) => {
-          server.close((err) => {
+          server.close(err => {
             if (err) {
               logger.error('Error closing server', { error: err.message });
               reject(err);
@@ -56,7 +56,7 @@ export function setupGracefulShutdown(
             await handler();
           } catch (error) {
             logger.error('Custom shutdown handler failed', {
-              error: error instanceof Error ? error.message : 'Unknown error'
+              error: error instanceof Error ? error.message : 'Unknown error',
             });
           }
         }
@@ -74,7 +74,7 @@ export function setupGracefulShutdown(
     } catch (error) {
       clearTimeout(shutdownTimer);
       logger.error('Error during graceful shutdown', {
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
       process.exit(1);
     }
@@ -85,10 +85,10 @@ export function setupGracefulShutdown(
   process.on('SIGINT', () => shutdown('SIGINT'));
 
   // Handle uncaught errors
-  process.on('uncaughtException', (error) => {
+  process.on('uncaughtException', error => {
     logger.error('Uncaught exception', {
       error: error.message,
-      stack: error.stack
+      stack: error.stack,
     });
     shutdown('uncaughtException');
   });
@@ -96,7 +96,7 @@ export function setupGracefulShutdown(
   process.on('unhandledRejection', (reason, promise) => {
     logger.error('Unhandled rejection', {
       reason: reason instanceof Error ? reason.message : reason,
-      promise
+      promise,
     });
     shutdown('unhandledRejection');
   });

@@ -10,18 +10,18 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '../components/schemas/auth.yaml#/components/schemas/UserRegistration'
+              $ref: "../components/schemas/auth.yaml#/components/schemas/UserRegistration"
       responses:
-        '201':
+        "201":
           description: User registered successfully
           content:
             application/json:
               schema:
-                $ref: '../components/schemas/auth.yaml#/components/schemas/AuthResponse'
-        '400':
-          $ref: '../components/responses.yaml#/components/responses/BadRequest'
-        '409':
-          $ref: '../components/responses.yaml#/components/responses/Conflict'
+                $ref: "../components/schemas/auth.yaml#/components/schemas/AuthResponse"
+        "400":
+          $ref: "../components/responses.yaml#/components/responses/BadRequest"
+        "409":
+          $ref: "../components/responses.yaml#/components/responses/Conflict"
   /auth/login:
     post:
       tags:
@@ -33,18 +33,18 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '../components/schemas/auth.yaml#/components/schemas/LoginCredentials'
+              $ref: "../components/schemas/auth.yaml#/components/schemas/LoginCredentials"
       responses:
-        '200':
+        "200":
           description: Login successful
           content:
             application/json:
               schema:
-                $ref: '../components/schemas/auth.yaml#/components/schemas/AuthResponse'
-        '401':
-          $ref: '../components/responses.yaml#/components/responses/Unauthorized'
-        '429':
-          $ref: '../components/responses.yaml#/components/responses/TooManyRequests'
+                $ref: "../components/schemas/auth.yaml#/components/schemas/AuthResponse"
+        "401":
+          $ref: "../components/responses.yaml#/components/responses/Unauthorized"
+        "429":
+          $ref: "../components/responses.yaml#/components/responses/TooManyRequests"
   /auth/logout:
     post:
       tags:
@@ -54,7 +54,7 @@ paths:
       security:
         - bearerAuth: []
       responses:
-        '200':
+        "200":
           description: Logout successful
           content:
             application/json:
@@ -64,8 +64,8 @@ paths:
                   message:
                     type: string
                     example: Logged out successfully
-        '401':
-          $ref: '../components/responses.yaml#/components/responses/Unauthorized'
+        "401":
+          $ref: "../components/responses.yaml#/components/responses/Unauthorized"
   /auth/refresh:
     post:
       tags:
@@ -85,14 +85,14 @@ paths:
                   type: string
                   description: Refresh token
       responses:
-        '200':
+        "200":
           description: Token refreshed successfully
           content:
             application/json:
               schema:
-                $ref: '../components/schemas/auth.yaml#/components/schemas/TokenResponse'
-        '401':
-          $ref: '../components/responses.yaml#/components/responses/Unauthorized'
+                $ref: "../components/schemas/auth.yaml#/components/schemas/TokenResponse"
+        "401":
+          $ref: "../components/responses.yaml#/components/responses/Unauthorized"
   /auth/verify-email:
     post:
       tags:
@@ -112,10 +112,10 @@ paths:
                   type: string
                   description: Email verification token
       responses:
-        '200':
+        "200":
           description: Email verified successfully
-        '400':
-          $ref: '../components/responses.yaml#/components/responses/BadRequest'
+        "400":
+          $ref: "../components/responses.yaml#/components/responses/BadRequest"
   /auth/forgot-password:
     post:
       tags:
@@ -135,10 +135,10 @@ paths:
                   type: string
                   format: email
       responses:
-        '200':
+        "200":
           description: Password reset email sent
-        '404':
-          $ref: '../components/responses.yaml#/components/responses/NotFound'
+        "404":
+          $ref: "../components/responses.yaml#/components/responses/NotFound"
   /auth/reset-password:
     post:
       tags:
@@ -163,10 +163,10 @@ paths:
                   format: password
                   minLength: 8
       responses:
-        '200':
+        "200":
           description: Password reset successfully
-        '400':
-          $ref: '../components/responses.yaml#/components/responses/BadRequest'
+        "400":
+          $ref: "../components/responses.yaml#/components/responses/BadRequest"
   /auth/change-password:
     post:
       tags:
@@ -193,10 +193,10 @@ paths:
                   format: password
                   minLength: 8
       responses:
-        '200':
+        "200":
           description: Password changed successfully
-        '401':
-          $ref: '../components/responses.yaml#/components/responses/Unauthorized'
+        "401":
+          $ref: "../components/responses.yaml#/components/responses/Unauthorized"
   /auth/mfa/enable:
     post:
       tags:
@@ -206,7 +206,7 @@ paths:
       security:
         - bearerAuth: []
       responses:
-        '200':
+        "200":
           description: MFA setup initiated
           content:
             application/json:
@@ -218,8 +218,8 @@ paths:
                   qrCode:
                     type: string
                     description: Base64 encoded QR code image
-        '401':
-          $ref: '../components/responses.yaml#/components/responses/Unauthorized'
+        "401":
+          $ref: "../components/responses.yaml#/components/responses/Unauthorized"
   /auth/mfa/verify:
     post:
       tags:
@@ -239,9 +239,9 @@ paths:
               properties:
                 token:
                   type: string
-                  pattern: '^[0-9]{6}$'
+                  pattern: "^[0-9]{6}$"
       responses:
-        '200':
+        "200":
           description: MFA verified successfully
-        '401':
-          $ref: '../components/responses.yaml#/components/responses/Unauthorized'
+        "401":
+          $ref: "../components/responses.yaml#/components/responses/Unauthorized"

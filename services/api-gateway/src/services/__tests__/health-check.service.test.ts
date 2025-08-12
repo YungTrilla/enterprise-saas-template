@@ -48,10 +48,9 @@ describe('HealthCheckService', () => {
         },
       });
 
-      expect(mockedAxios.get).toHaveBeenCalledWith(
-        'http://auth-service:3001/health',
-        { timeout: 5000 }
-      );
+      expect(mockedAxios.get).toHaveBeenCalledWith('http://auth-service:3001/health', {
+        timeout: 5000,
+      });
     });
 
     it('should return unhealthy status when service is down', async () => {
@@ -72,7 +71,10 @@ describe('HealthCheckService', () => {
       (timeoutError as any).code = 'ECONNABORTED';
       mockedAxios.get.mockRejectedValue(timeoutError);
 
-      const result = await healthCheckService.checkHealth('inventory', 'http://inventory-service:3020');
+      const result = await healthCheckService.checkHealth(
+        'inventory',
+        'http://inventory-service:3020'
+      );
 
       expect(result).toEqual({
         service: 'inventory',
@@ -100,13 +102,11 @@ describe('HealthCheckService', () => {
 
     it('should measure latency accurately', async () => {
       // Mock a delay
-      mockedAxios.get.mockImplementation(() => 
-        new Promise(resolve => 
-          setTimeout(() => 
-            resolve({ data: { status: 'healthy' }, status: 200 }), 
-            100
+      mockedAxios.get.mockImplementation(
+        () =>
+          new Promise(resolve =>
+            setTimeout(() => resolve({ data: { status: 'healthy' }, status: 200 }), 100)
           )
-        )
       );
 
       const result = await healthCheckService.checkHealth('auth', 'http://auth-service:3001');

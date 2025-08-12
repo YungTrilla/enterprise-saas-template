@@ -5,31 +5,31 @@ components:
       content:
         application/json:
           schema:
-            $ref: './schemas/common.yaml#/components/schemas/Error'
+            $ref: "./schemas/common.yaml#/components/schemas/Error"
     Unauthorized:
       description: Unauthorized
       content:
         application/json:
           schema:
-            $ref: './schemas/common.yaml#/components/schemas/Error'
+            $ref: "./schemas/common.yaml#/components/schemas/Error"
     Forbidden:
       description: Forbidden
       content:
         application/json:
           schema:
-            $ref: './schemas/common.yaml#/components/schemas/Error'
+            $ref: "./schemas/common.yaml#/components/schemas/Error"
     NotFound:
       description: Not found
       content:
         application/json:
           schema:
-            $ref: './schemas/common.yaml#/components/schemas/Error'
+            $ref: "./schemas/common.yaml#/components/schemas/Error"
     ServiceUnavailable:
       description: Service unavailable
       content:
         application/json:
           schema:
-            $ref: './schemas/common.yaml#/components/schemas/Error'
+            $ref: "./schemas/common.yaml#/components/schemas/Error"
       headers:
         Retry-After:
           schema:

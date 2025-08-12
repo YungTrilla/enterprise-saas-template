@@ -1,12 +1,12 @@
 import { AuthRepository } from '../database/repository';
-import { 
-  IUser, 
-  IUserCreateInput, 
-  IUserUpdateInput, 
+import {
+  IUser,
+  IUserCreateInput,
+  IUserUpdateInput,
   IUserFilter,
   IBulkUserDeactivateInput,
   IBulkUserActionResult,
-  IRolePreset 
+  IRolePreset,
 } from '../models/user.model';
 import { CorrelationId } from '@template/shared-types';
 import { ApiError } from '@template/shared-utils';
@@ -91,14 +91,14 @@ export class UserService {
         const preset = await this.rolePresetService.getPresetByName(data.rolePreset);
         if (preset) {
           await this.rolePresetService.applyPresetToUser(user.id, data.rolePreset, createdBy);
-          
+
           // Apply default pay settings if not provided
           if (!data.payType && preset.defaultPayType) {
             await this.updateUser(
               user.id,
               {
                 payType: preset.defaultPayType,
-                commissionRate: preset.defaultCommissionRate
+                commissionRate: preset.defaultCommissionRate,
               },
               createdBy,
               correlationId
@@ -110,24 +110,14 @@ export class UserService {
         for (const roleName of data.roles) {
           const role = await this.rbacService.getRoleByName(roleName, correlationId);
           if (role) {
-            await this.authRepository.assignRole(
-              user.id,
-              role.id,
-              createdBy,
-              correlationId
-            );
+            await this.authRepository.assignRole(user.id, role.id, createdBy, correlationId);
           }
         }
       } else {
         // Assign default role
         const defaultRole = await this.rbacService.getRoleByName('employee', correlationId);
         if (defaultRole) {
-          await this.authRepository.assignRole(
-            user.id,
-            defaultRole.id,
-            createdBy,
-            correlationId
-          );
+          await this.authRepository.assignRole(user.id, defaultRole.id, createdBy, correlationId);
         }
       }
 
@@ -146,10 +136,10 @@ export class UserService {
 
       // TODO: Send welcome email if requested
       if (data.sendWelcomeEmail) {
-        logger.info('Welcome email would be sent here', { 
-          userId: user.id, 
+        logger.info('Welcome email would be sent here', {
+          userId: user.id,
           email: user.email,
-          correlationId 
+          correlationId,
         });
       }
 
@@ -174,11 +164,7 @@ export class UserService {
       }
 
       // Update user
-      const user = await this.authRepository.updateUser(
-        userId,
-        data,
-        correlationId
-      );
+      const user = await this.authRepository.updateUser(userId, data, correlationId);
 
       // Audit log
       await this.auditService.logAction({
@@ -197,10 +183,7 @@ export class UserService {
     }
   }
 
-  async getUser(
-    userId: string,
-    correlationId?: CorrelationId
-  ): Promise<IUser | null> {
+  async getUser(userId: string, correlationId?: CorrelationId): Promise<IUser | null> {
     try {
       const user = await this.authRepository.findUserById(userId, correlationId);
       if (!user) {
@@ -234,16 +217,11 @@ export class UserService {
     limit: number;
   }> {
     try {
-      const result = await this.authRepository.listUsers(
-        filter,
-        page,
-        limit,
-        correlationId
-      );
+      const result = await this.authRepository.listUsers(filter, page, limit, correlationId);
 
       // Enrich users with roles and permissions
       const enrichedUsers = await Promise.all(
-        result.items.map(async (user) => {
+        result.items.map(async user => {
           const roles = await this.authRepository.getUserRoles(user.id, correlationId);
           const permissions = await this.rbacService.getUserPermissions(user.id, correlationId);
           return {
@@ -393,12 +371,7 @@ export class UserService {
     activatedBy: string,
     correlationId?: CorrelationId
   ): Promise<IUser> {
-    return this.updateUser(
-      userId,
-      { isActive: true },
-      activatedBy,
-      correlationId
-    );
+    return this.updateUser(userId, { isActive: true }, activatedBy, correlationId);
   }
 
   async deactivateUser(
@@ -406,12 +379,7 @@ export class UserService {
     deactivatedBy: string,
     correlationId?: CorrelationId
   ): Promise<IUser> {
-    return this.updateUser(
-      userId,
-      { isActive: false },
-      deactivatedBy,
-      correlationId
-    );
+    return this.updateUser(userId, { isActive: false }, deactivatedBy, correlationId);
   }
 
   async assignRoles(
@@ -434,11 +402,7 @@ export class UserService {
       // Remove roles that are no longer in the list
       for (const currentRole of currentRoles) {
         if (!roleNames.includes(currentRole.roleName)) {
-          await this.authRepository.removeRole(
-            userId,
-            currentRole.roleId,
-            correlationId
-          );
+          await this.authRepository.removeRole(userId, currentRole.roleId, correlationId);
         }
       }
 
@@ -447,12 +411,7 @@ export class UserService {
         if (!currentRoleNames.includes(roleName)) {
           const role = await this.rbacService.getRoleByName(roleName, correlationId);
           if (role) {
-            await this.authRepository.assignRole(
-              userId,
-              role.id,
-              assignedBy,
-              correlationId
-            );
+            await this.authRepository.assignRole(userId, role.id, assignedBy, correlationId);
           }
         }
       }
@@ -509,9 +468,7 @@ export class UserService {
     }
   }
 
-  async getRolePresets(
-    correlationId?: CorrelationId
-  ): Promise<IRolePreset[]> {
+  async getRolePresets(correlationId?: CorrelationId): Promise<IRolePreset[]> {
     try {
       return await this.rolePresetService.getAllPresets();
     } catch (error) {
@@ -527,7 +484,11 @@ export class UserService {
     try {
       return await this.rolePresetService.getPresetsByDepartment(department);
     } catch (error) {
-      logger.error('Failed to get role presets by department', { error, department, correlationId });
+      logger.error('Failed to get role presets by department', {
+        error,
+        department,
+        correlationId,
+      });
       throw error;
     }
   }

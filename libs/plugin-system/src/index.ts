@@ -1,9 +1,9 @@
 /**
  * Plugin System Library
- * 
+ *
  * Provides a comprehensive plugin architecture for extending the Enterprise SaaS Template
  * with custom functionality, integrations, and third-party extensions.
- * 
+ *
  * Features:
  * - Dynamic plugin loading and unloading
  * - Secure plugin execution environment

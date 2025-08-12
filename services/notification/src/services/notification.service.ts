@@ -16,7 +16,6 @@ const notifications = new Map<string, NotificationResponse>();
 const templates = new Map<string, NotificationTemplate>();
 
 export class NotificationService {
-  
   /**
    * Send a single notification
    */
@@ -72,7 +71,7 @@ export class NotificationService {
 
     for (let i = 0; i < request.notifications.length; i += batchSize) {
       const batch = request.notifications.slice(i, i + batchSize);
-      
+
       // Process batch
       for (const notificationRequest of batch) {
         try {
@@ -158,14 +157,14 @@ export class NotificationService {
       filteredNotifications = filteredNotifications.filter(n => n.priority === filters.priority);
     }
     if (filters.recipient) {
-      filteredNotifications = filteredNotifications.filter(n => 
+      filteredNotifications = filteredNotifications.filter(n =>
         n.recipient.toLowerCase().includes(filters.recipient!.toLowerCase())
       );
     }
 
     // Sort by creation date (newest first)
-    filteredNotifications.sort((a, b) => 
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    filteredNotifications.sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
 
     // Apply pagination
@@ -206,7 +205,11 @@ export class NotificationService {
    */
   async retryNotification(id: string): Promise<NotificationResponse | null> {
     const notification = notifications.get(id);
-    if (!notification || notification.status !== 'failed' || notification.retryCount >= notification.maxRetries) {
+    if (
+      !notification ||
+      notification.status !== 'failed' ||
+      notification.retryCount >= notification.maxRetries
+    ) {
       return null;
     }
 
@@ -229,14 +232,12 @@ export class NotificationService {
 
     // Filter by date range if provided
     if (startDate) {
-      notificationsList = notificationsList.filter(n => 
-        new Date(n.createdAt) >= new Date(startDate)
+      notificationsList = notificationsList.filter(
+        n => new Date(n.createdAt) >= new Date(startDate)
       );
     }
     if (endDate) {
-      notificationsList = notificationsList.filter(n => 
-        new Date(n.createdAt) <= new Date(endDate)
-      );
+      notificationsList = notificationsList.filter(n => new Date(n.createdAt) <= new Date(endDate));
     }
 
     const total = notificationsList.length;
@@ -270,8 +271,8 @@ export class NotificationService {
       byPriority[notification.priority]++;
 
       if (notification.deliveredAt && notification.sentAt) {
-        const deliveryTime = new Date(notification.deliveredAt).getTime() - 
-                            new Date(notification.sentAt).getTime();
+        const deliveryTime =
+          new Date(notification.deliveredAt).getTime() - new Date(notification.sentAt).getTime();
         totalDeliveryTime += deliveryTime;
         deliveredCount++;
       }
@@ -292,7 +293,9 @@ export class NotificationService {
   }
 
   // Template management methods
-  async createTemplate(templateData: Omit<NotificationTemplate, 'id' | 'createdAt' | 'updatedAt'>): Promise<NotificationTemplate> {
+  async createTemplate(
+    templateData: Omit<NotificationTemplate, 'id' | 'createdAt' | 'updatedAt'>
+  ): Promise<NotificationTemplate> {
     const template: NotificationTemplate = {
       ...templateData,
       id: uuidv4(),
@@ -304,7 +307,9 @@ export class NotificationService {
     return template;
   }
 
-  async getTemplates(filters: { type?: string; isActive?: boolean } = {}): Promise<NotificationTemplate[]> {
+  async getTemplates(
+    filters: { type?: string; isActive?: boolean } = {}
+  ): Promise<NotificationTemplate[]> {
     let templatesList = Array.from(templates.values());
 
     if (filters.type) {
@@ -314,8 +319,8 @@ export class NotificationService {
       templatesList = templatesList.filter(t => t.isActive === filters.isActive);
     }
 
-    return templatesList.sort((a, b) => 
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    return templatesList.sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
   }
 
@@ -323,7 +328,10 @@ export class NotificationService {
     return templates.get(id) || null;
   }
 
-  async updateTemplate(id: string, updates: Partial<NotificationTemplate>): Promise<NotificationTemplate | null> {
+  async updateTemplate(
+    id: string,
+    updates: Partial<NotificationTemplate>
+  ): Promise<NotificationTemplate | null> {
     const template = templates.get(id);
     if (!template) {
       return null;
@@ -348,11 +356,16 @@ export class NotificationService {
   // Private helper methods
   private getMaxRetries(priority: NotificationPriority): number {
     switch (priority) {
-      case 'urgent': return 5;
-      case 'high': return 3;
-      case 'normal': return 2;
-      case 'low': return 1;
-      default: return 2;
+      case 'urgent':
+        return 5;
+      case 'high':
+        return 3;
+      case 'normal':
+        return 2;
+      case 'low':
+        return 1;
+      default:
+        return 2;
     }
   }
 
@@ -367,50 +380,54 @@ export class NotificationService {
 
   private async processNotificationAsync(notificationId: string): Promise<void> {
     // Simulate async processing with random delay
-    setTimeout(async () => {
-      const notification = notifications.get(notificationId);
-      if (!notification) return;
+    setTimeout(
+      async () => {
+        const notification = notifications.get(notificationId);
+        if (!notification) return;
 
-      try {
-        // Simulate sending process
-        notification.status = 'sending';
-        notification.updatedAt = new Date().toISOString();
-        notifications.set(notificationId, notification);
+        try {
+          // Simulate sending process
+          notification.status = 'sending';
+          notification.updatedAt = new Date().toISOString();
+          notifications.set(notificationId, notification);
 
-        // Simulate random success/failure (90% success rate)
-        const success = Math.random() > 0.1;
+          // Simulate random success/failure (90% success rate)
+          const success = Math.random() > 0.1;
 
-        if (success) {
-          notification.status = 'sent';
-          notification.sentAt = new Date().toISOString();
-          
-          // Simulate delivery confirmation after a short delay
-          setTimeout(() => {
-            const currentNotification = notifications.get(notificationId);
-            if (currentNotification && currentNotification.status === 'sent') {
-              currentNotification.status = 'delivered';
-              currentNotification.deliveredAt = new Date().toISOString();
-              currentNotification.updatedAt = new Date().toISOString();
-              notifications.set(notificationId, currentNotification);
-            }
-          }, Math.random() * 5000 + 1000); // 1-6 seconds delay
+          if (success) {
+            notification.status = 'sent';
+            notification.sentAt = new Date().toISOString();
 
-        } else {
+            // Simulate delivery confirmation after a short delay
+            setTimeout(
+              () => {
+                const currentNotification = notifications.get(notificationId);
+                if (currentNotification && currentNotification.status === 'sent') {
+                  currentNotification.status = 'delivered';
+                  currentNotification.deliveredAt = new Date().toISOString();
+                  currentNotification.updatedAt = new Date().toISOString();
+                  notifications.set(notificationId, currentNotification);
+                }
+              },
+              Math.random() * 5000 + 1000
+            ); // 1-6 seconds delay
+          } else {
+            notification.status = 'failed';
+            notification.failedAt = new Date().toISOString();
+            notification.failureReason = 'Simulated network error';
+          }
+
+          notification.updatedAt = new Date().toISOString();
+          notifications.set(notificationId, notification);
+        } catch (error) {
           notification.status = 'failed';
           notification.failedAt = new Date().toISOString();
-          notification.failureReason = 'Simulated network error';
+          notification.failureReason = error instanceof Error ? error.message : 'Unknown error';
+          notification.updatedAt = new Date().toISOString();
+          notifications.set(notificationId, notification);
         }
-
-        notification.updatedAt = new Date().toISOString();
-        notifications.set(notificationId, notification);
-
-      } catch (error) {
-        notification.status = 'failed';
-        notification.failedAt = new Date().toISOString();
-        notification.failureReason = error instanceof Error ? error.message : 'Unknown error';
-        notification.updatedAt = new Date().toISOString();
-        notifications.set(notificationId, notification);
-      }
-    }, Math.random() * 2000 + 500); // 0.5-2.5 seconds delay
+      },
+      Math.random() * 2000 + 500
+    ); // 0.5-2.5 seconds delay
   }
 }

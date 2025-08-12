@@ -6,12 +6,27 @@
 import { Pool, PoolClient } from 'pg';
 import { EntityId, CorrelationId } from '@template/shared-types';
 import { getDatabaseConfig } from '@template/shared-config';
-import { 
-  IUser, IRole, IPermission, IUserSession, IAuthAuditLog, ISecurityEvent,
-  AuthAuditAction, SecurityEventType, SecuritySeverity,
-  ILoginCredentials, IRegistrationData, IPermissionCheck, IPermissionResult,
-  IUserFilter, IUserCreateData, ISchedule, IScheduleCreateData,
-  ITimeOffRequest, ITimeOffRequestData, IUserRole
+import {
+  IUser,
+  IRole,
+  IPermission,
+  IUserSession,
+  IAuthAuditLog,
+  ISecurityEvent,
+  AuthAuditAction,
+  SecurityEventType,
+  SecuritySeverity,
+  ILoginCredentials,
+  IRegistrationData,
+  IPermissionCheck,
+  IPermissionResult,
+  IUserFilter,
+  IUserCreateData,
+  ISchedule,
+  IScheduleCreateData,
+  ITimeOffRequest,
+  ITimeOffRequestData,
+  IUserRole,
 } from '../types/auth';
 import { CorrelatedLogger } from '../utils/logger';
 import { UserRepository } from './user.repository';
@@ -22,7 +37,7 @@ import { TimeOffRepository } from './timeoff.repository';
 export class AuthRepository {
   private pool: Pool;
   private logger: CorrelatedLogger;
-  
+
   // Delegated repositories
   public readonly userRepo: UserRepository;
   public readonly roleRepo: RoleRepository;
@@ -32,7 +47,7 @@ export class AuthRepository {
   constructor() {
     this.logger = new CorrelatedLogger('auth-repository');
     this.initializeDatabase();
-    
+
     // Initialize sub-repositories
     this.userRepo = new UserRepository(this.pool);
     this.roleRepo = new RoleRepository(this.pool);
@@ -42,31 +57,33 @@ export class AuthRepository {
 
   private initializeDatabase() {
     const dbConfig = getDatabaseConfig();
-    
+
     this.pool = new Pool({
       host: dbConfig.DB_HOST,
       port: dbConfig.DB_PORT,
       database: dbConfig.DB_NAME,
       user: dbConfig.DB_USER,
       password: dbConfig.DB_PASSWORD,
-      ssl: dbConfig.DB_SSL_ENABLED ? {
-        rejectUnauthorized: dbConfig.DB_SSL_REJECT_UNAUTHORIZED,
-        ca: dbConfig.DB_SSL_CA,
-        cert: dbConfig.DB_SSL_CERT,
-        key: dbConfig.DB_SSL_KEY
-      } : false,
+      ssl: dbConfig.DB_SSL_ENABLED
+        ? {
+            rejectUnauthorized: dbConfig.DB_SSL_REJECT_UNAUTHORIZED,
+            ca: dbConfig.DB_SSL_CA,
+            cert: dbConfig.DB_SSL_CERT,
+            key: dbConfig.DB_SSL_KEY,
+          }
+        : false,
       max: dbConfig.DB_POOL_MAX,
       min: dbConfig.DB_POOL_MIN,
       idleTimeoutMillis: dbConfig.DB_POOL_IDLE_TIMEOUT,
       connectionTimeoutMillis: dbConfig.DB_CONNECTION_TIMEOUT,
-      query_timeout: dbConfig.DB_QUERY_TIMEOUT
+      query_timeout: dbConfig.DB_QUERY_TIMEOUT,
     });
 
     // Handle pool errors
-    this.pool.on('error', (err) => {
+    this.pool.on('error', err => {
       this.logger.error('Database pool error', {
         error: err.message,
-        stack: err.stack
+        stack: err.stack,
       });
     });
   }
@@ -84,7 +101,11 @@ export class AuthRepository {
     return this.userRepo.createUser(userData, correlationId);
   }
 
-  async updateUser(userId: string, data: Partial<IUser>, correlationId?: CorrelationId): Promise<IUser> {
+  async updateUser(
+    userId: string,
+    data: Partial<IUser>,
+    correlationId?: CorrelationId
+  ): Promise<IUser> {
     return this.userRepo.updateUser(userId, data, correlationId);
   }
 
@@ -92,11 +113,20 @@ export class AuthRepository {
     return this.userRepo.deleteUser(userId, correlationId);
   }
 
-  async listUsers(filter: IUserFilter, page: number, limit: number, correlationId?: CorrelationId): Promise<{ items: IUser[]; total: number }> {
+  async listUsers(
+    filter: IUserFilter,
+    page: number,
+    limit: number,
+    correlationId?: CorrelationId
+  ): Promise<{ items: IUser[]; total: number }> {
     return this.userRepo.listUsers(filter, page, limit, correlationId);
   }
 
-  async updateUserPassword(userId: string, passwordHash: string, correlationId?: CorrelationId): Promise<void> {
+  async updateUserPassword(
+    userId: string,
+    passwordHash: string,
+    correlationId?: CorrelationId
+  ): Promise<void> {
     return this.userRepo.updateUserPassword(userId, passwordHash, correlationId);
   }
 
@@ -108,19 +138,30 @@ export class AuthRepository {
     return this.userRepo.findUserByEmail(email, correlationId);
   }
 
-  async getUserByPasswordResetToken(token: string, correlationId?: CorrelationId): Promise<IUser | null> {
+  async getUserByPasswordResetToken(
+    token: string,
+    correlationId?: CorrelationId
+  ): Promise<IUser | null> {
     const query = 'SELECT * FROM users WHERE password_reset_token = $1 AND deleted_at IS NULL';
     const result = await this.executeQuery<IUser>(query, [token], correlationId);
     return result[0] || null;
   }
 
-  async getUserByEmailVerificationToken(token: string, correlationId?: CorrelationId): Promise<IUser | null> {
+  async getUserByEmailVerificationToken(
+    token: string,
+    correlationId?: CorrelationId
+  ): Promise<IUser | null> {
     const query = 'SELECT * FROM users WHERE email_verification_token = $1 AND deleted_at IS NULL';
     const result = await this.executeQuery<IUser>(query, [token], correlationId);
     return result[0] || null;
   }
 
-  async revokeAllUserSessions(userId: string, revokedBy: string, reason: string, correlationId?: CorrelationId): Promise<void> {
+  async revokeAllUserSessions(
+    userId: string,
+    revokedBy: string,
+    reason: string,
+    correlationId?: CorrelationId
+  ): Promise<void> {
     const query = `
       UPDATE user_sessions 
       SET is_active = false, revoked_at = NOW(), revoked_by = $2, revocation_reason = $3
@@ -134,7 +175,12 @@ export class AuthRepository {
     return this.roleRepo.getUserRoles(userId, correlationId);
   }
 
-  async assignRole(userId: string, roleId: string, assignedBy: string, correlationId?: CorrelationId) {
+  async assignRole(
+    userId: string,
+    roleId: string,
+    assignedBy: string,
+    correlationId?: CorrelationId
+  ) {
     return this.roleRepo.assignRole(userId, roleId, assignedBy, correlationId);
   }
 
@@ -151,11 +197,18 @@ export class AuthRepository {
   }
 
   // Delegate schedule methods to ScheduleRepository
-  async createSchedule(data: IScheduleCreateData, correlationId?: CorrelationId): Promise<ISchedule> {
+  async createSchedule(
+    data: IScheduleCreateData,
+    correlationId?: CorrelationId
+  ): Promise<ISchedule> {
     return this.scheduleRepo.createSchedule(data, correlationId);
   }
 
-  async updateSchedule(scheduleId: string, data: Partial<ISchedule>, correlationId?: CorrelationId): Promise<ISchedule> {
+  async updateSchedule(
+    scheduleId: string,
+    data: Partial<ISchedule>,
+    correlationId?: CorrelationId
+  ): Promise<ISchedule> {
     return this.scheduleRepo.updateSchedule(scheduleId, data, correlationId);
   }
 
@@ -171,40 +224,77 @@ export class AuthRepository {
     return this.scheduleRepo.updateScheduleStatus(scheduleId, status, correlationId);
   }
 
-  async getUserSchedules(userId: string, startDate: Date, endDate: Date, correlationId?: CorrelationId): Promise<ISchedule[]> {
+  async getUserSchedules(
+    userId: string,
+    startDate: Date,
+    endDate: Date,
+    correlationId?: CorrelationId
+  ): Promise<ISchedule[]> {
     return this.scheduleRepo.getUserSchedules(userId, startDate, endDate, correlationId);
   }
 
-  async getSchedulesByDate(date: Date, department?: string, correlationId?: CorrelationId): Promise<ISchedule[]> {
+  async getSchedulesByDate(
+    date: Date,
+    department?: string,
+    correlationId?: CorrelationId
+  ): Promise<ISchedule[]> {
     return this.scheduleRepo.getSchedulesByDate(date, department, correlationId);
   }
 
-  async getSchedulesByDateRange(startDate: Date, endDate: Date, department?: string, correlationId?: CorrelationId): Promise<ISchedule[]> {
+  async getSchedulesByDateRange(
+    startDate: Date,
+    endDate: Date,
+    department?: string,
+    correlationId?: CorrelationId
+  ): Promise<ISchedule[]> {
     return this.scheduleRepo.getSchedulesByDateRange(startDate, endDate, department, correlationId);
   }
 
   // Delegate time off methods to TimeOffRepository
-  async createTimeOffRequest(data: ITimeOffRequestData, correlationId?: CorrelationId): Promise<ITimeOffRequest> {
+  async createTimeOffRequest(
+    data: ITimeOffRequestData,
+    correlationId?: CorrelationId
+  ): Promise<ITimeOffRequest> {
     return this.timeOffRepo.createTimeOffRequest(data, correlationId);
   }
 
-  async getTimeOffRequests(userId: string, startDate: Date, endDate: Date, correlationId?: CorrelationId): Promise<ITimeOffRequest[]> {
+  async getTimeOffRequests(
+    userId: string,
+    startDate: Date,
+    endDate: Date,
+    correlationId?: CorrelationId
+  ): Promise<ITimeOffRequest[]> {
     return this.timeOffRepo.getTimeOffRequests(userId, startDate, endDate, correlationId);
   }
 
-  async updateTimeOffStatus(requestId: string, status: string, approvedBy: string, correlationId?: CorrelationId): Promise<ITimeOffRequest> {
+  async updateTimeOffStatus(
+    requestId: string,
+    status: string,
+    approvedBy: string,
+    correlationId?: CorrelationId
+  ): Promise<ITimeOffRequest> {
     return this.timeOffRepo.updateTimeOffStatus(requestId, status, approvedBy, correlationId);
   }
 
-  async getTimeOffRequest(requestId: string, correlationId?: CorrelationId): Promise<ITimeOffRequest | null> {
+  async getTimeOffRequest(
+    requestId: string,
+    correlationId?: CorrelationId
+  ): Promise<ITimeOffRequest | null> {
     return this.timeOffRepo.getTimeOffRequest(requestId, correlationId);
   }
 
-  async getUserTimeOffRequests(userId: string, year?: number, correlationId?: CorrelationId): Promise<ITimeOffRequest[]> {
+  async getUserTimeOffRequests(
+    userId: string,
+    year?: number,
+    correlationId?: CorrelationId
+  ): Promise<ITimeOffRequest[]> {
     return this.timeOffRepo.getUserTimeOffRequests(userId, correlationId);
   }
 
-  async getPendingTimeOffRequests(department?: string, correlationId?: CorrelationId): Promise<ITimeOffRequest[]> {
+  async getPendingTimeOffRequests(
+    department?: string,
+    correlationId?: CorrelationId
+  ): Promise<ITimeOffRequest[]> {
     return this.timeOffRepo.getPendingTimeOffRequests(department, correlationId);
   }
 
@@ -220,18 +310,26 @@ export class AuthRepository {
       INSERT INTO roles (id, name, description, status, is_system, created_at, updated_at, created_by, updated_by)
       VALUES ($1, $2, $3, $4, $5, NOW(), NOW(), $6, $7)
     `;
-    await this.executeQuery(query, [
-      role.id,
-      role.name,
-      role.description,
-      role.status || 'active',
-      role.isSystem || false,
-      role.createdBy,
-      role.updatedBy
-    ], correlationId);
+    await this.executeQuery(
+      query,
+      [
+        role.id,
+        role.name,
+        role.description,
+        role.status || 'active',
+        role.isSystem || false,
+        role.createdBy,
+        role.updatedBy,
+      ],
+      correlationId
+    );
   }
 
-  async updateRole(roleId: string, updates: Partial<IRole>, correlationId?: CorrelationId): Promise<IRole> {
+  async updateRole(
+    roleId: string,
+    updates: Partial<IRole>,
+    correlationId?: CorrelationId
+  ): Promise<IRole> {
     const fields = [];
     const values = [];
     let paramIndex = 1;
@@ -265,7 +363,7 @@ export class AuthRepository {
   }
 
   async listRoles(includeSystem: boolean, correlationId?: CorrelationId): Promise<IRole[]> {
-    const query = includeSystem 
+    const query = includeSystem
       ? 'SELECT * FROM roles ORDER BY name'
       : 'SELECT * FROM roles WHERE is_system = false ORDER BY name';
     return this.executeQuery<IRole>(query, [], correlationId);
@@ -278,13 +376,20 @@ export class AuthRepository {
   }
 
   // Permission methods
-  async getPermissionById(permissionId: string, correlationId?: CorrelationId): Promise<IPermission | null> {
+  async getPermissionById(
+    permissionId: string,
+    correlationId?: CorrelationId
+  ): Promise<IPermission | null> {
     const query = 'SELECT * FROM permissions WHERE id = $1';
     const result = await this.executeQuery<IPermission>(query, [permissionId], correlationId);
     return result[0] || null;
   }
 
-  async getPermissionByResourceAction(resource: string, action: string, correlationId?: CorrelationId): Promise<IPermission | null> {
+  async getPermissionByResourceAction(
+    resource: string,
+    action: string,
+    correlationId?: CorrelationId
+  ): Promise<IPermission | null> {
     const query = 'SELECT * FROM permissions WHERE resource = $1 AND action = $2';
     const result = await this.executeQuery<IPermission>(query, [resource, action], correlationId);
     return result[0] || null;
@@ -295,18 +400,26 @@ export class AuthRepository {
       INSERT INTO permissions (id, resource, action, description, is_active, created_at, updated_at, created_by, updated_by)
       VALUES ($1, $2, $3, $4, $5, NOW(), NOW(), $6, $7)
     `;
-    await this.executeQuery(query, [
-      permission.id,
-      permission.resource,
-      permission.action,
-      permission.description,
-      permission.isActive,
-      permission.createdBy,
-      permission.updatedBy
-    ], correlationId);
+    await this.executeQuery(
+      query,
+      [
+        permission.id,
+        permission.resource,
+        permission.action,
+        permission.description,
+        permission.isActive,
+        permission.createdBy,
+        permission.updatedBy,
+      ],
+      correlationId
+    );
   }
 
-  async updatePermission(permissionId: string, updates: Partial<IPermission>, correlationId?: CorrelationId): Promise<IPermission> {
+  async updatePermission(
+    permissionId: string,
+    updates: Partial<IPermission>,
+    correlationId?: CorrelationId
+  ): Promise<IPermission> {
     const fields = [];
     const values = [];
     let paramIndex = 1;
@@ -344,12 +457,18 @@ export class AuthRepository {
     return this.executeQuery<IPermission>(query, [], correlationId);
   }
 
-  async getPermissionsByResource(resource: string, correlationId?: CorrelationId): Promise<IPermission[]> {
+  async getPermissionsByResource(
+    resource: string,
+    correlationId?: CorrelationId
+  ): Promise<IPermission[]> {
     const query = 'SELECT * FROM permissions WHERE resource = $1 ORDER BY action';
     return this.executeQuery<IPermission>(query, [resource], correlationId);
   }
 
-  async getPermissionAssignmentCount(permissionId: string, correlationId?: CorrelationId): Promise<number> {
+  async getPermissionAssignmentCount(
+    permissionId: string,
+    correlationId?: CorrelationId
+  ): Promise<number> {
     const query = 'SELECT COUNT(*) as count FROM role_permissions WHERE permission_id = $1';
     const result = await this.executeQuery<{ count: string }>(query, [permissionId], correlationId);
     return parseInt(result[0].count, 10);
@@ -366,7 +485,7 @@ export class AuthRepository {
    */
   async healthCheck(): Promise<{ status: 'healthy' | 'unhealthy'; latency: number }> {
     const startTime = Date.now();
-    
+
     try {
       await this.executeQuery('SELECT 1');
       const latency = Date.now() - startTime;
@@ -375,7 +494,7 @@ export class AuthRepository {
       const latency = Date.now() - startTime;
       this.logger.error('Database health check failed', {
         error: (error as Error).message,
-        latency
+        latency,
       });
       return { status: 'unhealthy', latency };
     }
@@ -391,8 +510,8 @@ export class AuthRepository {
 
   // Keep executeQuery method for internal use
   private async executeQuery<T = unknown>(
-    query: string, 
-    values: unknown[] = [], 
+    query: string,
+    values: unknown[] = [],
     correlationId?: CorrelationId
   ): Promise<T[]> {
     const client = await this.pool.connect();
@@ -400,9 +519,9 @@ export class AuthRepository {
       const result = await client.query(query, values);
       return result.rows;
     } catch (error) {
-      this.logger.error('Query execution failed', { 
-        error: (error as Error).message, 
-        correlationId 
+      this.logger.error('Query execution failed', {
+        error: (error as Error).message,
+        correlationId,
       });
       throw error;
     } finally {

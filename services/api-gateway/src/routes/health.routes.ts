@@ -17,13 +17,13 @@ export function createHealthRoutes(healthService: HealthCheckService): Router {
    */
   router.get('/', (req: Request, res: Response) => {
     const serviceInfo = getServiceInfo();
-    
+
     res.json({
       success: true,
       status: 'healthy',
       service: serviceInfo,
       timestamp: new Date().toISOString(),
-      correlationId: req.correlationId
+      correlationId: req.correlationId,
     });
   });
 
@@ -36,7 +36,7 @@ export function createHealthRoutes(healthService: HealthCheckService): Router {
       success: true,
       status: 'alive',
       timestamp: new Date().toISOString(),
-      correlationId: req.correlationId
+      correlationId: req.correlationId,
     });
   });
 
@@ -47,7 +47,7 @@ export function createHealthRoutes(healthService: HealthCheckService): Router {
   router.get('/ready', async (req: Request, res: Response) => {
     try {
       const systemHealth = await healthService.getSystemHealth();
-      
+
       if (systemHealth.status === 'unhealthy') {
         return res.status(503).json({
           success: false,
@@ -55,7 +55,7 @@ export function createHealthRoutes(healthService: HealthCheckService): Router {
           reason: 'One or more services are unhealthy',
           services: systemHealth.services.filter(s => s.status === 'unhealthy'),
           timestamp: new Date().toISOString(),
-          correlationId: req.correlationId
+          correlationId: req.correlationId,
         });
       }
 
@@ -63,16 +63,15 @@ export function createHealthRoutes(healthService: HealthCheckService): Router {
         success: true,
         status: 'ready',
         timestamp: new Date().toISOString(),
-        correlationId: req.correlationId
+        correlationId: req.correlationId,
       });
-
     } catch (error) {
       res.status(503).json({
         success: false,
         status: 'not_ready',
         reason: (error as Error).message,
         timestamp: new Date().toISOString(),
-        correlationId: req.correlationId
+        correlationId: req.correlationId,
       });
     }
   });
@@ -85,23 +84,22 @@ export function createHealthRoutes(healthService: HealthCheckService): Router {
     try {
       const systemHealth = await healthService.getSystemHealth();
       const circuitStates = circuitBreakerRegistry.getAllStates();
-      
+
       res.json({
         success: true,
         ...systemHealth,
         circuitBreakers: circuitStates,
-        correlationId: req.correlationId
+        correlationId: req.correlationId,
       });
-
     } catch (error) {
       res.status(500).json({
         success: false,
         error: {
           code: 'HEALTH_CHECK_FAILED',
-          message: (error as Error).message
+          message: (error as Error).message,
         },
         timestamp: new Date().toISOString(),
-        correlationId: req.correlationId
+        correlationId: req.correlationId,
       });
     }
   });
@@ -114,24 +112,23 @@ export function createHealthRoutes(healthService: HealthCheckService): Router {
     try {
       await healthService.checkAllServices();
       const systemHealth = await healthService.getSystemHealth();
-      
+
       res.json({
         success: true,
         status: systemHealth.status,
         services: systemHealth.services,
         timestamp: new Date().toISOString(),
-        correlationId: req.correlationId
+        correlationId: req.correlationId,
       });
-
     } catch (error) {
       res.status(500).json({
         success: false,
         error: {
           code: 'SERVICE_CHECK_FAILED',
-          message: (error as Error).message
+          message: (error as Error).message,
         },
         timestamp: new Date().toISOString(),
-        correlationId: req.correlationId
+        correlationId: req.correlationId,
       });
     }
   });
@@ -160,10 +157,10 @@ export function createHealthRoutes(healthService: HealthCheckService): Router {
           success: false,
           error: {
             code: 'SERVICE_NOT_FOUND',
-            message: `Service ${serviceName} not found in registry`
+            message: `Service ${serviceName} not found in registry`,
           },
           timestamp: new Date().toISOString(),
-          correlationId: req.correlationId
+          correlationId: req.correlationId,
         });
       }
 
@@ -171,18 +168,17 @@ export function createHealthRoutes(healthService: HealthCheckService): Router {
         success: true,
         service: serviceHealth,
         timestamp: new Date().toISOString(),
-        correlationId: req.correlationId
+        correlationId: req.correlationId,
       });
-
     } catch (error) {
       res.status(500).json({
         success: false,
         error: {
           code: 'SERVICE_CHECK_FAILED',
-          message: (error as Error).message
+          message: (error as Error).message,
         },
         timestamp: new Date().toISOString(),
-        correlationId: req.correlationId
+        correlationId: req.correlationId,
       });
     }
   });
@@ -201,10 +197,10 @@ export function createHealthRoutes(healthService: HealthCheckService): Router {
           success: false,
           error: {
             code: 'SERVICE_NOT_FOUND',
-            message: `Service ${serviceName} not found in registry`
+            message: `Service ${serviceName} not found in registry`,
           },
           timestamp: new Date().toISOString(),
-          correlationId: req.correlationId
+          correlationId: req.correlationId,
         });
       }
 
@@ -214,18 +210,17 @@ export function createHealthRoutes(healthService: HealthCheckService): Router {
         success: true,
         message: `Circuit breaker for ${serviceName} has been reset`,
         timestamp: new Date().toISOString(),
-        correlationId: req.correlationId
+        correlationId: req.correlationId,
       });
-
     } catch (error) {
       res.status(500).json({
         success: false,
         error: {
           code: 'CIRCUIT_RESET_FAILED',
-          message: (error as Error).message
+          message: (error as Error).message,
         },
         timestamp: new Date().toISOString(),
-        correlationId: req.correlationId
+        correlationId: req.correlationId,
       });
     }
   });

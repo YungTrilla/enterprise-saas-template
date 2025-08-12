@@ -1,6 +1,6 @@
 /**
  * Multi-Tenancy Configuration
- * 
+ *
  * Configuration options for the multi-tenancy system
  */
 
@@ -49,16 +49,19 @@ export interface IMultiTenancyConfig {
   };
 
   // Default tenant limits by plan
-  defaultLimits: Record<TenantPlan, {
-    users: number;
-    storage: number; // bytes
-    apiCalls: number; // per month
-    bandwidth: number; // bytes per month
-    projects: number;
-    customFields: number;
-    webhooks: number;
-    integrations: number;
-  }>;
+  defaultLimits: Record<
+    TenantPlan,
+    {
+      users: number;
+      storage: number; // bytes
+      apiCalls: number; // per month
+      bandwidth: number; // bytes per month
+      projects: number;
+      customFields: number;
+      webhooks: number;
+      integrations: number;
+    }
+  >;
 
   // Default tenant features by plan
   defaultFeatures: Record<TenantPlan, string[]>;
@@ -228,11 +231,7 @@ export const defaultMultiTenancyConfig: IMultiTenancyConfig = {
   },
 
   defaultFeatures: {
-    [TenantPlan.FREE]: [
-      'basic_dashboard',
-      'basic_reports',
-      'email_support',
-    ],
+    [TenantPlan.FREE]: ['basic_dashboard', 'basic_reports', 'email_support'],
     [TenantPlan.STARTER]: [
       'basic_dashboard',
       'basic_reports',

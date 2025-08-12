@@ -1,0 +1,181 @@
+{
+  "folders": [
+    {
+      "name": "🏠 Root",
+      "path": ".",
+    },
+    {
+      "name": "🌐 Web App",
+      "path": "./apps/web",
+    },
+    {
+      "name": "🔐 Auth Service",
+      "path": "./services/auth-service",
+    },
+    {
+      "name": "🚪 API Gateway",
+      "path": "./services/api-gateway",
+    },
+    {
+      "name": "📦 Shared Libraries",
+      "path": "./libs",
+    },
+    {
+      "name": "🛠️ Tools & Scripts",
+      "path": "./tools",
+    },
+    {
+      "name": "📚 Documentation",
+      "path": "./docs",
+    },
+  ],
+  "settings": {
+    // Inherit all settings from .vscode/settings.json
+    "typescript.preferences.includePackageJsonAutoImports": "on",
+    "typescript.suggest.autoImports": true,
+    "typescript.updateImportsOnFileMove.enabled": "always",
+
+    // Multi-root workspace specific settings
+    "search.useGlobalIgnoreFiles": true,
+    "files.watcherExclude": {
+      "**/node_modules/**": true,
+      "**/dist/**": true,
+      "**/build/**": true,
+      "**/coverage/**": true,
+      "**/.next/**": true,
+      "**/.turbo/**": true,
+    },
+
+    // Terminal settings for multi-root
+    "terminal.integrated.cwd": "${workspaceFolder}",
+
+    // Workspace trust
+    "security.workspace.trust.enabled": true,
+    "security.workspace.trust.startupPrompt": "once",
+
+    // Extension recommendations for workspace
+    "extensions.autoCheckUpdates": true,
+    "extensions.autoUpdate": true,
+  },
+  "extensions": {
+    "recommendations": [
+      // Core extensions for this workspace
+      "ms-vscode.vscode-typescript-next",
+      "esbenp.prettier-vscode",
+      "dbaeumer.vscode-eslint",
+      "eamodio.gitlens",
+      "ms-azuretools.vscode-docker",
+      "humao.rest-client",
+      "42crunch.vscode-openapi",
+      "orta.vscode-jest",
+      "bradlc.vscode-tailwindcss",
+      "mtxr.sqltools",
+      "mtxr.sqltools-driver-pg",
+      "github.vscode-pull-request-github",
+      "github.copilot",
+      "pkief.material-icon-theme",
+      "github.github-vscode-theme",
+    ],
+  },
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      // Workspace-level quick tasks
+      {
+        "label": "🚀 Start Full Development Environment",
+        "type": "shell",
+        "command": "pnpm",
+        "args": ["run", "dev"],
+        "group": {
+          "kind": "build",
+          "isDefault": true,
+        },
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+          "showReuseMessage": true,
+          "clear": false,
+        },
+        "isBackground": true,
+        "problemMatcher": [],
+      },
+      {
+        "label": "🧪 Run All Tests",
+        "type": "shell",
+        "command": "pnpm",
+        "args": ["run", "test"],
+        "group": {
+          "kind": "test",
+          "isDefault": true,
+        },
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+        },
+      },
+      {
+        "label": "✅ Validate Everything",
+        "type": "shell",
+        "command": "pnpm",
+        "args": ["run", "validate"],
+        "group": "build",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+        },
+      },
+      {
+        "label": "🔒 Security Check",
+        "type": "shell",
+        "command": "pnpm",
+        "args": ["run", "security:check"],
+        "group": "build",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+        },
+      },
+      {
+        "label": "📚 Generate Documentation",
+        "type": "shell",
+        "command": "pnpm",
+        "args": ["run", "docs:generate:all"],
+        "group": "build",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared",
+        },
+      },
+    ],
+  },
+  "launch": {
+    "version": "0.2.0",
+    "configurations": [
+      // Quick launch configurations for workspace
+      {
+        "name": "🚀 Debug Full Stack",
+        "type": "node",
+        "request": "launch",
+        "program": "${workspaceFolder}/scripts/debug-full-stack.js",
+        "console": "integratedTerminal",
+      },
+    ],
+    "compounds": [
+      {
+        "name": "🏗️ Debug All Services",
+        "configurations": ["Debug Auth Service", "Debug API Gateway"],
+        "stopAll": true,
+      },
+    ],
+  },
+}

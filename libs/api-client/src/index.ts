@@ -150,7 +150,7 @@ export class ServiceClientRegistry {
    * Set authentication tokens for all registered services
    */
   setAuthTokensForAll(accessToken: string, refreshToken: string, expiresAt: number): void {
-    this.clients.forEach((client) => {
+    this.clients.forEach(client => {
       client.setAuthTokens(accessToken, refreshToken, expiresAt);
     });
   }
@@ -159,7 +159,7 @@ export class ServiceClientRegistry {
    * Clear authentication tokens from all registered services
    */
   clearAuthTokensForAll(): void {
-    this.clients.forEach((client) => {
+    this.clients.forEach(client => {
       client.clearAuthTokens();
     });
   }
@@ -169,7 +169,7 @@ export class ServiceClientRegistry {
    */
   async healthCheckAll(): Promise<Record<string, any>> {
     const results: Record<string, any> = {};
-    
+
     await Promise.allSettled(
       Array.from(this.clients.entries()).map(async ([name, client]) => {
         try {

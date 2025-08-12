@@ -40,34 +40,27 @@ export class RbacRoleService {
       // Check if user already has this role
       const userRoles = await this.authRepository.getUserRoles(userId, correlationId);
       const hasRole = userRoles.some(ur => ur.role_id === role.id);
-      
+
       if (hasRole) {
         throw new Error(`User already has role '${roleName}'`);
       }
 
       // Assign the role
-      await this.authRepository.assignRole(
-        userId,
-        role.id,
-        assignedBy,
-        expiresAt,
-        correlationId
-      );
+      await this.authRepository.assignRole(userId, role.id, assignedBy, expiresAt, correlationId);
 
       this.logger.info('Role assigned to user', {
         userId,
         roleName,
         roleId: role.id,
         assignedBy,
-        expiresAt
+        expiresAt,
       });
-
     } catch (error) {
       this.logger.error('Failed to assign role', {
         userId,
         roleName,
         assignedBy,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       throw error;
     }
@@ -94,7 +87,7 @@ export class RbacRoleService {
       // Check if user has this role
       const userRoles = await this.authRepository.getUserRoles(userId, correlationId);
       const hasRole = userRoles.some(ur => ur.role_id === role.id);
-      
+
       if (!hasRole) {
         throw new Error(`User does not have role '${roleName}'`);
       }
@@ -106,15 +99,14 @@ export class RbacRoleService {
         userId,
         roleName,
         roleId: role.id,
-        revokedBy
+        revokedBy,
       });
-
     } catch (error) {
       this.logger.error('Failed to revoke role', {
         userId,
         roleName,
         revokedBy,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       throw error;
     }
@@ -132,13 +124,12 @@ export class RbacRoleService {
 
       this.logger.info('Default role assigned to new user', {
         userId,
-        defaultRole: defaultRoleName
+        defaultRole: defaultRoleName,
       });
-
     } catch (error) {
       this.logger.error('Failed to assign default role', {
         userId,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       throw error;
     }
@@ -174,7 +165,7 @@ export class RbacRoleService {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         createdBy,
-        updatedBy: createdBy
+        updatedBy: createdBy,
       };
 
       await this.authRepository.createRole(role, correlationId);
@@ -183,16 +174,15 @@ export class RbacRoleService {
         roleId: role.id,
         name,
         permissionCount: permissions.length,
-        createdBy
+        createdBy,
       });
 
       return role;
-
     } catch (error) {
       this.logger.error('Failed to create role', {
         name,
         createdBy,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       throw error;
     }
@@ -224,7 +214,7 @@ export class RbacRoleService {
         {
           ...updates,
           updatedAt: new Date().toISOString(),
-          updatedBy
+          updatedBy,
         },
         correlationId
       );
@@ -232,16 +222,15 @@ export class RbacRoleService {
       this.logger.info('Role updated successfully', {
         roleId,
         updates: Object.keys(updates),
-        updatedBy
+        updatedBy,
       });
 
       return updatedRole;
-
     } catch (error) {
       this.logger.error('Failed to update role', {
         roleId,
         updatedBy,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       throw error;
     }
@@ -268,7 +257,10 @@ export class RbacRoleService {
       }
 
       // Check if role is assigned to any users
-      const roleAssignments = await this.authRepository.getRoleAssignmentCount(roleId, correlationId);
+      const roleAssignments = await this.authRepository.getRoleAssignmentCount(
+        roleId,
+        correlationId
+      );
       if (roleAssignments > 0) {
         throw new Error(`Cannot delete role that is assigned to ${roleAssignments} users`);
       }
@@ -278,14 +270,13 @@ export class RbacRoleService {
       this.logger.info('Role deleted successfully', {
         roleId,
         roleName: role.name,
-        deletedBy
+        deletedBy,
       });
-
     } catch (error) {
       this.logger.error('Failed to delete role', {
         roleId,
         deletedBy,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       throw error;
     }
@@ -294,10 +285,7 @@ export class RbacRoleService {
   /**
    * List all roles
    */
-  async listRoles(
-    includeSystem: boolean,
-    correlationId: CorrelationId
-  ): Promise<IRole[]> {
+  async listRoles(includeSystem: boolean, correlationId: CorrelationId): Promise<IRole[]> {
     this.logger.setCorrelationId(correlationId);
 
     try {
@@ -305,15 +293,14 @@ export class RbacRoleService {
 
       this.logger.debug('Listed roles', {
         count: roles.length,
-        includeSystem
+        includeSystem,
       });
 
       return roles;
-
     } catch (error) {
       this.logger.error('Failed to list roles', {
         includeSystem,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       throw error;
     }

@@ -1,0 +1,430 @@
+name: PR Validation
+
+# Fast quality gates for pull request validation
+# Focuses on blocking issues and changed files only for speed
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+env:
+  NODE_VERSION: "20.x"
+  PNPM_VERSION: "8.15.0"
+
+# Minimal permissions for PR validation
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+  statuses: write
+
+jobs:
+  # Pre-validation: Check PR metadata and structure
+  pr-metadata:
+    name: PR Metadata Validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate PR title (Conventional Commits)
+        run: |
+          pr_title="${{ github.event.pull_request.title }}"
+          echo "🔍 Validating PR title: '$pr_title'"
+
+          # Conventional commit pattern
+          if [[ $pr_title =~ ^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert)(\(.+\))?: .{1,50} ]]; then
+            echo "✅ PR title follows conventional commit format"
+          else
+            echo "❌ PR title must follow conventional commit format"
+            echo "💡 Examples:"
+            echo "   feat: add user authentication"
+            echo "   fix(auth): resolve token expiration issue"  
+            echo "   docs: update API documentation"
+            echo "   chore: update dependencies"
+            exit 1
+          fi
+
+      - name: Check PR description
+        run: |
+          description="${{ github.event.pull_request.body }}"
+          if [[ -z "$description" || ${#description} -lt 20 ]]; then
+            echo "❌ PR description is required and should be at least 20 characters"
+            echo "💡 Please add a meaningful description explaining:"
+            echo "   - What changes were made"
+            echo "   - Why these changes are needed"
+            echo "   - How to test the changes"
+            exit 1
+          fi
+          echo "✅ PR description provided"
+
+      - name: Check for breaking changes
+        run: |
+          pr_title="${{ github.event.pull_request.title }}"
+          pr_body="${{ github.event.pull_request.body }}"
+
+          # Look for breaking change indicators
+          if [[ $pr_title == *"!"* ]] || [[ $pr_body == *"BREAKING"* ]] || [[ $pr_body == *"breaking"* ]]; then
+            echo "⚠️ Breaking change detected in PR"
+            echo "breaking_change=true" >> $GITHUB_ENV
+          fi
+
+      - name: Analyze PR size and complexity
+        run: |
+          changed_files="${{ github.event.pull_request.changed_files }}"
+          additions="${{ github.event.pull_request.additions }}"
+          deletions="${{ github.event.pull_request.deletions }}"
+
+          echo "📊 PR Size Analysis:"
+          echo "   Files changed: $changed_files"
+          echo "   Lines added: $additions"
+          echo "   Lines deleted: $deletions"
+
+          # Size warnings
+          if [[ $changed_files -gt 50 ]]; then
+            echo "⚠️ Large PR: $changed_files files changed"
+            echo "💡 Consider breaking this into smaller PRs for easier review"
+            echo "large_pr=true" >> $GITHUB_ENV
+          fi
+
+          if [[ $additions -gt 1000 ]]; then
+            echo "⚠️ Large PR: $additions lines added"
+            echo "💡 Consider breaking this into smaller PRs"
+            echo "large_pr=true" >> $GITHUB_ENV
+          fi
+
+  # Quick lint check on changed files only
+  quick-lint:
+    name: Quick Lint Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Install dependencies (minimal)
+        run: |
+          # Install only essential linting dependencies for speed
+          pnpm install --frozen-lockfile --filter="@template/shared-types" --filter="@template/shared-utils"
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v40
+        with:
+          files: |
+            **/*.{ts,tsx,js,jsx}
+          files_ignore: |
+            node_modules/**
+            dist/**
+            build/**
+            coverage/**
+
+      - name: Lint changed files only
+        if: steps.changed-files.outputs.any_changed == 'true'
+        run: |
+          echo "🔍 Quick lint check on changed files:"
+          echo "${{ steps.changed-files.outputs.all_changed_files }}" | tr ' ' '\n'
+
+          # Run ESLint on changed files only
+          changed_files="${{ steps.changed-files.outputs.all_changed_files }}"
+          if [[ -n "$changed_files" ]]; then
+            echo "$changed_files" | xargs pnpm exec eslint --ext .ts,.tsx,.js,.jsx || {
+              echo "❌ Linting issues found in changed files"
+              echo "💡 Run 'pnpm run lint:fix' to auto-fix issues"
+              exit 1
+            }
+          fi
+          echo "✅ Changed files pass linting"
+
+  # Quick TypeScript compilation check
+  quick-typecheck:
+    name: Quick Type Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Install dependencies (quick)
+        run: pnpm install --frozen-lockfile
+
+      - name: Quick TypeScript check on shared libraries
+        run: |
+          echo "🔍 Quick TypeScript compilation check..."
+          # Check core shared libraries first (fastest to fail fast)
+          pnpm run typecheck --filter="@template/shared-types" --filter="@template/shared-utils"
+          echo "✅ Core libraries typecheck passed"
+
+  # Security quick scan on changed files
+  security-quick-scan:
+    name: Quick Security Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v40
+        with:
+          files: |
+            **/*.{ts,tsx,js,jsx,json,yml,yaml}
+          files_ignore: |
+            node_modules/**
+            dist/**
+            build/**
+
+      - name: Quick secret scan on changed files
+        if: steps.changed-files.outputs.any_changed == 'true'
+        run: |
+          echo "🔍 Quick security scan on changed files..."
+
+          # Scan changed files for obvious secrets
+          changed_files="${{ steps.changed-files.outputs.all_changed_files }}"
+          secret_patterns=(
+            "password\s*[:=]\s*['\"][^'\"]{8,}['\"]"
+            "api[_-]?key\s*[:=]\s*['\"][^'\"]{10,}['\"]"
+            "secret\s*[:=]\s*['\"][^'\"]{8,}['\"]"
+            "token\s*[:=]\s*['\"][^'\"]{16,}['\"]"
+            "AKIA[0-9A-Z]{16}"
+            "sk-[0-9a-zA-Z]{20,}"
+          )
+
+          secret_found=false
+          for file in $changed_files; do
+            if [[ -f "$file" ]]; then
+              for pattern in "${patterns[@]}"; do
+                if grep -l -i -E "$pattern" "$file" 2>/dev/null; then
+                  echo "🚨 Potential secret in $file"
+                  secret_found=true
+                fi
+              done
+            fi
+          done
+
+          if [[ "$secret_found" == "true" ]]; then
+            echo "❌ Potential secrets detected in changed files"
+            echo "💡 Please review and remove any hardcoded secrets"
+            exit 1
+          fi
+          echo "✅ No obvious secrets detected in changed files"
+
+  # Check for merge conflicts
+  conflict-check:
+    name: Merge Conflict Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for merge conflicts
+        run: |
+          echo "🔍 Checking for merge conflict markers..."
+
+          # Check for conflict markers in files
+          conflict_files=$(grep -r -l "<<<<<<< HEAD\|>>>>>>> \|=======" . \
+            --exclude-dir=node_modules \
+            --exclude-dir=.git \
+            --exclude-dir=dist \
+            --exclude-dir=build \
+            2>/dev/null || true)
+
+          if [[ -n "$conflict_files" ]]; then
+            echo "❌ Merge conflict markers found in:"
+            echo "$conflict_files"
+            echo "💡 Please resolve merge conflicts before proceeding"
+            exit 1
+          fi
+          echo "✅ No merge conflict markers detected"
+
+      - name: Check if PR can be merged
+        run: |
+          # Check if PR has merge conflicts with base branch
+          git fetch origin ${{ github.base_ref }}
+
+          if ! git merge-tree $(git merge-base HEAD origin/${{ github.base_ref }}) HEAD origin/${{ github.base_ref }}) | grep -q "^"; then
+            echo "✅ PR can be merged cleanly"
+          else
+            echo "⚠️ PR may have merge conflicts with base branch"
+            echo "💡 Consider rebasing on latest ${{ github.base_ref }}"
+          fi
+
+  # PR status summary and actions
+  pr-summary:
+    name: PR Validation Summary
+    runs-on: ubuntu-latest
+    needs: [pr-metadata, quick-lint, quick-typecheck, security-quick-scan, conflict-check]
+    if: always()
+    timeout-minutes: 2
+
+    steps:
+      - name: Generate PR validation summary
+        run: |
+          echo "📋 PR Validation Results"
+          echo "======================"
+
+          all_passed=true
+
+          # Check each validation result
+          if [[ "${{ needs.pr-metadata.result }}" == "success" ]]; then
+            echo "✅ PR Metadata: VALID"
+          else
+            echo "❌ PR Metadata: INVALID"
+            all_passed=false
+          fi
+
+          if [[ "${{ needs.quick-lint.result }}" == "success" ]]; then
+            echo "✅ Quick Lint: PASSED"
+          else
+            echo "❌ Quick Lint: FAILED"
+            all_passed=false
+          fi
+
+          if [[ "${{ needs.quick-typecheck.result }}" == "success" ]]; then
+            echo "✅ Type Check: PASSED"
+          else
+            echo "❌ Type Check: FAILED"
+            all_passed=false
+          fi
+
+          if [[ "${{ needs.security-quick-scan.result }}" == "success" ]]; then
+            echo "✅ Security Scan: PASSED"
+          else
+            echo "❌ Security Scan: FAILED"
+            all_passed=false
+          fi
+
+          if [[ "${{ needs.conflict-check.result }}" == "success" ]]; then
+            echo "✅ Conflict Check: PASSED"
+          else
+            echo "❌ Conflict Check: FAILED"
+            all_passed=false
+          fi
+
+          echo "======================"
+
+          if [[ "$all_passed" == "true" ]]; then
+            echo "🎉 PR Validation: ALL CHECKS PASSED"
+            echo "This PR is ready for detailed CI/CD validation and review."
+            echo "pr_status=passed" >> $GITHUB_ENV
+          else
+            echo "🚨 PR Validation: ISSUES DETECTED"
+            echo "Please fix the issues above before requesting review."
+            echo "pr_status=failed" >> $GITHUB_ENV
+          fi
+
+      - name: Update PR with validation results
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const allPassed = '${{ env.pr_status }}' === 'passed';
+            const icon = allPassed ? '✅' : '❌';
+            const status = allPassed ? 'PASSED' : 'FAILED';
+            const color = allPassed ? '28a745' : 'dc3545';
+
+            const results = {
+              metadata: '${{ needs.pr-metadata.result }}',
+              lint: '${{ needs.quick-lint.result }}', 
+              typecheck: '${{ needs.quick-typecheck.result }}',
+              security: '${{ needs.security-quick-scan.result }}',
+              conflicts: '${{ needs.conflict-check.result }}'
+            };
+
+            let details = '**Validation Details:**\n';
+            details += `- PR Metadata: ${results.metadata === 'success' ? '✅' : '❌'}\n`;
+            details += `- Quick Lint: ${results.lint === 'success' ? '✅' : '❌'}\n`; 
+            details += `- Type Check: ${results.typecheck === 'success' ? '✅' : '❌'}\n`;
+            details += `- Security Scan: ${results.security === 'success' ? '✅' : '❌'}\n`;
+            details += `- Merge Conflicts: ${results.conflicts === 'success' ? '✅' : '❌'}\n`;
+
+            const message = `${icon} **PR Validation: ${status}**\n\n${details}\n\n` +
+              (allPassed ? 
+                'This PR passes all quick validation checks and is ready for full CI/CD pipeline validation.' :
+                'Please resolve the failing checks above. The full CI/CD pipeline will run once these issues are fixed.'
+              );
+
+            // Update PR with results
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: message
+            });
+
+            // Set commit status
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.payload.pull_request.head.sha,
+              state: allPassed ? 'success' : 'failure',
+              target_url: `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+              description: `PR Validation ${status}`,
+              context: 'PR Validation'
+            });
+
+  # Auto-assign reviewers for passing PRs
+  auto-assign:
+    name: Auto-assign Reviewers
+    runs-on: ubuntu-latest
+    needs: [pr-summary]
+    if: needs.pr-summary.outputs.pr_status == 'passed' && github.event.action == 'opened'
+    timeout-minutes: 1
+
+    steps:
+      - name: Auto-assign reviewers
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Auto-assign reviewers for PRs that pass validation
+            // Customize this list based on your team
+            const reviewers = ['maintainer1', 'maintainer2'];
+
+            if (reviewers.length > 0) {
+              await github.rest.pulls.requestReviewers({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.issue.number,
+                reviewers: reviewers.slice(0, 2) // Assign max 2 reviewers
+              });
+              
+              console.log(`Assigned reviewers: ${reviewers.slice(0, 2).join(', ')}`);
+            }

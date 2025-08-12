@@ -11,7 +11,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": false,
-    "lib": ["DOM", "DOM.Iterable", "ES6"]
+    "lib": ["DOM", "DOM.Iterable", "ES2017"]
   },
   "include": [
     "src/**/*"

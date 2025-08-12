@@ -1,0 +1,435 @@
+name: Security Scanning
+
+# Comprehensive security scanning on code changes and scheduled audits
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    # Run security scan daily at 2 AM UTC for continuous monitoring
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+    # Allow manual triggering for immediate security assessment
+    inputs:
+      scan_intensity:
+        description: "Security scan intensity"
+        required: true
+        default: "standard"
+        type: choice
+        options:
+          - "quick"
+          - "standard"
+          - "comprehensive"
+
+env:
+  NODE_VERSION: "20.x"
+  PNPM_VERSION: "8.15.0"
+
+# Security-focused permissions
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  # Vulnerability scanning with Trivy
+  trivy-scan:
+    name: Trivy Vulnerability Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full history for accurate analysis
+
+      - name: Run Trivy filesystem scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: "fs"
+          scan-ref: "."
+          format: "sarif"
+          output: "trivy-fs-results.sarif"
+          severity: "CRITICAL,HIGH,MEDIUM"
+          exit-code: "0" # Don't fail on vulnerabilities, just report
+
+      - name: Upload Trivy filesystem results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: "trivy-fs-results.sarif"
+          category: "trivy-filesystem"
+
+      - name: Run Trivy dependency scan
+        run: |
+          echo "🔍 Scanning dependencies for vulnerabilities..."
+          trivy fs --format json --output trivy-deps.json --severity CRITICAL,HIGH .
+
+          # Check if critical vulnerabilities found
+          critical_count=$(jq '.Results[]?.Vulnerabilities[]? | select(.Severity == "CRITICAL") | length' trivy-deps.json 2>/dev/null | wc -l || echo "0")
+          high_count=$(jq '.Results[]?.Vulnerabilities[]? | select(.Severity == "HIGH") | length' trivy-deps.json 2>/dev/null | wc -l || echo "0")
+
+          echo "📊 Security Summary:"
+          echo "   Critical vulnerabilities: $critical_count"
+          echo "   High vulnerabilities: $high_count"
+
+          if [[ $critical_count -gt 0 ]]; then
+            echo "🚨 Critical vulnerabilities found - security review required"
+            echo "critical_vulns=true" >> $GITHUB_ENV
+          else
+            echo "✅ No critical vulnerabilities detected"
+          fi
+
+      - name: Comment on PR with vulnerability summary
+        if: github.event_name == 'pull_request' && env.critical_vulns == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '🚨 **Critical Security Vulnerabilities Detected**\n\n' +
+                    'Trivy scan found critical vulnerabilities that require immediate attention.\n' +
+                    'Please review the Security tab for detailed information and update dependencies before merging.'
+            })
+
+  # Static Application Security Testing with Semgrep
+  semgrep-scan:
+    name: Semgrep SAST Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Semgrep scan
+        uses: semgrep/semgrep-action@v1
+        with:
+          config: .semgrep.yml # Use our custom configuration
+          generateSarif: "1"
+
+        env:
+          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+
+      - name: Upload Semgrep SARIF results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: semgrep.sarif
+          category: "semgrep-sast"
+
+      - name: Process Semgrep results
+        if: always()
+        run: |
+          if [[ -f "semgrep.sarif" ]]; then
+            # Count findings by severity
+            critical_findings=$(jq '.runs[0].results[] | select(.level == "error") | length' semgrep.sarif 2>/dev/null | wc -l || echo "0")
+            warning_findings=$(jq '.runs[0].results[] | select(.level == "warning") | length' semgrep.sarif 2>/dev/null | wc -l || echo "0")
+            
+            echo "📊 SAST Analysis Results:"
+            echo "   Critical findings: $critical_findings"
+            echo "   Warning findings: $warning_findings"
+            
+            if [[ $critical_findings -gt 0 ]]; then
+              echo "🚨 Critical security issues found"
+              echo "sast_critical=true" >> $GITHUB_ENV
+            fi
+          fi
+
+  # CodeQL analysis for advanced semantic security scanning
+  codeql-analyze:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ["javascript"] # Template uses JavaScript/TypeScript
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          # Use default query suite plus security queries
+          queries: +security-extended
+
+      - name: Setup Node.js for CodeQL analysis
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install dependencies for analysis
+        run: pnpm install --frozen-lockfile
+
+      - name: Build for CodeQL analysis
+        run: pnpm run build:libs
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ matrix.language }}"
+          upload: true
+
+  # Secret scanning with multiple tools
+  secret-scan:
+    name: Secret Detection
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full history for comprehensive secret detection
+
+      - name: Run TruffleHog secret scan
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: main
+          head: HEAD
+          extra_args: --debug --only-verified
+
+      - name: GitLeaks secret scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+
+      - name: Custom secret pattern check
+        run: |
+          echo "🔍 Scanning for common secret patterns..."
+
+          # Define patterns for common secrets
+          patterns=(
+            "password\s*=\s*['\"][^'\"]*['\"]"
+            "api[_-]?key\s*=\s*['\"][^'\"]*['\"]"
+            "secret\s*=\s*['\"][^'\"]*['\"]"
+            "token\s*=\s*['\"][^'\"]*['\"]"
+            "AKIA[0-9A-Z]{16}"  # AWS Access Key
+            "-----BEGIN [A-Z]+ PRIVATE KEY-----"  # Private keys
+          )
+
+          secret_found=false
+          for pattern in "${patterns[@]}"; do
+            if grep -r -i -E "$pattern" --exclude-dir=node_modules --exclude-dir=.git . 2>/dev/null; then
+              echo "🚨 Potential secret found: $pattern"
+              secret_found=true
+            fi
+          done
+
+          if [[ "$secret_found" == "true" ]]; then
+            echo "secrets_detected=true" >> $GITHUB_ENV
+            echo "🚨 Manual review required for potential secrets"
+          else
+            echo "✅ No obvious secret patterns detected"
+          fi
+
+  # Dependency security audit
+  dependency-audit:
+    name: Dependency Security Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run pnpm audit
+        run: |
+          echo "🔍 Running dependency security audit..."
+          pnpm audit --audit-level moderate --json > audit-results.json || true
+
+          # Parse audit results
+          if [[ -f "audit-results.json" ]]; then
+            vulnerabilities=$(jq '.metadata.vulnerabilities | to_entries | map(select(.value > 0)) | length' audit-results.json 2>/dev/null || echo "0")
+            
+            if [[ $vulnerabilities -gt 0 ]]; then
+              echo "🚨 $vulnerabilities types of vulnerabilities found in dependencies"
+              echo "dependency_vulns=true" >> $GITHUB_ENV
+              
+              # Show summary
+              echo "📊 Vulnerability Summary:"
+              jq '.metadata.vulnerabilities' audit-results.json 2>/dev/null || echo "Unable to parse details"
+            else
+              echo "✅ No dependency vulnerabilities detected"
+            fi
+          fi
+
+      - name: Upload audit results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dependency-audit-results
+          path: audit-results.json
+          retention-days: 30
+
+  # Security summary and reporting
+  security-summary:
+    name: Security Summary 🔒
+    runs-on: ubuntu-latest
+    needs: [trivy-scan, semgrep-scan, codeql-analyze, secret-scan, dependency-audit]
+    if: always()
+    timeout-minutes: 5
+
+    steps:
+      - name: Generate security summary
+        run: |
+          echo "🔒 Enterprise Security Scan Results"
+          echo "=================================="
+          echo ""
+
+          # Trivy Results
+          if [[ "${{ needs.trivy-scan.result }}" == "success" ]]; then
+            echo "✅ Trivy Vulnerability Scan: PASSED"
+          else
+            echo "❌ Trivy Vulnerability Scan: FAILED"
+          fi
+
+          # Semgrep Results  
+          if [[ "${{ needs.semgrep-scan.result }}" == "success" ]]; then
+            echo "✅ Semgrep SAST Analysis: PASSED"
+          else
+            echo "❌ Semgrep SAST Analysis: FAILED"
+          fi
+
+          # CodeQL Results
+          if [[ "${{ needs.codeql-analyze.result }}" == "success" ]]; then
+            echo "✅ CodeQL Analysis: PASSED"
+          else
+            echo "❌ CodeQL Analysis: FAILED"
+          fi
+
+          # Secret Scan Results
+          if [[ "${{ needs.secret-scan.result }}" == "success" ]]; then
+            echo "✅ Secret Detection: PASSED"
+          else
+            echo "❌ Secret Detection: FAILED"
+          fi
+
+          # Dependency Audit Results
+          if [[ "${{ needs.dependency-audit.result }}" == "success" ]]; then
+            echo "✅ Dependency Audit: PASSED"
+          else
+            echo "❌ Dependency Audit: FAILED"
+          fi
+
+          echo ""
+          echo "=================================="
+
+          # Determine overall security status
+          if [[ "${{ needs.trivy-scan.result }}" == "success" ]] && 
+             [[ "${{ needs.semgrep-scan.result }}" == "success" ]] && 
+             [[ "${{ needs.codeql-analyze.result }}" == "success" ]] && 
+             [[ "${{ needs.secret-scan.result }}" == "success" ]] && 
+             [[ "${{ needs.dependency-audit.result }}" == "success" ]]; then
+            echo "🎉 Overall Security Status: SECURE ✅"
+            echo "All security scans completed successfully. No critical issues detected."
+          else
+            echo "🚨 Overall Security Status: ATTENTION REQUIRED ⚠️"
+            echo "One or more security scans detected issues requiring review."
+            echo "Please check the Security tab and individual scan results."
+          fi
+
+      - name: Post security summary to PR
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const results = {
+              trivy: '${{ needs.trivy-scan.result }}',
+              semgrep: '${{ needs.semgrep-scan.result }}',
+              codeql: '${{ needs.codeql-analyze.result }}',
+              secrets: '${{ needs.secret-scan.result }}',
+              dependencies: '${{ needs.dependency-audit.result }}'
+            };
+
+            const passed = Object.values(results).every(r => r === 'success');
+            const summary = passed ? 
+              '🔒 **Security Scan Results: SECURE** ✅\n\nAll enterprise security scans passed successfully.' :
+              '🚨 **Security Scan Results: REVIEW REQUIRED** ⚠️\n\nSome security scans detected issues. Please review the Security tab for details.';
+
+            let details = '\n\n**Scan Results:**\n';
+            details += `- Vulnerability Scan (Trivy): ${results.trivy === 'success' ? '✅' : '❌'}\n`;
+            details += `- SAST Analysis (Semgrep): ${results.semgrep === 'success' ? '✅' : '❌'}\n`;
+            details += `- Code Analysis (CodeQL): ${results.codeql === 'success' ? '✅' : '❌'}\n`;
+            details += `- Secret Detection: ${results.secrets === 'success' ? '✅' : '❌'}\n`;
+            details += `- Dependency Audit: ${results.dependencies === 'success' ? '✅' : '❌'}\n`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: summary + details
+            })
+
+  # Security gate for critical issues
+  security-gate:
+    name: Security Gate
+    runs-on: ubuntu-latest
+    needs: [trivy-scan, semgrep-scan, secret-scan, dependency-audit]
+    if: github.event_name == 'pull_request'
+    timeout-minutes: 2
+
+    steps:
+      - name: Check for blocking security issues
+        run: |
+          echo "🚪 Evaluating security gate criteria..."
+
+          blocking_issues=false
+
+          # Check each scan for critical issues
+          if [[ "${{ needs.trivy-scan.result }}" != "success" ]]; then
+            echo "❌ Trivy scan failed"
+            blocking_issues=true
+          fi
+
+          if [[ "${{ needs.semgrep-scan.result }}" != "success" ]]; then
+            echo "❌ SAST scan failed"
+            blocking_issues=true
+          fi
+
+          if [[ "${{ needs.secret-scan.result }}" != "success" ]]; then
+            echo "❌ Secret detection failed"
+            blocking_issues=true
+          fi
+
+          if [[ "$blocking_issues" == "true" ]]; then
+            echo "🚨 Security gate: BLOCKED"
+            echo "Critical security issues detected. This PR cannot be merged until issues are resolved."
+            exit 1
+          else
+            echo "✅ Security gate: PASSED"
+            echo "No blocking security issues detected. PR can proceed."
+          fi

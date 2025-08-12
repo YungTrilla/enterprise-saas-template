@@ -26,7 +26,7 @@ export class DatabaseClient {
       this.neonSql = neon(this.config.connectionString, {
         fullResults: true,
       });
-      
+
       // Also create a pool for migrations table management
       this.pool = new Pool({
         connectionString: this.config.connectionString,

@@ -30,11 +30,7 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({
     onOpenChange?.(newOpen);
   };
 
-  return (
-    <DropdownContext.Provider value={{ open, setOpen }}>
-      {children}
-    </DropdownContext.Provider>
-  );
+  return <DropdownContext.Provider value={{ open, setOpen }}>{children}</DropdownContext.Provider>;
 };
 
 export interface DropdownMenuTriggerProps {
@@ -71,10 +67,10 @@ export const DropdownMenuTrigger: React.FC<DropdownMenuTriggerProps> = ({
 
   return (
     <button
-      type="button"
+      type='button'
       onClick={handleClick}
       aria-expanded={open}
-      aria-haspopup="menu"
+      aria-haspopup='menu'
       className={className}
     >
       {children}
@@ -109,10 +105,7 @@ export const DropdownMenuContent: React.FC<DropdownMenuContentProps> = ({
     if (!open) return;
 
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        contentRef.current &&
-        !contentRef.current.contains(event.target as Node)
-      ) {
+      if (contentRef.current && !contentRef.current.contains(event.target as Node)) {
         setOpen(false);
       }
     };
@@ -143,15 +136,18 @@ export const DropdownMenuContent: React.FC<DropdownMenuContentProps> = ({
 
   const alignClasses = {
     start: side === 'bottom' || side === 'top' ? 'left-0' : 'top-0',
-    center: side === 'bottom' || side === 'top' ? 'left-1/2 -translate-x-1/2' : 'top-1/2 -translate-y-1/2',
+    center:
+      side === 'bottom' || side === 'top'
+        ? 'left-1/2 -translate-x-1/2'
+        : 'top-1/2 -translate-y-1/2',
     end: side === 'bottom' || side === 'top' ? 'right-0' : 'bottom-0',
   };
 
   return (
     <div
       ref={contentRef}
-      role="menu"
-      aria-orientation="vertical"
+      role='menu'
+      aria-orientation='vertical'
       className={cn(
         'absolute z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md',
         'animate-in fade-in-0 zoom-in-95',
@@ -197,7 +193,7 @@ export const DropdownMenuItem: React.FC<DropdownMenuItemProps> = ({
 
   return (
     <div
-      role="menuitem"
+      role='menuitem'
       tabIndex={disabled ? -1 : 0}
       className={cn(
         'relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors',
@@ -207,7 +203,7 @@ export const DropdownMenuItem: React.FC<DropdownMenuItemProps> = ({
         className
       )}
       onClick={handleClick}
-      onKeyDown={(e) => {
+      onKeyDown={e => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           handleClick(e as any);
@@ -231,14 +227,11 @@ export const DropdownMenuCheckboxItem: React.FC<DropdownMenuCheckboxItemProps> =
   ...props
 }) => {
   return (
-    <DropdownMenuItem
-      {...props}
-      onSelect={() => onCheckedChange?.(!checked)}
-    >
-      <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
-        {checked && <Check className="h-4 w-4" />}
+    <DropdownMenuItem {...props} onSelect={() => onCheckedChange?.(!checked)}>
+      <span className='absolute left-2 flex h-3.5 w-3.5 items-center justify-center'>
+        {checked && <Check className='h-4 w-4' />}
       </span>
-      <span className="pl-8">{children}</span>
+      <span className='pl-8'>{children}</span>
     </DropdownMenuItem>
   );
 };
@@ -248,29 +241,15 @@ export interface DropdownMenuLabelProps {
   className?: string;
 }
 
-export const DropdownMenuLabel: React.FC<DropdownMenuLabelProps> = ({
-  children,
-  className,
-}) => {
-  return (
-    <div
-      className={cn(
-        'px-2 py-1.5 text-sm font-semibold',
-        className
-      )}
-    >
-      {children}
-    </div>
-  );
+export const DropdownMenuLabel: React.FC<DropdownMenuLabelProps> = ({ children, className }) => {
+  return <div className={cn('px-2 py-1.5 text-sm font-semibold', className)}>{children}</div>;
 };
 
-export const DropdownMenuSeparator: React.FC<{ className?: string }> = ({
-  className,
-}) => {
+export const DropdownMenuSeparator: React.FC<{ className?: string }> = ({ className }) => {
   return (
     <div
-      role="separator"
-      aria-orientation="horizontal"
+      role='separator'
+      aria-orientation='horizontal'
       className={cn('-mx-1 my-1 h-px bg-muted', className)}
     />
   );
@@ -282,12 +261,8 @@ export interface DropdownMenuSubProps {
 
 export const DropdownMenuSub: React.FC<DropdownMenuSubProps> = ({ children }) => {
   const [open, setOpen] = useState(false);
-  
-  return (
-    <DropdownContext.Provider value={{ open, setOpen }}>
-      {children}
-    </DropdownContext.Provider>
-  );
+
+  return <DropdownContext.Provider value={{ open, setOpen }}>{children}</DropdownContext.Provider>;
 };
 
 export interface DropdownMenuSubTriggerProps extends DropdownMenuItemProps {}
@@ -298,12 +273,9 @@ export const DropdownMenuSubTrigger: React.FC<DropdownMenuSubTriggerProps> = ({
   ...props
 }) => {
   return (
-    <DropdownMenuItem
-      {...props}
-      className={cn('flex items-center justify-between', className)}
-    >
+    <DropdownMenuItem {...props} className={cn('flex items-center justify-between', className)}>
       {children}
-      <ChevronRight className="ml-auto h-4 w-4" />
+      <ChevronRight className='ml-auto h-4 w-4' />
     </DropdownMenuItem>
   );
 };

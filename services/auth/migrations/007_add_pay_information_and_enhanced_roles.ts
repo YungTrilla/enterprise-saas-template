@@ -88,7 +88,6 @@ export async function up(client: PoolClient): Promise<void> {
     WHERE preset_name IN ('sales_manager', 'operations_manager', 'dispatcher', 'driver', 'crew_member');
   `);
 
-
   // Add Admin role preset with full access
   await client.query(`
     INSERT INTO role_presets (preset_name, display_name, description, base_role_id, additional_permissions, department, default_pay_type)

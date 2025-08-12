@@ -131,7 +131,9 @@ export function createMockLoginRequest(overrides: Partial<ILoginRequest> = {}): 
 /**
  * Create a mock register request
  */
-export function createMockRegisterRequest(overrides: Partial<IRegisterRequest> = {}): IRegisterRequest {
+export function createMockRegisterRequest(
+  overrides: Partial<IRegisterRequest> = {}
+): IRegisterRequest {
   return {
     email: 'newuser@example.com',
     password: 'Password123!',

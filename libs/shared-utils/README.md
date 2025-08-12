@@ -1,6 +1,7 @@
 # @abyss/shared-utils
 
-Comprehensive utility library for Abyss Central suite with validation, encryption, formatting, datetime, logging, and common helper functions.
+Comprehensive utility library for Abyss Central suite with validation,
+encryption, formatting, datetime, logging, and common helper functions.
 
 ## Features
 
@@ -9,12 +10,15 @@ Comprehensive utility library for Abyss Central suite with validation, encryptio
 - 🔒 **Encryption** - AES encryption, bcrypt hashing, secure token generation
 - 📅 **DateTime** - Date manipulation, timezone handling, business calendar
 - 📝 **Formatting** - Currency, numbers, text, addresses, dates
-- 📊 **Logging** - Structured logging with Winston, correlation IDs, audit trails
-- 🛠️ **Utilities** - Common helper functions for arrays, objects, async operations
+- 📊 **Logging** - Structured logging with Winston, correlation IDs, audit
+  trails
+- 🛠️ **Utilities** - Common helper functions for arrays, objects, async
+  operations
 
 ## Installation
 
-This library is part of the Abyss Central monorepo and is used internally by the suite applications.
+This library is part of the Abyss Central monorepo and is used internally by the
+suite applications.
 
 ```bash
 # Install dependencies in the monorepo root
@@ -26,20 +30,20 @@ npm install
 ### Validation
 
 ```typescript
-import { 
-  validateWithJoi, 
+import {
+  validateWithJoi,
   validateWithZod,
   commonJoiSchemas,
   commonZodSchemas,
   sanitizeHtml,
-  isValidEmail 
+  isValidEmail,
 } from '@abyss/shared-utils/validation';
 
 // Joi validation
 const userSchema = Joi.object({
   email: commonJoiSchemas.email.required(),
   password: commonJoiSchemas.password.required(),
-  age: commonJoiSchemas.positiveInteger.optional()
+  age: commonJoiSchemas.positiveInteger.optional(),
 });
 
 const result = validateWithJoi(userData, userSchema);
@@ -53,7 +57,7 @@ if (result.isValid) {
 const itemSchema = z.object({
   name: commonZodSchemas.nonEmptyString,
   sku: commonZodSchemas.sku,
-  price: commonZodSchemas.currency
+  price: commonZodSchemas.currency,
 });
 
 // Input sanitization
@@ -64,13 +68,13 @@ const isEmail = isValidEmail('user@example.com');
 ### Encryption
 
 ```typescript
-import { 
+import {
   hashPassword,
   verifyPassword,
   encryptData,
   decryptData,
   generateSecureToken,
-  generateApiKey 
+  generateApiKey,
 } from '@abyss/shared-utils/encryption';
 
 // Password hashing
@@ -90,14 +94,14 @@ const apiKey = generateApiKey('ak');
 ### Formatting
 
 ```typescript
-import { 
+import {
   formatCurrency,
   formatPercentage,
   formatFileSize,
   toTitleCase,
   truncateText,
   formatPhoneNumber,
-  formatRelativeTime 
+  formatRelativeTime,
 } from '@abyss/shared-utils/formatting';
 
 // Number formatting
@@ -117,13 +121,13 @@ const timeAgo = formatRelativeTime(new Date(Date.now() - 3600000)); // "1 hour a
 ### DateTime
 
 ```typescript
-import { 
+import {
   parseDate,
   isDateInRange,
   addBusinessDays,
   getBusinessDaysBetween,
   formatDuration,
-  isWithinBusinessHours 
+  isWithinBusinessHours,
 } from '@abyss/shared-utils/datetime';
 
 // Date parsing and validation
@@ -142,17 +146,17 @@ const inBusinessHours = isWithinBusinessHours(new Date());
 ### Logging
 
 ```typescript
-import { 
+import {
   StructuredLogger,
   logBusinessEvent,
   logSecurityEvent,
-  defaultLogger 
+  defaultLogger,
 } from '@abyss/shared-utils/logger';
 
 // Create structured logger
 const logger = new StructuredLogger({
   service: 'inventory-service',
-  level: 'info'
+  level: 'info',
 });
 
 // Basic logging
@@ -167,8 +171,8 @@ logBusinessEvent(logger, {
   action: 'quantity_updated',
   userId: 'user-456',
   changes: {
-    quantity: { from: 10, to: 8 }
-  }
+    quantity: { from: 10, to: 8 },
+  },
 });
 
 // Security event logging
@@ -177,14 +181,14 @@ logSecurityEvent(logger, {
   action: 'login_attempt',
   userId: 'user-123',
   success: true,
-  ip: '192.168.1.1'
+  ip: '192.168.1.1',
 });
 ```
 
 ### Common Utilities
 
 ```typescript
-import { 
+import {
   deepClone,
   debounce,
   retry,
@@ -192,7 +196,7 @@ import {
   unique,
   isEmpty,
   pick,
-  omit 
+  omit,
 } from '@abyss/shared-utils';
 
 // Object utilities
@@ -217,12 +221,14 @@ const hasData = !isEmpty(value);
 ### Validation (`@abyss/shared-utils/validation`)
 
 **Input Validation & Sanitization:**
+
 - **Joi Schemas** - Pre-built schemas for common data types
 - **Zod Schemas** - Type-safe validation schemas
 - **Sanitization** - HTML, SQL, file name, URL sanitization
 - **Validation Helpers** - Email, UUID, phone, password strength
 
 **Security Features:**
+
 - XSS prevention through HTML sanitization
 - SQL injection prevention
 - Path traversal protection for file names
@@ -231,16 +237,19 @@ const hasData = !isEmpty(value);
 ### Encryption (`@abyss/shared-utils/encryption`)
 
 **Password Security:**
+
 - **bcrypt Hashing** - Secure password hashing with configurable cost
 - **Password Verification** - Timing-safe password comparison
 - **Rehash Detection** - Check if passwords need rehashing
 
 **Data Encryption:**
+
 - **AES-256-GCM** - Symmetric encryption for sensitive data
 - **Object Encryption** - JSON object encryption/decryption
 - **Secure Token Generation** - Cryptographically secure random tokens
 
 **Security Utilities:**
+
 - **Data Masking** - Mask sensitive data for logging
 - **HMAC Signatures** - Message authentication codes
 - **Secure Random** - Cryptographically secure random generation
@@ -248,17 +257,20 @@ const hasData = !isEmpty(value);
 ### Formatting (`@abyss/shared-utils/formatting`)
 
 **Number Formatting:**
+
 - **Currency** - Locale-aware currency formatting
 - **Percentages** - Percentage formatting with precision
 - **Large Numbers** - K, M, B abbreviations
 - **File Sizes** - Human-readable file size formatting
 
 **Text Formatting:**
+
 - **Case Conversion** - Title, camel, kebab, snake, pascal case
 - **Text Truncation** - Smart text truncation with ellipsis
 - **Whitespace Normalization** - Clean up extra whitespace
 
 **Business Formatting:**
+
 - **SKU Formatting** - Standardized SKU format
 - **Order Numbers** - Order number with prefix
 - **Quantity Display** - Quantity with units
@@ -267,29 +279,34 @@ const hasData = !isEmpty(value);
 ### DateTime (`@abyss/shared-utils/datetime`)
 
 **Date Operations:**
+
 - **Parsing & Validation** - Safe date parsing with validation
 - **Date Calculations** - Add/subtract days, weeks, months, years
 - **Date Comparisons** - Before, after, overlap detection
 - **Range Generation** - Generate date ranges and intervals
 
 **Business Calendar:**
+
 - **Business Days** - Add business days, skip weekends
 - **Holiday Detection** - US holiday checking
 - **Working Hours** - Business hours validation
 
 **Timezone Support:**
+
 - **Timezone Conversion** - Convert dates to user timezone
 - **Timezone Detection** - Get user's timezone automatically
 
 ### Logger (`@abyss/shared-utils/logger`)
 
 **Structured Logging:**
+
 - **Winston Integration** - Production-ready logging with Winston
 - **Correlation IDs** - Request tracking across services
 - **Contextual Logging** - Attach context to all log entries
 - **Multiple Transports** - Console, file, and syslog support
 
 **Business Logging:**
+
 - **Audit Trails** - Business event logging for compliance
 - **Security Events** - Authentication, authorization logging
 - **Performance Metrics** - Operation timing and resource usage
@@ -323,25 +340,28 @@ const logger = new StructuredLogger({
   enableJsonFormat: true,
   logDirectory: './logs',
   maxFileSize: '10m',
-  maxFiles: 5
+  maxFiles: 5,
 });
 ```
 
 ## Security Features
 
 ### Input Validation
+
 - **XSS Prevention** - HTML sanitization and encoding
 - **SQL Injection Prevention** - Input sanitization for database queries
 - **File Upload Security** - File name and type validation
 - **URL Validation** - Safe URL parsing and validation
 
 ### Encryption & Hashing
+
 - **Password Security** - bcrypt with cost factor ≥12
 - **Data Encryption** - AES-256-GCM for sensitive data
 - **Secure Tokens** - Cryptographically secure random generation
 - **HMAC Signatures** - Message authentication and integrity
 
 ### Logging Security
+
 - **Data Masking** - Automatic masking of sensitive fields
 - **Structured Logs** - Consistent log format for security monitoring
 - **Correlation Tracking** - Request correlation across services
@@ -377,20 +397,24 @@ turbo run typecheck --filter=@abyss/shared-utils
 ## Testing
 
 ```typescript
-import { validateWithJoi, hashPassword, formatCurrency } from '@abyss/shared-utils';
+import {
+  validateWithJoi,
+  hashPassword,
+  formatCurrency,
+} from '@abyss/shared-utils';
 
 describe('Utilities', () => {
   test('validation works correctly', () => {
     const result = validateWithJoi({ email: 'test@example.com' }, schema);
     expect(result.isValid).toBe(true);
   });
-  
+
   test('password hashing is secure', async () => {
     const hash = await hashPassword('password123');
     expect(hash).not.toBe('password123');
     expect(hash.length).toBeGreaterThan(50);
   });
-  
+
   test('currency formatting is locale-aware', () => {
     const formatted = formatCurrency(1234.56, 'USD', 'en-US');
     expect(formatted).toBe('$1,234.56');

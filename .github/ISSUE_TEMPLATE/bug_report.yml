@@ -1,0 +1,205 @@
+name: 🐛 Bug Report
+description: Report a bug or unexpected behavior in the Enterprise SaaS Template
+title: "[Bug]: "
+labels: ["bug", "needs-triage"]
+projects: ["enterprise-saas-template/1"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🐛 Bug Report
+
+        Thank you for taking the time to report a bug! This helps us improve the Enterprise SaaS Template.
+
+        Please fill out this template to help us understand and reproduce the issue.
+
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: Prerequisites
+      description: Please confirm you have completed the following
+      options:
+        - label: I have searched existing issues to ensure this bug hasn't been reported
+          required: true
+        - label: I have read the [Contributing Guidelines](../../CONTRIBUTING.md)
+          required: true
+        - label: I am running the latest version of the template
+          required: true
+
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: 🔍 Bug Description
+      description: A clear and concise description of what the bug is
+      placeholder: Describe the bug clearly and concisely...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: ✅ Expected Behavior
+      description: What you expected to happen
+      placeholder: Describe what you expected to happen...
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: ❌ Actual Behavior
+      description: What actually happened
+      placeholder: Describe what actually happened...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction-steps
+    attributes:
+      label: 🔄 Steps to Reproduce
+      description: Detailed steps to reproduce the issue
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. Execute command '...'
+        4. See error
+      value: |
+        1. 
+        2. 
+        3. 
+        4.
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: 🌍 Environment Information
+      description: Please provide your environment details
+      value: |
+        **Operating System:**
+        - OS: [e.g., macOS 13.0, Windows 11, Ubuntu 22.04]
+        - Architecture: [e.g., x64, arm64]
+
+        **Runtime Environment:**
+        - Node.js Version: [e.g., 18.17.0]
+        - pnpm Version: [e.g., 8.15.0]
+        - TypeScript Version: [e.g., 5.3.2]
+
+        **Template Information:**
+        - Template Version: [e.g., 1.0.0]
+        - Last Git Commit: [e.g., abc123]
+
+        **Browser (if applicable):**
+        - Browser: [e.g., Chrome 119, Firefox 120, Safari 17]
+        - Version: [e.g., 119.0.6045.105]
+
+        **Additional Tools:**
+        - Docker Version: [e.g., 24.0.6]
+        - Database Version: [e.g., PostgreSQL 15.4]
+    validations:
+      required: true
+
+  - type: textarea
+    id: error-logs
+    attributes:
+      label: 📋 Error Logs
+      description: Please include relevant error logs, stack traces, or console output
+      placeholder: |
+        Paste error logs here. Please include:
+        - Full stack traces
+        - Console errors
+        - Network errors (if applicable)
+        - Database errors (if applicable)
+      render: shell
+    validations:
+      required: false
+
+  - type: textarea
+    id: configuration
+    attributes:
+      label: ⚙️ Configuration
+      description: Relevant configuration files or environment variables (remove sensitive data)
+      placeholder: |
+        Include relevant configuration:
+        - package.json dependencies
+        - .env variables (without secrets)
+        - Service configurations
+        - Database settings
+      render: yaml
+    validations:
+      required: false
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: 🚨 Severity Level
+      description: How severe is this bug?
+      options:
+        - "🔴 Critical - System unusable, security vulnerability, data loss"
+        - "🟠 High - Major functionality broken, significant user impact"
+        - "🟡 Medium - Minor functionality issues, workaround available"
+        - "🟢 Low - Cosmetic issues, minimal impact"
+      default: 1
+    validations:
+      required: true
+
+  - type: dropdown
+    id: affected-components
+    attributes:
+      label: 🏗️ Affected Components
+      description: Which parts of the system are affected?
+      multiple: true
+      options:
+        - "Authentication Service"
+        - "API Gateway"
+        - "User Interface (React)"
+        - "Database (PostgreSQL)"
+        - "Cache (Redis)"
+        - "Email Service"
+        - "File Storage"
+        - "Background Jobs"
+        - "CI/CD Pipeline"
+        - "Documentation"
+        - "Development Tools"
+        - "Security"
+        - "Performance"
+        - "Other"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: security-impact
+    attributes:
+      label: 🔒 Security Impact
+      description: Does this bug have security implications?
+      options:
+        - label: This bug has potential security implications
+        - label: This bug involves handling of sensitive data
+        - label: This bug could affect authentication/authorization
+        - label: This bug could be exploited maliciously
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: 📎 Additional Context
+      description: Any additional information that might help us understand the issue
+      placeholder: |
+        Add any other context about the problem here:
+        - Screenshots or videos
+        - Related issues
+        - Potential solutions you've considered
+        - Impact on users or business
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: 🤝 Contribution
+      description: Are you willing to help fix this issue?
+      options:
+        - label: I am willing to submit a pull request to fix this issue
+        - label: I can help test the fix
+        - label: I can provide additional information if needed

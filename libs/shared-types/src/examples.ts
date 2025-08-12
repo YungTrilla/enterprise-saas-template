@@ -77,14 +77,14 @@ export enum ExampleStatus {
   DRAFT = 'DRAFT',
   ACTIVE = 'ACTIVE',
   ARCHIVED = 'ARCHIVED',
-  DELETED = 'DELETED'
+  DELETED = 'DELETED',
 }
 
 export enum ExamplePriority {
   LOW = 'LOW',
-  NORMAL = 'NORMAL', 
+  NORMAL = 'NORMAL',
   HIGH = 'HIGH',
-  URGENT = 'URGENT'
+  URGENT = 'URGENT',
 }
 
 export enum ExampleActivityType {
@@ -95,7 +95,7 @@ export enum ExampleActivityType {
   ATTACHMENT_ADDED = 'ATTACHMENT_ADDED',
   ATTACHMENT_REMOVED = 'ATTACHMENT_REMOVED',
   SHARED = 'SHARED',
-  UNSHARED = 'UNSHARED'
+  UNSHARED = 'UNSHARED',
 }
 
 // Search and filter types
@@ -116,13 +116,26 @@ export interface IExampleSearchParams {
 }
 
 // Create/Update request types
-export type CreateExampleRequest = Omit<IExample, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy'>;
-export type UpdateExampleRequest = Partial<Omit<IExample, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy'>>;
+export type CreateExampleRequest = Omit<
+  IExample,
+  'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy'
+>;
+export type UpdateExampleRequest = Partial<
+  Omit<IExample, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy'>
+>;
 
-export type CreateExampleCategoryRequest = Omit<IExampleCategory, 'id' | 'exampleCount' | 'createdAt' | 'updatedAt'>;
-export type UpdateExampleCategoryRequest = Partial<Omit<IExampleCategory, 'id' | 'exampleCount' | 'createdAt' | 'updatedAt'>>;
+export type CreateExampleCategoryRequest = Omit<
+  IExampleCategory,
+  'id' | 'exampleCount' | 'createdAt' | 'updatedAt'
+>;
+export type UpdateExampleCategoryRequest = Partial<
+  Omit<IExampleCategory, 'id' | 'exampleCount' | 'createdAt' | 'updatedAt'>
+>;
 
-export type CreateExampleCommentRequest = Omit<IExampleComment, 'id' | 'authorName' | 'isEdited' | 'createdAt' | 'updatedAt'>;
+export type CreateExampleCommentRequest = Omit<
+  IExampleComment,
+  'id' | 'authorName' | 'isEdited' | 'createdAt' | 'updatedAt'
+>;
 export type UpdateExampleCommentRequest = Pick<IExampleComment, 'content'>;
 
 // Statistics types

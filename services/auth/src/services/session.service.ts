@@ -24,7 +24,7 @@ export class SessionService {
       // Store session in Redis with expiration
       const sessionKey = this.getSessionKey(session.id);
       const sessionData = JSON.stringify(session);
-      
+
       // Calculate TTL from expiresAt
       const expiresAt = new Date(session.expiresAt);
       const ttlSeconds = Math.floor((expiresAt.getTime() - Date.now()) / 1000);
@@ -40,14 +40,13 @@ export class SessionService {
         sessionId: session.id,
         userId: session.userId,
         expiresAt: session.expiresAt,
-        ttl: ttlSeconds
+        ttl: ttlSeconds,
       });
-
     } catch (error) {
       this.logger.error('Failed to create session', {
         sessionId: session.id,
         userId: session.userId,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       throw error;
     }
@@ -65,33 +64,35 @@ export class SessionService {
         const sessionData = await this.redisClient.get(sessionKey);
         if (sessionData) {
           const session = JSON.parse(sessionData) as IUserSession;
-          
+
           this.logger.debug('Session retrieved from Redis', {
             sessionId,
-            userId: session.userId
+            userId: session.userId,
           });
-          
+
           return session;
         }
       }
 
       // Fall back to database
       const session = await this.getSessionFromDatabase(sessionId);
-      
+
       if (session) {
         // Check if session is still valid
         if (new Date(session.expiresAt) > new Date() && session.isActive) {
           // Cache in Redis for future requests
           if (this.redisClient) {
-            const ttlSeconds = Math.floor((new Date(session.expiresAt).getTime() - Date.now()) / 1000);
+            const ttlSeconds = Math.floor(
+              (new Date(session.expiresAt).getTime() - Date.now()) / 1000
+            );
             await this.redisClient.setex(sessionKey, ttlSeconds, JSON.stringify(session));
           }
-          
+
           this.logger.debug('Session retrieved from database', {
             sessionId,
-            userId: session.userId
+            userId: session.userId,
           });
-          
+
           return session;
         } else {
           // Session expired or inactive
@@ -102,11 +103,10 @@ export class SessionService {
 
       this.logger.debug('Session not found', { sessionId });
       return null;
-
     } catch (error) {
       this.logger.error('Failed to get session', {
         sessionId,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       return null;
     }
@@ -117,7 +117,9 @@ export class SessionService {
    */
   async updateSession(
     sessionId: EntityId,
-    updates: Partial<Pick<IUserSession, 'accessToken' | 'refreshToken' | 'lastAccessAt' | 'expiresAt'>>
+    updates: Partial<
+      Pick<IUserSession, 'accessToken' | 'refreshToken' | 'lastAccessAt' | 'expiresAt'>
+    >
   ): Promise<void> {
     try {
       // Get current session
@@ -130,13 +132,15 @@ export class SessionService {
       const updatedSession: IUserSession = {
         ...session,
         ...updates,
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       };
 
       // Update in Redis
       if (this.redisClient) {
         const sessionKey = this.getSessionKey(sessionId);
-        const ttlSeconds = Math.floor((new Date(updatedSession.expiresAt).getTime() - Date.now()) / 1000);
+        const ttlSeconds = Math.floor(
+          (new Date(updatedSession.expiresAt).getTime() - Date.now()) / 1000
+        );
         await this.redisClient.setex(sessionKey, ttlSeconds, JSON.stringify(updatedSession));
       }
 
@@ -146,13 +150,12 @@ export class SessionService {
       this.logger.info('Session updated successfully', {
         sessionId,
         userId: session.userId,
-        updates: Object.keys(updates)
+        updates: Object.keys(updates),
       });
-
     } catch (error) {
       this.logger.error('Failed to update session', {
         sessionId,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       throw error;
     }
@@ -173,13 +176,12 @@ export class SessionService {
       await this.deactivateSessionInDatabase(sessionId);
 
       this.logger.info('Session revoked successfully', {
-        sessionId
+        sessionId,
       });
-
     } catch (error) {
       this.logger.error('Failed to revoke session', {
         sessionId,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       throw error;
     }
@@ -204,13 +206,12 @@ export class SessionService {
 
       this.logger.info('All user sessions revoked', {
         userId,
-        sessionCount: userSessions.length
+        sessionCount: userSessions.length,
       });
-
     } catch (error) {
       this.logger.error('Failed to revoke all user sessions', {
         userId,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       throw error;
     }
@@ -239,14 +240,13 @@ export class SessionService {
       await this.deleteExpiredSessionsFromDatabase(sessionIds);
 
       this.logger.info('Expired sessions cleaned up', {
-        cleanupCount: expiredSessions.length
+        cleanupCount: expiredSessions.length,
       });
 
       return expiredSessions.length;
-
     } catch (error) {
       this.logger.error('Failed to cleanup expired sessions', {
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       return 0;
     }
@@ -258,24 +258,23 @@ export class SessionService {
   async getUserActiveSessions(userId: EntityId): Promise<IUserSession[]> {
     try {
       const sessions = await this.getUserSessionsFromDatabase(userId);
-      
+
       // Filter for active and non-expired sessions
-      const activeSessions = sessions.filter(session => 
-        session.isActive && new Date(session.expiresAt) > new Date()
+      const activeSessions = sessions.filter(
+        session => session.isActive && new Date(session.expiresAt) > new Date()
       );
 
       this.logger.debug('Retrieved user active sessions', {
         userId,
         totalSessions: sessions.length,
-        activeSessions: activeSessions.length
+        activeSessions: activeSessions.length,
       });
 
       return activeSessions;
-
     } catch (error) {
       this.logger.error('Failed to get user active sessions', {
         userId,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       return [];
     }
@@ -291,7 +290,7 @@ export class SessionService {
   }> {
     try {
       const stats = await this.getSessionStatsFromDatabase();
-      
+
       let sessionsInRedis = 0;
       if (this.redisClient) {
         const sessionKeys = await this.redisClient.keys(this.getSessionKey('*'));
@@ -300,17 +299,16 @@ export class SessionService {
 
       return {
         ...stats,
-        sessionsInRedis
+        sessionsInRedis,
       };
-
     } catch (error) {
       this.logger.error('Failed to get session statistics', {
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       return {
         totalActiveSessions: 0,
         totalExpiredSessions: 0,
-        sessionsInRedis: 0
+        sessionsInRedis: 0,
       };
     }
   }
@@ -362,7 +360,7 @@ export class SessionService {
     // Database query implementation would go here
     return {
       totalActiveSessions: 0,
-      totalExpiredSessions: 0
+      totalExpiredSessions: 0,
     };
   }
 }

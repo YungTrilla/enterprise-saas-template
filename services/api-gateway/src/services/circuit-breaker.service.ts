@@ -9,7 +9,7 @@ import { createLogger } from '../utils/logger';
 export enum CircuitState {
   CLOSED = 'CLOSED',
   OPEN = 'OPEN',
-  HALF_OPEN = 'HALF_OPEN'
+  HALF_OPEN = 'HALF_OPEN',
 }
 
 export interface ICircuitBreakerOptions {
@@ -43,25 +43,22 @@ export class CircuitBreaker {
   /**
    * Execute function with circuit breaker protection
    */
-  async execute<T>(
-    fn: () => Promise<T>,
-    correlationId?: CorrelationId
-  ): Promise<T> {
+  async execute<T>(fn: () => Promise<T>, correlationId?: CorrelationId): Promise<T> {
     if (this.state === CircuitState.OPEN) {
       if (Date.now() < this.nextAttemptTime!) {
         this.logger.warn('Circuit breaker is OPEN', {
           service: this.name,
           nextAttemptTime: new Date(this.nextAttemptTime!).toISOString(),
-          correlationId
+          correlationId,
         });
         throw new Error(`Circuit breaker is OPEN for ${this.name}`);
       }
-      
+
       // Try half-open state
       this.state = CircuitState.HALF_OPEN;
       this.logger.info('Circuit breaker entering HALF_OPEN state', {
         service: this.name,
-        correlationId
+        correlationId,
       });
     }
 
@@ -84,7 +81,7 @@ export class CircuitBreaker {
       failures: this.failures,
       successes: this.successes,
       lastFailureTime: this.lastFailureTime,
-      nextAttemptTime: this.nextAttemptTime
+      nextAttemptTime: this.nextAttemptTime,
     };
   }
 
@@ -97,9 +94,9 @@ export class CircuitBreaker {
     this.successes = 0;
     this.lastFailureTime = undefined;
     this.nextAttemptTime = undefined;
-    
+
     this.logger.info('Circuit breaker reset', {
-      service: this.name
+      service: this.name,
     });
   }
 
@@ -108,10 +105,10 @@ export class CircuitBreaker {
       this.state = CircuitState.CLOSED;
       this.failures = 0;
       this.logger.info('Circuit breaker recovered to CLOSED state', {
-        service: this.name
+        service: this.name,
       });
     }
-    
+
     if (this.state === CircuitState.CLOSED) {
       this.successes++;
     }
@@ -124,38 +121,35 @@ export class CircuitBreaker {
     if (this.state === CircuitState.HALF_OPEN) {
       this.state = CircuitState.OPEN;
       this.nextAttemptTime = Date.now() + this.options.resetTimeout;
-      
+
       this.logger.error('Circuit breaker tripped to OPEN state from HALF_OPEN', {
         service: this.name,
         failures: this.failures,
-        nextAttemptTime: new Date(this.nextAttemptTime).toISOString()
+        nextAttemptTime: new Date(this.nextAttemptTime).toISOString(),
       });
     } else if (this.failures >= this.options.failureThreshold) {
       this.state = CircuitState.OPEN;
       this.nextAttemptTime = Date.now() + this.options.resetTimeout;
-      
+
       this.logger.error('Circuit breaker tripped to OPEN state', {
         service: this.name,
         failures: this.failures,
         threshold: this.options.failureThreshold,
-        nextAttemptTime: new Date(this.nextAttemptTime).toISOString()
+        nextAttemptTime: new Date(this.nextAttemptTime).toISOString(),
       });
     }
   }
 
-  private async executeWithTimeout<T>(
-    fn: () => Promise<T>,
-    timeout?: number
-  ): Promise<T> {
+  private async executeWithTimeout<T>(fn: () => Promise<T>, timeout?: number): Promise<T> {
     if (!timeout) {
       return fn();
     }
 
     return Promise.race([
       fn(),
-      new Promise<T>((_, reject) => 
+      new Promise<T>((_, reject) =>
         setTimeout(() => reject(new Error('Request timeout')), timeout)
-      )
+      ),
     ]);
   }
 }
@@ -167,17 +161,14 @@ export class CircuitBreakerRegistry {
   /**
    * Get or create circuit breaker for service
    */
-  getCircuitBreaker(
-    serviceName: string,
-    options: ICircuitBreakerOptions
-  ): CircuitBreaker {
+  getCircuitBreaker(serviceName: string, options: ICircuitBreakerOptions): CircuitBreaker {
     if (!this.circuits.has(serviceName)) {
       const circuit = new CircuitBreaker(serviceName, options);
       this.circuits.set(serviceName, circuit);
-      
+
       this.logger.info('Created new circuit breaker', {
         service: serviceName,
-        options
+        options,
       });
     }
 
@@ -189,7 +180,7 @@ export class CircuitBreakerRegistry {
    */
   getAllStates(): Record<string, ICircuitBreakerState> {
     const states: Record<string, ICircuitBreakerState> = {};
-    
+
     this.circuits.forEach((circuit, name) => {
       states[name] = circuit.getState();
     });

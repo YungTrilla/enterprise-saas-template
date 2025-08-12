@@ -19,19 +19,19 @@ export interface ServiceBootstrapConfig {
     origins?: string[];
     credentials?: boolean;
   };
-  
+
   rateLimit?: {
     enabled?: boolean;
     windowMs?: number;
     maxRequests?: number;
     message?: string;
   };
-  
+
   bodyParser?: {
     jsonLimit?: string;
     urlEncodedLimit?: string;
   };
-  
+
   // Database options
   database?: {
     enabled: boolean;
@@ -40,27 +40,27 @@ export interface ServiceBootstrapConfig {
     poolMax?: number;
     healthCheckQuery?: string;
   };
-  
+
   // Redis options
   redis?: {
     enabled: boolean;
     url?: string;
     optional?: boolean; // if true, don't fail if Redis unavailable
   };
-  
+
   // Health check options
   healthCheck?: {
     path?: string; // defaults to /health
     detailed?: boolean;
     custom?: () => Promise<any>;
   };
-  
+
   // Logging options
   logging?: {
     service?: string;
     level?: string;
   };
-  
+
   // Graceful shutdown options
   shutdown?: {
     timeout?: number; // defaults to 30000ms

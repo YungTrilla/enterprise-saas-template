@@ -1,20 +1,24 @@
 # @abyss/shared-config
 
-Centralized configuration management for Abyss Central suite with environment-aware loading, validation, and type safety.
+Centralized configuration management for Abyss Central suite with
+environment-aware loading, validation, and type safety.
 
 ## Features
 
-- 🌍 **Environment-Aware** - Automatic environment detection and configuration loading
+- 🌍 **Environment-Aware** - Automatic environment detection and configuration
+  loading
 - 🔒 **Type-Safe** - Full TypeScript support with typed configuration objects
 - ✅ **Validation** - Joi schema validation for all configuration values
-- 📁 **Multiple Sources** - Load from .env files, environment variables, and defaults
+- 📁 **Multiple Sources** - Load from .env files, environment variables, and
+  defaults
 - 🔧 **Centralized** - Single source of truth for all service configurations
 - 🚀 **Production-Ready** - Environment-specific validation and security checks
 - 🎯 **Service-Oriented** - Pre-configured for microservices architecture
 
 ## Installation
 
-This library is part of the Abyss Central monorepo and is used internally by the suite applications.
+This library is part of the Abyss Central monorepo and is used internally by the
+suite applications.
 
 ```bash
 # Install dependencies in the monorepo root
@@ -58,7 +62,7 @@ const dbConfig = {
   database: config.get('DB_NAME'),
   user: config.get('DB_USER'),
   password: config.get('DB_PASSWORD'),
-  ssl: config.get('DB_SSL')
+  ssl: config.get('DB_SSL'),
 };
 
 // Service URLs for API calls
@@ -70,7 +74,11 @@ console.log('Inventory Service:', serviceUrls.INVENTORY_SERVICE_URL);
 ### Environment-Specific Configuration
 
 ```typescript
-import { loadConfig, getEnvironment, validateConfig } from '@abyss/shared-config';
+import {
+  loadConfig,
+  getEnvironment,
+  validateConfig,
+} from '@abyss/shared-config';
 
 // Load environment-specific configuration
 await loadConfig(); // Automatically loads .env.production, .env.development, etc.
@@ -111,105 +119,112 @@ The configuration loader checks for environment files in this order:
 ### Configuration Categories
 
 #### Base Configuration
+
 ```typescript
 interface BaseConfig {
   NODE_ENV: 'development' | 'test' | 'staging' | 'production';
-  PORT: number;                    // Default: 3000
-  SERVICE_NAME: string;            // Required
-  SERVICE_VERSION: string;         // Default: '1.0.0'
-  LOG_LEVEL: string;              // Default: 'info'
-  API_PREFIX: string;             // Default: '/api/v1'
-  CORS_ORIGINS: string[];         // Default: ['http://localhost:3000']
-  ENABLE_CORS: boolean;           // Default: true
-  REQUEST_TIMEOUT: number;        // Default: 30000
-  RATE_LIMIT_WINDOW: number;      // Default: 900000 (15 min)
-  RATE_LIMIT_MAX: number;         // Default: 100
+  PORT: number; // Default: 3000
+  SERVICE_NAME: string; // Required
+  SERVICE_VERSION: string; // Default: '1.0.0'
+  LOG_LEVEL: string; // Default: 'info'
+  API_PREFIX: string; // Default: '/api/v1'
+  CORS_ORIGINS: string[]; // Default: ['http://localhost:3000']
+  ENABLE_CORS: boolean; // Default: true
+  REQUEST_TIMEOUT: number; // Default: 30000
+  RATE_LIMIT_WINDOW: number; // Default: 900000 (15 min)
+  RATE_LIMIT_MAX: number; // Default: 100
 }
 ```
 
 #### Database Configuration
+
 ```typescript
 interface DatabaseConfig {
-  DB_HOST: string;                        // Required
-  DB_PORT: number;                        // Default: 5432
-  DB_NAME: string;                        // Required (validated pattern)
-  DB_USER: string;                        // Required
-  DB_PASSWORD: string;                    // Required (min 8 chars, 12+ in production)
-  DB_SSL: boolean;                        // Default: false (true in production)
-  DB_SSL_REJECT_UNAUTHORIZED: boolean;    // Default: true
-  DB_POOL_MIN: number;                    // Default: 2 (5 in production)
-  DB_POOL_MAX: number;                    // Default: 10 (20 in production)
-  DB_TIMEOUT: number;                     // Default: 30000
-  DB_CONNECTION_TIMEOUT: number;          // Default: 10000
-  DB_IDLE_TIMEOUT: number;                // Default: 30000
-  DB_MIGRATION_TIMEOUT: number;           // Default: 300000
-  DB_STATEMENT_TIMEOUT: number;           // Default: 60000
-  DB_MAX_LIFETIME: number;                // Default: 3600000 (1 hour)
-  DB_RETRY_ATTEMPTS: number;              // Default: 3
-  DB_RETRY_DELAY: number;                 // Default: 1000
-  DB_CONNECTION_CHECK_INTERVAL: number;   // Default: 30000
+  DB_HOST: string; // Required
+  DB_PORT: number; // Default: 5432
+  DB_NAME: string; // Required (validated pattern)
+  DB_USER: string; // Required
+  DB_PASSWORD: string; // Required (min 8 chars, 12+ in production)
+  DB_SSL: boolean; // Default: false (true in production)
+  DB_SSL_REJECT_UNAUTHORIZED: boolean; // Default: true
+  DB_POOL_MIN: number; // Default: 2 (5 in production)
+  DB_POOL_MAX: number; // Default: 10 (20 in production)
+  DB_TIMEOUT: number; // Default: 30000
+  DB_CONNECTION_TIMEOUT: number; // Default: 10000
+  DB_IDLE_TIMEOUT: number; // Default: 30000
+  DB_MIGRATION_TIMEOUT: number; // Default: 300000
+  DB_STATEMENT_TIMEOUT: number; // Default: 60000
+  DB_MAX_LIFETIME: number; // Default: 3600000 (1 hour)
+  DB_RETRY_ATTEMPTS: number; // Default: 3
+  DB_RETRY_DELAY: number; // Default: 1000
+  DB_CONNECTION_CHECK_INTERVAL: number; // Default: 30000
   DB_CREDENTIAL_ROTATION_ENABLED: boolean; // Default: false
   DB_CREDENTIAL_ROTATION_INTERVAL: number; // Default: 86400000 (24 hours)
 }
 ```
 
 #### Redis Configuration
+
 ```typescript
 interface RedisConfig {
-  REDIS_HOST: string;             // Default: 'localhost'
-  REDIS_PORT: number;             // Default: 6379
-  REDIS_PASSWORD?: string;        // Optional
-  REDIS_DB: number;               // Default: 0
-  REDIS_TIMEOUT: number;          // Default: 5000
-  REDIS_RETRY_ATTEMPTS: number;   // Default: 3
-  REDIS_RETRY_DELAY: number;      // Default: 1000
+  REDIS_HOST: string; // Default: 'localhost'
+  REDIS_PORT: number; // Default: 6379
+  REDIS_PASSWORD?: string; // Optional
+  REDIS_DB: number; // Default: 0
+  REDIS_TIMEOUT: number; // Default: 5000
+  REDIS_RETRY_ATTEMPTS: number; // Default: 3
+  REDIS_RETRY_DELAY: number; // Default: 1000
 }
 ```
 
 #### Authentication Configuration
+
 ```typescript
 interface AuthConfig {
-  JWT_SECRET: string;                    // Required (min 32 chars)
-  JWT_ACCESS_EXPIRATION: string;         // Default: '15m'
-  JWT_REFRESH_EXPIRATION: string;        // Default: '7d'
-  JWT_ISSUER: string;                    // Default: 'abyss-central'
-  JWT_AUDIENCE: string;                  // Default: 'abyss-users'
-  BCRYPT_ROUNDS: number;                 // Default: 12 (min: 10, max: 15)
-  SESSION_SECRET: string;                // Required (min 32 chars)
-  ENABLE_MFA: boolean;                   // Default: false
-  PASSWORD_RESET_EXPIRATION: number;     // Default: 3600000 (1 hour)
+  JWT_SECRET: string; // Required (min 32 chars)
+  JWT_ACCESS_EXPIRATION: string; // Default: '15m'
+  JWT_REFRESH_EXPIRATION: string; // Default: '7d'
+  JWT_ISSUER: string; // Default: 'abyss-central'
+  JWT_AUDIENCE: string; // Default: 'abyss-users'
+  BCRYPT_ROUNDS: number; // Default: 12 (min: 10, max: 15)
+  SESSION_SECRET: string; // Required (min 32 chars)
+  ENABLE_MFA: boolean; // Default: false
+  PASSWORD_RESET_EXPIRATION: number; // Default: 3600000 (1 hour)
 }
 ```
 
 #### Security Configuration
+
 ```typescript
 interface SecurityConfig {
-  ENCRYPTION_KEY: string;         // Required (min 32 chars)
-  API_KEY_PREFIX: string;         // Default: 'ak'
-  TRUSTED_PROXIES: string[];      // Default: []
-  ENABLE_RATE_LIMITING: boolean;  // Default: true
-  ENABLE_HELMET: boolean;         // Default: true
-  SECURE_COOKIES: boolean;        // Default: false
-  CSRF_SECRET: string;            // Required (min 32 chars)
-  MAX_REQUEST_SIZE: string;       // Default: '1mb'
+  ENCRYPTION_KEY: string; // Required (min 32 chars)
+  API_KEY_PREFIX: string; // Default: 'ak'
+  TRUSTED_PROXIES: string[]; // Default: []
+  ENABLE_RATE_LIMITING: boolean; // Default: true
+  ENABLE_HELMET: boolean; // Default: true
+  SECURE_COOKIES: boolean; // Default: false
+  CSRF_SECRET: string; // Required (min 32 chars)
+  MAX_REQUEST_SIZE: string; // Default: '1mb'
 }
 ```
 
 #### Service URLs Configuration
+
 ```typescript
 interface ServiceUrlsConfig {
-  AUTH_SERVICE_URL: string;           // Default: 'http://localhost:3001'
-  INVENTORY_SERVICE_URL: string;      // Default: 'http://localhost:3002'
-  ORDER_SERVICE_URL: string;          // Default: 'http://localhost:3003'
-  EMPLOYEE_SERVICE_URL: string;       // Default: 'http://localhost:3004'
-  ANALYTICS_SERVICE_URL: string;      // Default: 'http://localhost:3005'
-  NOTIFICATION_SERVICE_URL: string;   // Default: 'http://localhost:3006'
+  AUTH_SERVICE_URL: string; // Default: 'http://localhost:3001'
+  INVENTORY_SERVICE_URL: string; // Default: 'http://localhost:3002'
+  ORDER_SERVICE_URL: string; // Default: 'http://localhost:3003'
+  EMPLOYEE_SERVICE_URL: string; // Default: 'http://localhost:3004'
+  ANALYTICS_SERVICE_URL: string; // Default: 'http://localhost:3005'
+  NOTIFICATION_SERVICE_URL: string; // Default: 'http://localhost:3006'
 }
 ```
 
 ## Environment Examples
 
 ### Development (.env.development)
+
 ```bash
 NODE_ENV=development
 PORT=3000
@@ -246,6 +261,7 @@ ORDER_SERVICE_URL=http://localhost:3003
 ```
 
 ### Production (.env.production)
+
 ```bash
 NODE_ENV=production
 PORT=3000
@@ -301,7 +317,7 @@ import { ConfigManager } from '@abyss/shared-config';
 class CustomConfigManager extends ConfigManager {
   async loadWithSecrets() {
     await this.load();
-    
+
     // Load secrets from external service
     const secrets = await secretManager.getSecrets();
     this.set('JWT_SECRET', secrets.jwtSecret);
@@ -336,11 +352,11 @@ console.log('Configuration is valid');
 ### Environment-Specific Behavior
 
 ```typescript
-import { 
-  isProduction, 
-  isDevelopment, 
-  isTest, 
-  getEnvironment 
+import {
+  isProduction,
+  isDevelopment,
+  isTest,
+  getEnvironment,
 } from '@abyss/shared-config';
 
 // Environment checks
@@ -367,12 +383,12 @@ console.log(`Running in ${env} environment`);
 ### Enhanced Database and Redis Setup
 
 ```typescript
-import { 
-  getDatabaseUrl, 
+import {
+  getDatabaseUrl,
   getDatabaseConfig,
   getDatabaseRetryConfig,
-  getRedisConfig, 
-  getConfig 
+  getRedisConfig,
+  getConfig,
 } from '@abyss/shared-config';
 
 // Enhanced database connection with full configuration
@@ -391,12 +407,17 @@ async function connectWithRetry() {
     } catch (error) {
       attempts++;
       if (attempts >= retryConfig.attempts) throw error;
-      
-      const delay = retryConfig.exponentialBackoff 
-        ? Math.min(retryConfig.delay * Math.pow(2, attempts - 1), retryConfig.maxDelay)
+
+      const delay = retryConfig.exponentialBackoff
+        ? Math.min(
+            retryConfig.delay * Math.pow(2, attempts - 1),
+            retryConfig.maxDelay
+          )
         : retryConfig.delay;
-      
-      console.log(`Database connection failed, retrying in ${delay}ms (attempt ${attempts}/${retryConfig.attempts})`);
+
+      console.log(
+        `Database connection failed, retrying in ${delay}ms (attempt ${attempts}/${retryConfig.attempts})`
+      );
       await new Promise(resolve => setTimeout(resolve, delay));
     }
   }
@@ -410,7 +431,7 @@ const redis = new Redis({
   retryDelayOnFailover: redisConfig.retryDelayOnFailover,
   maxRetriesPerRequest: redisConfig.maxRetriesPerRequest,
   enableReadyCheck: true,
-  enableOfflineQueue: false
+  enableOfflineQueue: false,
 });
 
 // Simple database URL for quick connections
@@ -421,38 +442,49 @@ const simpleDb = new Pool({ connectionString: databaseUrl });
 ### Advanced Database Connection Management
 
 ```typescript
-import { 
+import {
   DatabaseConnectionManager,
   createDatabaseConnection,
   checkDatabaseHealth,
-  createConnectionPool
+  createConnectionPool,
 } from '@abyss/shared-config';
 
 // Create managed database connection with retry logic
-const dbManager = createDatabaseConnection({
-  maxRetries: 5,
-  retryDelay: 1000,
-  exponentialBackoff: true,
-  maxRetryDelay: 10000,
-  enableMonitoring: true,
-  healthCheckInterval: 30000
-}, {
-  onConnect: (client) => console.log('Client connected'),
-  onError: (error) => console.error('Connection error:', error),
-  onAcquire: (client) => console.log('Client acquired from pool'),
-  onRelease: (client) => console.log('Client returned to pool')
-});
+const dbManager = createDatabaseConnection(
+  {
+    maxRetries: 5,
+    retryDelay: 1000,
+    exponentialBackoff: true,
+    maxRetryDelay: 10000,
+    enableMonitoring: true,
+    healthCheckInterval: 30000,
+  },
+  {
+    onConnect: client => console.log('Client connected'),
+    onError: error => console.error('Connection error:', error),
+    onAcquire: client => console.log('Client acquired from pool'),
+    onRelease: client => console.log('Client returned to pool'),
+  }
+);
 
 // Connect with automatic retry
 await dbManager.connect();
 
 // Execute queries with built-in error handling
-const result = await dbManager.query('SELECT * FROM users WHERE id = $1', [userId]);
+const result = await dbManager.query('SELECT * FROM users WHERE id = $1', [
+  userId,
+]);
 
 // Execute transactions safely
-const transferResult = await dbManager.transaction(async (client) => {
-  await client.query('UPDATE accounts SET balance = balance - $1 WHERE id = $2', [amount, fromId]);
-  await client.query('UPDATE accounts SET balance = balance + $1 WHERE id = $2', [amount, toId]);
+const transferResult = await dbManager.transaction(async client => {
+  await client.query(
+    'UPDATE accounts SET balance = balance - $1 WHERE id = $2',
+    [amount, fromId]
+  );
+  await client.query(
+    'UPDATE accounts SET balance = balance + $1 WHERE id = $2',
+    [amount, toId]
+  );
   return { success: true };
 });
 
@@ -462,7 +494,7 @@ console.log('Database health:', {
   isHealthy: healthMetrics.isHealthy,
   totalConnections: healthMetrics.totalConnections,
   activeConnections: healthMetrics.activeConnections,
-  lastHealthCheck: healthMetrics.lastHealthCheck
+  lastHealthCheck: healthMetrics.lastHealthCheck,
 });
 
 // Health check for API endpoints
@@ -487,7 +519,7 @@ import { createConnectionPool, getDatabaseConfig } from '@abyss/shared-config';
 const poolConfig = createConnectionPool({
   // Override specific settings if needed
   max: 25, // Override environment default
-  ssl: { rejectUnauthorized: true }
+  ssl: { rejectUnauthorized: true },
 });
 
 // Use with your preferred database library
@@ -497,8 +529,10 @@ const pool = new Pool(poolConfig);
 ## Security Best Practices
 
 ### Database Security
+
 1. **SSL/TLS Encryption** - Always enable SSL in production (`DB_SSL=true`)
-2. **Certificate Validation** - Use `DB_SSL_REJECT_UNAUTHORIZED=true` for strict certificate validation
+2. **Certificate Validation** - Use `DB_SSL_REJECT_UNAUTHORIZED=true` for strict
+   certificate validation
 3. **Strong Passwords** - Minimum 12 characters in production, 8+ in development
 4. **Connection Timeouts** - Configure timeouts to prevent hanging connections
 5. **Connection Pool Limits** - Use appropriate pool sizes for your environment
@@ -506,10 +540,12 @@ const pool = new Pool(poolConfig);
 7. **Credential Rotation** - Enable automatic credential rotation in production
 
 ### General Security
+
 1. **Never commit secrets** to version control
 2. **Use environment variables** for sensitive data in production
 3. **Validate configuration** on startup with strict schemas
-4. **Use secure defaults** for production environments (auto-enabled SSL, higher pool limits)
+4. **Use secure defaults** for production environments (auto-enabled SSL, higher
+   pool limits)
 5. **Rotate secrets regularly** using external secret management
 6. **Environment-specific validation** - Stricter rules in production
 7. **Connection resilience** - Implement retry logic with exponential backoff
@@ -521,12 +557,14 @@ import { loadConfig, validateConfig } from '@abyss/shared-config';
 
 try {
   await loadConfig();
-  
+
   const validation = validateConfig();
   if (!validation.isValid) {
-    throw new Error(`Configuration validation failed: ${validation.errors.join(', ')}`);
+    throw new Error(
+      `Configuration validation failed: ${validation.errors.join(', ')}`
+    );
   }
-  
+
   console.log('Configuration loaded successfully');
 } catch (error) {
   console.error('Failed to load configuration:', error.message);
@@ -557,29 +595,31 @@ import { ConfigManager } from '@abyss/shared-config';
 
 describe('Configuration', () => {
   let config: ConfigManager;
-  
+
   beforeEach(() => {
     config = ConfigManager.getInstance();
     config.reset(); // Reset for clean test state
   });
-  
+
   test('loads configuration correctly', async () => {
     process.env.SERVICE_NAME = 'test-service';
     process.env.JWT_SECRET = 'test-jwt-secret-min-32-characters';
-    
+
     await config.load();
-    
+
     expect(config.get('SERVICE_NAME')).toBe('test-service');
     expect(config.get('JWT_SECRET')).toBe('test-jwt-secret-min-32-characters');
   });
-  
+
   test('validates configuration', async () => {
     process.env.PORT = 'invalid-port';
     await config.load();
-    
+
     const validation = config.validate();
     expect(validation.isValid).toBe(false);
-    expect(validation.errors).toContain('Base config: "PORT" must be a valid port');
+    expect(validation.errors).toContain(
+      'Base config: "PORT" must be a valid port'
+    );
   });
 });
 ```
@@ -594,4 +634,5 @@ describe('Configuration', () => {
 
 ---
 
-Built with ❤️ for centralized, secure configuration management in the Abyss Central Suite
+Built with ❤️ for centralized, secure configuration management in the Abyss
+Central Suite

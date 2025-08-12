@@ -1,6 +1,7 @@
 # @abyss/database-migration
 
-Database migration infrastructure for Abyss Central services, optimized for Neon.tech serverless PostgreSQL.
+Database migration infrastructure for Abyss Central services, optimized for
+Neon.tech serverless PostgreSQL.
 
 ## Features
 

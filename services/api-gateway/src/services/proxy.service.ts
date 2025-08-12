@@ -36,13 +36,10 @@ export class ProxyService {
   /**
    * Create proxy middleware for a specific service
    */
-  createServiceProxy(
-    serviceName: string,
-    options: IProxyOptions = {}
-  ) {
+  createServiceProxy(serviceName: string, options: IProxyOptions = {}) {
     return async (req: Request, res: Response, next: NextFunction) => {
       const correlationId = req.correlationId;
-      
+
       try {
         const serviceConfig = this.getRegistry()[serviceName];
         if (!serviceConfig) {
@@ -50,14 +47,11 @@ export class ProxyService {
         }
 
         // Get circuit breaker for this service
-        const circuitBreaker = circuitBreakerRegistry.getCircuitBreaker(
-          serviceName,
-          {
-            failureThreshold: serviceConfig.circuitBreakerThreshold,
-            resetTimeout: serviceConfig.circuitBreakerTimeout,
-            requestTimeout: serviceConfig.timeout
-          }
-        );
+        const circuitBreaker = circuitBreakerRegistry.getCircuitBreaker(serviceName, {
+          failureThreshold: serviceConfig.circuitBreakerThreshold,
+          resetTimeout: serviceConfig.circuitBreakerTimeout,
+          requestTimeout: serviceConfig.timeout,
+        });
 
         // Execute request through circuit breaker
         const response = await circuitBreaker.execute(
@@ -67,7 +61,6 @@ export class ProxyService {
 
         // Send response
         res.status(response.status).json(response.data);
-
       } catch (error) {
         this.handleProxyError(error as Error, serviceName, req, res, next);
       }
@@ -96,13 +89,12 @@ export class ProxyService {
       headers: this.buildProxyHeaders(req, options.preserveHeaders),
       timeout: options.timeout || serviceConfig.timeout,
       maxRedirects: 0,
-      validateStatus: () => true // We'll handle all status codes
+      validateStatus: () => true, // We'll handle all status codes
     };
 
     // Add request body if present
     if (req.body && Object.keys(req.body).length > 0) {
-      axiosConfig.data = options.transformRequest ? 
-        options.transformRequest(req) : req.body;
+      axiosConfig.data = options.transformRequest ? options.transformRequest(req) : req.body;
     }
 
     // Add query parameters
@@ -115,7 +107,7 @@ export class ProxyService {
       method: req.method,
       path: req.path,
       targetUrl,
-      correlationId
+      correlationId,
     });
 
     try {
@@ -130,7 +122,7 @@ export class ProxyService {
         service: serviceName,
         status: response.status,
         duration,
-        correlationId
+        correlationId,
       });
 
       // Transform response if needed
@@ -139,15 +131,14 @@ export class ProxyService {
       }
 
       return response;
-
     } catch (error) {
       const duration = Date.now() - startTime;
-      
+
       this.logger.error('Proxy request failed', {
         service: serviceName,
         error: (error as Error).message,
         duration,
-        correlationId
+        correlationId,
       });
 
       throw error;
@@ -160,7 +151,7 @@ export class ProxyService {
   private buildTargetUrl(serviceUrl: string, req: Request): string {
     // Remove the API prefix and service name from the path
     const pathParts = req.path.split('/').filter(Boolean);
-    
+
     // Expected format: /api/v1/{serviceName}/{resource}
     // Remove: api, v1, serviceName
     if (pathParts[0] === 'api' && pathParts[1] === 'v1') {
@@ -174,16 +165,13 @@ export class ProxyService {
   /**
    * Build headers for proxy request
    */
-  private buildProxyHeaders(
-    req: Request,
-    preserveHeaders: string[] = []
-  ): Record<string, string> {
+  private buildProxyHeaders(req: Request, preserveHeaders: string[] = []): Record<string, string> {
     const headers: Record<string, string> = {
       'x-correlation-id': req.correlationId,
       'x-forwarded-for': req.ip || req.connection.remoteAddress || '',
       'x-forwarded-host': req.hostname,
       'x-forwarded-proto': req.protocol,
-      'x-original-uri': req.originalUrl
+      'x-original-uri': req.originalUrl,
     };
 
     // Preserve authorization header
@@ -210,18 +198,15 @@ export class ProxyService {
   /**
    * Execute request with retry logic
    */
-  private async executeWithRetry<T>(
-    fn: () => Promise<T>,
-    maxRetries: number
-  ): Promise<T> {
+  private async executeWithRetry<T>(fn: () => Promise<T>, maxRetries: number): Promise<T> {
     let lastError: Error;
-    
+
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         return await fn();
       } catch (error) {
         lastError = error as Error;
-        
+
         // Don't retry on client errors (4xx)
         if (axios.isAxiosError(error) && error.response?.status && error.response.status < 500) {
           throw error;
@@ -233,9 +218,9 @@ export class ProxyService {
             attempt,
             maxRetries,
             delay,
-            error: lastError.message
+            error: lastError.message,
           });
-          
+
           await new Promise(resolve => setTimeout(resolve, delay));
         }
       }
@@ -256,7 +241,7 @@ export class ProxyService {
   ): void {
     if (axios.isAxiosError(error)) {
       const axiosError = error as AxiosError;
-      
+
       if (axiosError.response) {
         // Forward error response from service
         res.status(axiosError.response.status).json(axiosError.response.data);
@@ -265,20 +250,20 @@ export class ProxyService {
           success: false,
           error: {
             code: 'GATEWAY_TIMEOUT',
-            message: `Request to ${serviceName} service timed out`
+            message: `Request to ${serviceName} service timed out`,
           },
           correlationId: req.correlationId,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       } else {
         res.status(503).json({
           success: false,
           error: {
             code: 'SERVICE_UNAVAILABLE',
-            message: `${serviceName} service is currently unavailable`
+            message: `${serviceName} service is currently unavailable`,
           },
           correlationId: req.correlationId,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       }
     } else if (error.message.includes('Circuit breaker is OPEN')) {
@@ -286,10 +271,10 @@ export class ProxyService {
         success: false,
         error: {
           code: 'SERVICE_UNAVAILABLE',
-          message: `${serviceName} service is temporarily unavailable due to repeated failures`
+          message: `${serviceName} service is temporarily unavailable due to repeated failures`,
         },
         correlationId: req.correlationId,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     } else {
       // Generic error
@@ -297,10 +282,10 @@ export class ProxyService {
         success: false,
         error: {
           code: 'INTERNAL_SERVER_ERROR',
-          message: 'An unexpected error occurred'
+          message: 'An unexpected error occurred',
         },
         correlationId: req.correlationId,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     }
   }

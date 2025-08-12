@@ -35,14 +35,14 @@ components:
           format: password
         mfaToken:
           type: string
-          pattern: '^[0-9]{6}$'
+          pattern: "^[0-9]{6}$"
     AuthResponse:
       type: object
       properties:
         user:
-          $ref: './user.yaml#/components/schemas/User'
+          $ref: "./user.yaml#/components/schemas/User"
         tokens:
-          $ref: '#/components/schemas/TokenResponse'
+          $ref: "#/components/schemas/TokenResponse"
     TokenResponse:
       type: object
       properties:

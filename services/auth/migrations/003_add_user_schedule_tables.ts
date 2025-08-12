@@ -138,12 +138,12 @@ export async function up(client: PoolClient): Promise<void> {
 export async function down(client: PoolClient): Promise<void> {
   // Drop view
   await client.query('DROP VIEW IF EXISTS schedule_overview;');
-  
+
   // Drop tables in reverse order
   await client.query('DROP TABLE IF EXISTS schedule_templates CASCADE;');
   await client.query('DROP TABLE IF EXISTS time_off_requests CASCADE;');
   await client.query('DROP TABLE IF EXISTS user_schedules CASCADE;');
-  
+
   // Remove added columns from users table
   await client.query(`
     ALTER TABLE users 

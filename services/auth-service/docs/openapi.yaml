@@ -1,0 +1,969 @@
+openapi: 3.0.3
+info:
+  title: "Authentication Service API"
+  version: "1.0.0"
+  description: |
+    Comprehensive authentication and authorization service for the Enterprise SaaS platform.
+
+    This service handles:
+    - User registration and email verification
+    - User authentication with JWT tokens
+    - Role-based access control (RBAC)
+    - Multi-factor authentication (MFA)
+    - Password management and reset
+    - Session management
+
+    ## Rate Limiting
+    - Login: 5 attempts per minute per IP
+    - Registration: 3 attempts per minute per IP
+    - Password reset: 1 attempt per minute per email
+
+    ## Authentication
+    Most endpoints require Bearer token authentication. Public endpoints include registration, login, and password reset.
+
+  contact:
+    name: "Authentication Team"
+    email: "auth-team@example.com"
+    url: "https://docs.example.com/auth"
+  license:
+    name: "MIT"
+    url: "https://opensource.org/licenses/MIT"
+  termsOfService: "https://example.com/terms"
+
+servers:
+  - url: "https://api.example.com/v1"
+    description: "Production server"
+  - url: "https://staging-api.example.com/v1"
+    description: "Staging server"
+  - url: "http://localhost:3001/v1"
+    description: "Local development server"
+
+security:
+  - bearerAuth: []
+
+paths:
+  /health:
+    get:
+      tags:
+        - "Health"
+      summary: "Health check"
+      description: "Check service health and status"
+      security: []
+      responses:
+        "200":
+          description: "Service is healthy"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+
+  /auth/register:
+    post:
+      tags:
+        - "Authentication"
+      summary: "Register new user"
+      description: |
+        Create a new user account with email verification.
+
+        **Business Rules:**
+        - Email must be unique across the system
+        - Password must meet complexity requirements (8+ chars, uppercase, lowercase, number, special char)
+        - User starts with 'pending' status until email verification
+        - Terms of service acceptance is required
+
+        **Rate Limiting:** 3 attempts per minute per IP
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+            examples:
+              basic_registration:
+                summary: "Basic user registration"
+                value:
+                  email: "john.doe@example.com"
+                  password: "SecureP@ssw0rd123"
+                  firstName: "John"
+                  lastName: "Doe"
+                  acceptTerms: true
+      responses:
+        "201":
+          description: "User registered successfully"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RegisterResponse"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "409":
+          $ref: "#/components/responses/ConflictError"
+        "429":
+          $ref: "#/components/responses/RateLimitError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /auth/login:
+    post:
+      tags:
+        - "Authentication"
+      summary: "Authenticate user"
+      description: |
+        Authenticate user with email and password, returning JWT tokens.
+
+        **Returns:**
+        - Access token (15 minutes expiry)
+        - Refresh token (7 days expiry)
+        - User profile information
+
+        **Security Features:**
+        - Account lockout after 5 failed attempts
+        - Audit logging of all login attempts
+        - Optional MFA verification
+
+        **Rate Limiting:** 5 attempts per minute per IP
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+            examples:
+              standard_login:
+                summary: "Standard email/password login"
+                value:
+                  email: "john.doe@example.com"
+                  password: "SecureP@ssw0rd123"
+              mfa_login:
+                summary: "Login with MFA token"
+                value:
+                  email: "john.doe@example.com"
+                  password: "SecureP@ssw0rd123"
+                  mfaToken: "123456"
+      responses:
+        "200":
+          description: "Authentication successful"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "401":
+          $ref: "#/components/responses/AuthenticationError"
+        "423":
+          description: "Account locked"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      success:
+                        example: false
+                      error:
+                        type: object
+                        properties:
+                          code:
+                            example: "ACCOUNT_LOCKED"
+                          message:
+                            example: "Account is temporarily locked due to multiple failed login attempts"
+                          details:
+                            type: object
+                            properties:
+                              lockoutUntil:
+                                type: string
+                                format: date-time
+                                example: "2024-01-01T13:00:00Z"
+        "429":
+          $ref: "#/components/responses/RateLimitError"
+
+  /auth/refresh:
+    post:
+      tags:
+        - "Authentication"
+      summary: "Refresh access token"
+      description: "Exchange refresh token for new access token"
+      security:
+        - refreshToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshRequest"
+      responses:
+        "200":
+          description: "Token refreshed successfully"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RefreshResponse"
+        "401":
+          description: "Invalid or expired refresh token"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      success:
+                        example: false
+                      error:
+                        type: object
+                        properties:
+                          code:
+                            example: "INVALID_REFRESH_TOKEN"
+                          message:
+                            example: "Refresh token is invalid or expired"
+
+  /auth/logout:
+    post:
+      tags:
+        - "Authentication"
+      summary: "Logout user"
+      description: "Invalidate access and refresh tokens"
+      responses:
+        "200":
+          description: "Logout successful"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      success:
+                        example: true
+                      data:
+                        type: object
+                        properties:
+                          message:
+                            type: string
+                            example: "Logout successful"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+
+  /auth/verify-email:
+    post:
+      tags:
+        - "Authentication"
+      summary: "Verify email address"
+      description: "Verify user email using verification token"
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - token
+              properties:
+                token:
+                  type: string
+                  description: "Email verification token"
+                  example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      responses:
+        "200":
+          description: "Email verified successfully"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      success:
+                        example: true
+                      data:
+                        type: object
+                        properties:
+                          message:
+                            type: string
+                            example: "Email verified successfully"
+        "400":
+          description: "Invalid or expired token"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      success:
+                        example: false
+                      error:
+                        type: object
+                        properties:
+                          code:
+                            example: "INVALID_VERIFICATION_TOKEN"
+                          message:
+                            example: "Verification token is invalid or expired"
+
+  /auth/forgot-password:
+    post:
+      tags:
+        - "Authentication"
+      summary: "Request password reset"
+      description: |
+        Send password reset email to user.
+
+        **Rate Limiting:** 1 attempt per minute per email
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "john.doe@example.com"
+      responses:
+        "200":
+          description: "Password reset email sent"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      success:
+                        example: true
+                      data:
+                        type: object
+                        properties:
+                          message:
+                            type: string
+                            example: "If an account with this email exists, a password reset link has been sent"
+        "429":
+          $ref: "#/components/responses/RateLimitError"
+
+  /auth/reset-password:
+    post:
+      tags:
+        - "Authentication"
+      summary: "Reset password"
+      description: "Reset user password using reset token"
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - token
+                - newPassword
+              properties:
+                token:
+                  type: string
+                  description: "Password reset token"
+                  example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                newPassword:
+                  type: string
+                  minLength: 8
+                  description: "New password meeting complexity requirements"
+                  example: "NewSecureP@ssw0rd123"
+      responses:
+        "200":
+          description: "Password reset successfully"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      success:
+                        example: true
+                      data:
+                        type: object
+                        properties:
+                          message:
+                            type: string
+                            example: "Password reset successfully"
+        "400":
+          description: "Invalid token or password"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      success:
+                        example: false
+                      error:
+                        type: object
+                        properties:
+                          code:
+                            example: "INVALID_RESET_TOKEN"
+                          message:
+                            example: "Reset token is invalid or expired"
+
+  /users/profile:
+    get:
+      tags:
+        - "Users"
+      summary: "Get user profile"
+      description: "Retrieve authenticated user's profile information"
+      responses:
+        "200":
+          description: "User profile retrieved successfully"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfileResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+
+    patch:
+      tags:
+        - "Users"
+      summary: "Update user profile"
+      description: "Update user profile information"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProfileRequest"
+      responses:
+        "200":
+          description: "Profile updated successfully"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfileResponse"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+
+  /users/change-password:
+    post:
+      tags:
+        - "Users"
+      summary: "Change password"
+      description: "Change user password (requires current password)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - currentPassword
+                - newPassword
+              properties:
+                currentPassword:
+                  type: string
+                  description: "Current password"
+                  example: "CurrentP@ssw0rd123"
+                newPassword:
+                  type: string
+                  minLength: 8
+                  description: "New password meeting complexity requirements"
+                  example: "NewSecureP@ssw0rd123"
+      responses:
+        "200":
+          description: "Password changed successfully"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      success:
+                        example: true
+                      data:
+                        type: object
+                        properties:
+                          message:
+                            type: string
+                            example: "Password changed successfully"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          description: "Current password is incorrect"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiResponse"
+                  - type: object
+                    properties:
+                      success:
+                        example: false
+                      error:
+                        type: object
+                        properties:
+                          code:
+                            example: "INVALID_CURRENT_PASSWORD"
+                          message:
+                            example: "Current password is incorrect"
+
+components:
+  schemas:
+    # Health schemas
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - service
+        - timestamp
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy, degraded]
+        service:
+          type: string
+          example: "auth-service"
+        version:
+          type: string
+          example: "1.0.0"
+        timestamp:
+          type: string
+          format: date-time
+        uptime:
+          type: number
+          description: "Service uptime in seconds"
+
+    # Request schemas
+    RegisterRequest:
+      type: object
+      required:
+        - email
+        - password
+        - firstName
+        - lastName
+        - acceptTerms
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 255
+          example: "john.doe@example.com"
+          description: "User's email address (must be unique)"
+        password:
+          type: string
+          minLength: 8
+          maxLength: 128
+          example: "SecureP@ssw0rd123"
+          description: "Password with minimum 8 characters, including uppercase, lowercase, number, and special character"
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: "John"
+          description: "User's first name"
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: "Doe"
+          description: "User's last name"
+        acceptTerms:
+          type: boolean
+          example: true
+          description: "User must accept terms of service"
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: "john.doe@example.com"
+        password:
+          type: string
+          example: "SecureP@ssw0rd123"
+        mfaToken:
+          type: string
+          pattern: "^[0-9]{6}$"
+          example: "123456"
+          description: "6-digit MFA token (required if MFA is enabled)"
+
+    RefreshRequest:
+      type: object
+      required:
+        - refreshToken
+      properties:
+        refreshToken:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+    UpdateProfileRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 100
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 100
+        phoneNumber:
+          type: string
+          pattern: "^\\+[1-9]\\d{1,14}$"
+          example: "+1234567890"
+        timezone:
+          type: string
+          example: "America/New_York"
+        locale:
+          type: string
+          example: "en-US"
+
+    # Response schemas
+    RegisterResponse:
+      allOf:
+        - $ref: "#/components/schemas/ApiResponse"
+        - type: object
+          properties:
+            success:
+              example: true
+            data:
+              type: object
+              properties:
+                user:
+                  $ref: "#/components/schemas/User"
+                message:
+                  type: string
+                  example: "Registration successful. Please check your email for verification."
+
+    LoginResponse:
+      allOf:
+        - $ref: "#/components/schemas/ApiResponse"
+        - type: object
+          properties:
+            success:
+              example: true
+            data:
+              type: object
+              properties:
+                accessToken:
+                  type: string
+                  example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                refreshToken:
+                  type: string
+                  example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                expiresIn:
+                  type: integer
+                  example: 900
+                  description: "Access token expiration in seconds"
+                user:
+                  $ref: "#/components/schemas/User"
+
+    RefreshResponse:
+      allOf:
+        - $ref: "#/components/schemas/ApiResponse"
+        - type: object
+          properties:
+            success:
+              example: true
+            data:
+              type: object
+              properties:
+                accessToken:
+                  type: string
+                  example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                expiresIn:
+                  type: integer
+                  example: 900
+
+    UserProfileResponse:
+      allOf:
+        - $ref: "#/components/schemas/ApiResponse"
+        - type: object
+          properties:
+            success:
+              example: true
+            data:
+              $ref: "#/components/schemas/UserProfile"
+
+    # Entity schemas
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        email:
+          type: string
+          format: email
+          example: "john.doe@example.com"
+        firstName:
+          type: string
+          example: "John"
+        lastName:
+          type: string
+          example: "Doe"
+        status:
+          type: string
+          enum: [pending, active, suspended, deleted]
+          example: "active"
+        emailVerified:
+          type: boolean
+          example: true
+        mfaEnabled:
+          type: boolean
+          example: false
+        lastLoginAt:
+          type: string
+          format: date-time
+          example: "2024-01-01T12:00:00Z"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2024-01-01T12:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2024-01-01T12:00:00Z"
+
+    UserProfile:
+      allOf:
+        - $ref: "#/components/schemas/User"
+        - type: object
+          properties:
+            phoneNumber:
+              type: string
+              example: "+1234567890"
+            timezone:
+              type: string
+              example: "America/New_York"
+            locale:
+              type: string
+              example: "en-US"
+            preferences:
+              type: object
+              properties:
+                notifications:
+                  type: object
+                  properties:
+                    email:
+                      type: boolean
+                      example: true
+                    sms:
+                      type: boolean
+                      example: false
+                    push:
+                      type: boolean
+                      example: true
+                theme:
+                  type: string
+                  enum: [light, dark, auto]
+                  example: "light"
+
+    # Common response structure
+    ApiResponse:
+      type: object
+      required:
+        - success
+        - meta
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+        error:
+          $ref: "#/components/schemas/ApiError"
+        meta:
+          $ref: "#/components/schemas/ResponseMeta"
+
+    ApiError:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+          additionalProperties: true
+
+    ResponseMeta:
+      type: object
+      required:
+        - timestamp
+        - requestId
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        requestId:
+          type: string
+
+  responses:
+    ValidationError:
+      description: "Validation error"
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ApiResponse"
+              - type: object
+                properties:
+                  success:
+                    example: false
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        example: "VALIDATION_ERROR"
+                      message:
+                        example: "Invalid input data"
+                      details:
+                        type: object
+                        example:
+                          email: "Email format is invalid"
+                          password: "Password must be at least 8 characters"
+
+    AuthenticationError:
+      description: "Authentication failed"
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ApiResponse"
+              - type: object
+                properties:
+                  success:
+                    example: false
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        example: "AUTHENTICATION_FAILED"
+                      message:
+                        example: "Invalid credentials"
+
+    UnauthorizedError:
+      description: "Unauthorized access"
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ApiResponse"
+              - type: object
+                properties:
+                  success:
+                    example: false
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        example: "UNAUTHORIZED"
+                      message:
+                        example: "Access token is required"
+
+    ConflictError:
+      description: "Resource conflict"
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ApiResponse"
+              - type: object
+                properties:
+                  success:
+                    example: false
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        example: "RESOURCE_CONFLICT"
+                      message:
+                        example: "A user with this email already exists"
+
+    RateLimitError:
+      description: "Rate limit exceeded"
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ApiResponse"
+              - type: object
+                properties:
+                  success:
+                    example: false
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        example: "RATE_LIMIT_EXCEEDED"
+                      message:
+                        example: "Too many requests. Please try again later."
+
+    InternalServerError:
+      description: "Internal server error"
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/ApiResponse"
+              - type: object
+                properties:
+                  success:
+                    example: false
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        example: "INTERNAL_SERVER_ERROR"
+                      message:
+                        example: "An unexpected error occurred"
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        JWT access token for authenticated requests.
+
+        **Format**: `Bearer <token>`
+        **Expiry**: 15 minutes
+        **How to obtain**: Use `/auth/login` endpoint
+        **Refresh**: Use `/auth/refresh` endpoint with refresh token
+
+    refreshToken:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        JWT refresh token for token renewal.
+
+        **Format**: `Bearer <refresh_token>`
+        **Expiry**: 7 days
+        **Usage**: Only for token refresh endpoint
+
+tags:
+  - name: "Health"
+    description: "Service health and status endpoints"
+  - name: "Authentication"
+    description: "User authentication and session management"
+  - name: "Users"
+    description: "User profile and account management"
+
+externalDocs:
+  description: "Authentication Service Documentation"
+  url: "https://docs.example.com/api/auth"

@@ -58,14 +58,7 @@ export interface LoadingProps
 }
 
 const Loading = React.forwardRef<HTMLDivElement, LoadingProps>(
-  ({ 
-    className, 
-    variant = 'spinner', 
-    size = 'default', 
-    text,
-    overlay = false,
-    ...props 
-  }, ref) => {
+  ({ className, variant = 'spinner', size = 'default', text, overlay = false, ...props }, ref) => {
     const renderSpinner = () => (
       <div
         className={cn(
@@ -76,16 +69,30 @@ const Loading = React.forwardRef<HTMLDivElement, LoadingProps>(
     );
 
     const renderPulse = () => (
-      <div className="space-y-2 w-full">
-        <div className={cn('animate-pulse bg-muted rounded-md', sizeClasses.pulse[size || 'default'])} />
-        <div className={cn('animate-pulse bg-muted rounded-md', sizeClasses.pulse[size || 'default'], 'w-3/4')} />
-        <div className={cn('animate-pulse bg-muted rounded-md', sizeClasses.pulse[size || 'default'], 'w-1/2')} />
+      <div className='space-y-2 w-full'>
+        <div
+          className={cn('animate-pulse bg-muted rounded-md', sizeClasses.pulse[size || 'default'])}
+        />
+        <div
+          className={cn(
+            'animate-pulse bg-muted rounded-md',
+            sizeClasses.pulse[size || 'default'],
+            'w-3/4'
+          )}
+        />
+        <div
+          className={cn(
+            'animate-pulse bg-muted rounded-md',
+            sizeClasses.pulse[size || 'default'],
+            'w-1/2'
+          )}
+        />
       </div>
     );
 
     const renderDots = () => (
-      <div className="flex space-x-1">
-        {[0, 1, 2].map((i) => (
+      <div className='flex space-x-1'>
+        {[0, 1, 2].map(i => (
           <div
             key={i}
             className={cn(
@@ -102,8 +109,8 @@ const Loading = React.forwardRef<HTMLDivElement, LoadingProps>(
     );
 
     const renderBars = () => (
-      <div className="flex space-x-1 items-end">
-        {[0, 1, 2, 3].map((i) => (
+      <div className='flex space-x-1 items-end'>
+        {[0, 1, 2, 3].map(i => (
           <div
             key={i}
             className={cn(
@@ -136,25 +143,17 @@ const Loading = React.forwardRef<HTMLDivElement, LoadingProps>(
     const content = (
       <div
         ref={ref}
-        className={cn(
-          'flex flex-col items-center justify-center',
-          text && 'space-y-2',
-          className
-        )}
+        className={cn('flex flex-col items-center justify-center', text && 'space-y-2', className)}
         {...props}
       >
         {renderLoading()}
-        {text && (
-          <p className="text-sm text-muted-foreground animate-pulse">
-            {text}
-          </p>
-        )}
+        {text && <p className='text-sm text-muted-foreground animate-pulse'>{text}</p>}
       </div>
     );
 
     if (overlay) {
       return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+        <div className='fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm'>
           {content}
         </div>
       );

@@ -32,7 +32,7 @@ router.get('/detailed', async (req, res) => {
 
   // TODO: Add actual health checks for external dependencies
   // - Database connectivity
-  // - Redis connectivity  
+  // - Redis connectivity
   // - Email provider status
   // - SMS provider status
   // - Push notification provider status

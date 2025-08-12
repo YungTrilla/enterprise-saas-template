@@ -19,33 +19,33 @@ export interface IPlugin {
   license: string;
   category: PluginCategory;
   tags: string[];
-  
+
   // Plugin configuration
   main: string; // Entry point file
   config?: IPluginConfig;
   dependencies?: Record<string, string>;
   peerDependencies?: Record<string, string>;
-  
+
   // Platform requirements
   engines: {
     node: string;
     template: string; // Minimum template version
   };
-  
+
   // Security and permissions
   permissions: IPluginPermissions;
   sandbox: boolean;
   trusted: boolean;
-  
+
   // Lifecycle hooks
   hooks?: IPluginHooks;
-  
+
   // UI extensions
   ui?: IPluginUI;
-  
+
   // API extensions
   api?: IPluginAPI;
-  
+
   // Metadata
   status: PluginStatus;
   installPath?: string;
@@ -53,7 +53,7 @@ export interface IPlugin {
   updatedAt?: string;
   lastUsed?: string;
   usage?: IPluginUsage;
-  
+
   // Validation
   checksum?: string;
   signature?: string;
@@ -82,7 +82,7 @@ export interface IPluginPermissions {
     write: boolean;
     admin: boolean;
   };
-  
+
   // API permissions
   api: {
     endpoints: string[]; // Allowed API endpoints
@@ -92,7 +92,7 @@ export interface IPluginPermissions {
       windowMs: number;
     };
   };
-  
+
   // Template-specific permissions
   tenants: {
     access: 'own' | 'all' | 'none';
@@ -103,7 +103,7 @@ export interface IPluginPermissions {
     write: boolean;
     admin: boolean;
   };
-  
+
   // Custom permissions
   custom: Record<string, any>;
 }
@@ -115,7 +115,7 @@ export interface IPluginHooks {
   activate?: string; // Function name to call on activation
   deactivate?: string; // Function name to call on deactivation
   update?: string; // Function name to call on update
-  
+
   // Application hooks
   beforeRequest?: string;
   afterRequest?: string;
@@ -123,7 +123,7 @@ export interface IPluginHooks {
   afterAuthentication?: string;
   beforeAuthorization?: string;
   afterAuthorization?: string;
-  
+
   // Data hooks
   beforeCreate?: string;
   afterCreate?: string;
@@ -131,7 +131,7 @@ export interface IPluginHooks {
   afterUpdate?: string;
   beforeDelete?: string;
   afterDelete?: string;
-  
+
   // Custom hooks
   custom?: Record<string, string>;
 }
@@ -143,14 +143,14 @@ export interface IPluginUI {
     pages?: IPluginPage[];
     widgets?: IPluginWidget[];
   };
-  
+
   // User interface extensions
   user?: {
     menu?: IPluginMenuItem[];
     pages?: IPluginPage[];
     widgets?: IPluginWidget[];
   };
-  
+
   // Embeddable components
   components?: IPluginComponent[];
 }
@@ -199,16 +199,16 @@ export interface IPluginComponent {
 export interface IPluginAPI {
   // REST API endpoints
   endpoints?: IPluginEndpoint[];
-  
+
   // GraphQL extensions
   graphql?: {
     schema?: string;
     resolvers?: string;
   };
-  
+
   // WebSocket handlers
   websockets?: IPluginWebSocket[];
-  
+
   // Middleware
   middleware?: IPluginMiddleware[];
 }
@@ -268,7 +268,7 @@ export enum PluginCategory {
   COMMUNICATION = 'COMMUNICATION',
   SECURITY = 'SECURITY',
   DEVELOPER_TOOLS = 'DEVELOPER_TOOLS',
-  CUSTOM = 'CUSTOM'
+  CUSTOM = 'CUSTOM',
 }
 
 export enum PluginStatus {
@@ -277,7 +277,7 @@ export enum PluginStatus {
   INACTIVE = 'INACTIVE',
   ERROR = 'ERROR',
   UPDATING = 'UPDATING',
-  UNINSTALLING = 'UNINSTALLING'
+  UNINSTALLING = 'UNINSTALLING',
 }
 
 export enum PluginSource {
@@ -285,7 +285,7 @@ export enum PluginSource {
   FILE_UPLOAD = 'FILE_UPLOAD',
   GIT_REPOSITORY = 'GIT_REPOSITORY',
   NPM_PACKAGE = 'NPM_PACKAGE',
-  LOCAL_DEVELOPMENT = 'LOCAL_DEVELOPMENT'
+  LOCAL_DEVELOPMENT = 'LOCAL_DEVELOPMENT',
 }
 
 // Plugin manifest (package.json extension)

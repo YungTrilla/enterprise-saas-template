@@ -11,7 +11,7 @@ import {
   ILoginResponse,
   ITokenPair,
   IAuthContext,
-  IAuthConfig
+  IAuthConfig,
 } from '../types/auth';
 import { JwtService } from './jwt.service';
 import { PasswordService } from './password.service';
@@ -71,13 +71,25 @@ export class AuthCoreService {
       // Find user by email
       const user = await this.authRepository.getUserByEmail(loginRequest.email, correlationId);
       if (!user) {
-        await this.handleFailedLogin(loginRequest.email, 'USER_NOT_FOUND', ipAddress, userAgent, correlationId);
+        await this.handleFailedLogin(
+          loginRequest.email,
+          'USER_NOT_FOUND',
+          ipAddress,
+          userAgent,
+          correlationId
+        );
         throw new Error('Invalid credentials');
       }
 
       // Check if account is locked
       if (await this.isAccountLocked(user)) {
-        await this.handleFailedLogin(loginRequest.email, 'ACCOUNT_LOCKED', ipAddress, userAgent, correlationId);
+        await this.handleFailedLogin(
+          loginRequest.email,
+          'ACCOUNT_LOCKED',
+          ipAddress,
+          userAgent,
+          correlationId
+        );
         throw new Error('Account is temporarily locked due to too many failed login attempts');
       }
 
@@ -89,8 +101,18 @@ export class AuthCoreService {
       );
 
       if (!isValidPassword) {
-        await this.authRepository.updateUserLoginAttempts(user.id, user.failedLoginAttempts + 1, correlationId);
-        await this.handleFailedLogin(loginRequest.email, 'INVALID_PASSWORD', ipAddress, userAgent, correlationId);
+        await this.authRepository.updateUserLoginAttempts(
+          user.id,
+          user.failedLoginAttempts + 1,
+          correlationId
+        );
+        await this.handleFailedLogin(
+          loginRequest.email,
+          'INVALID_PASSWORD',
+          ipAddress,
+          userAgent,
+          correlationId
+        );
         throw new Error('Invalid credentials');
       }
 
@@ -100,7 +122,7 @@ export class AuthCoreService {
           return {
             user: this.sanitizeUser(user),
             tokens: {} as ITokenPair,
-            requiresMfa: true
+            requiresMfa: true,
           };
         }
 
@@ -113,15 +135,25 @@ export class AuthCoreService {
         );
 
         if (!mfaResult.isValid) {
-          await this.handleFailedLogin(loginRequest.email, 'INVALID_MFA', ipAddress, userAgent, correlationId);
+          await this.handleFailedLogin(
+            loginRequest.email,
+            'INVALID_MFA',
+            ipAddress,
+            userAgent,
+            correlationId
+          );
           throw new Error('Invalid MFA code');
         }
 
         // Update backup codes if one was used
         if (mfaResult.usedBackupCode) {
-          await this.authRepository.updateUser(user.id, { 
-            mfaBackupCodes: user.mfaBackupCodes?.filter(code => code !== loginRequest.mfaCode) 
-          }, correlationId);
+          await this.authRepository.updateUser(
+            user.id,
+            {
+              mfaBackupCodes: user.mfaBackupCodes?.filter(code => code !== loginRequest.mfaCode),
+            },
+            correlationId
+          );
         }
       }
 
@@ -150,7 +182,10 @@ export class AuthCoreService {
         sessionToken: tokens.accessToken,
         refreshToken: tokens.refreshToken,
         accessToken: tokens.accessToken,
-        expiresAt: new Date(Date.now() + this.jwtService.getTokenExpirationTime(this.config.jwt.accessTokenExpiration) * 1000).toISOString(),
+        expiresAt: new Date(
+          Date.now() +
+            this.jwtService.getTokenExpirationTime(this.config.jwt.accessTokenExpiration) * 1000
+        ).toISOString(),
         isActive: true,
         ipAddress,
         userAgent,
@@ -160,7 +195,7 @@ export class AuthCoreService {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         createdBy: user.id,
-        updatedBy: user.id
+        updatedBy: user.id,
       });
 
       // Log successful authentication
@@ -183,20 +218,19 @@ export class AuthCoreService {
         userId: user.id,
         email: user.email,
         mfaUsed: user.mfaEnabled,
-        sessionId
+        sessionId,
       });
 
       return {
         user: this.sanitizeUser(user),
         tokens,
         requiresMfa: false,
-        mfaSetupRequired: !user.mfaEnabled && this.config.security.mfaRequired
+        mfaSetupRequired: !user.mfaEnabled && this.config.security.mfaRequired,
       };
-
     } catch (error) {
       this.logger.error('Login failed', {
         email: loginRequest.email,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       throw error;
     }
@@ -247,22 +281,30 @@ export class AuthCoreService {
         accessToken: newTokens.accessToken,
         refreshToken: newTokens.refreshToken,
         lastAccessAt: new Date().toISOString(),
-        expiresAt: new Date(Date.now() + this.jwtService.getTokenExpirationTime(this.config.jwt.accessTokenExpiration) * 1000).toISOString()
+        expiresAt: new Date(
+          Date.now() +
+            this.jwtService.getTokenExpirationTime(this.config.jwt.accessTokenExpiration) * 1000
+        ).toISOString(),
       });
 
       // Log token refresh
-      this.securityLogger.logSessionActivity(user.id, session.id, 'REFRESH', ipAddress, correlationId);
+      this.securityLogger.logSessionActivity(
+        user.id,
+        session.id,
+        'REFRESH',
+        ipAddress,
+        correlationId
+      );
 
       this.logger.info('Token refresh successful', {
         userId: user.id,
-        sessionId: session.id
+        sessionId: session.id,
       });
 
       return newTokens;
-
     } catch (error) {
       this.logger.error('Token refresh failed', {
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       throw error;
     }
@@ -305,12 +347,11 @@ export class AuthCoreService {
 
       this.logger.info('User logout successful', {
         userId: tokenPayload.sub,
-        sessionId: tokenPayload.sessionId
+        sessionId: tokenPayload.sessionId,
       });
-
     } catch (error) {
       this.logger.error('Logout failed', {
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       throw error;
     }
@@ -338,12 +379,11 @@ export class AuthCoreService {
         permissions: tokenPayload.permissions,
         sessionId: tokenPayload.sessionId,
         correlationId: tokenPayload.correlationId,
-        isAuthenticated: true
+        isAuthenticated: true,
       };
-
     } catch (error) {
       this.logger.error('Failed to get auth context', {
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       throw error;
     }
@@ -363,7 +403,7 @@ export class AuthCoreService {
     correlationId: CorrelationId
   ): Promise<void> {
     this.securityLogger.logAuthAttempt(email, false, ipAddress, userAgent, correlationId, reason);
-    
+
     // Log security event for suspicious activity
     if (reason === 'ACCOUNT_LOCKED' || reason === 'INVALID_MFA') {
       this.securityLogger.logSecurityEvent(

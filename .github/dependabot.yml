@@ -1,0 +1,445 @@
+# Enterprise Dependabot Configuration
+# Automated dependency updates with security focus and monorepo support
+
+version: 2
+
+# Global configuration
+updates:
+  # === NPM DEPENDENCIES ===
+
+  # Root package.json (workspace configuration)
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "maintainer-team"
+    assignees:
+      - "security-team"
+    labels:
+      - "dependencies"
+      - "root-workspace"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    groups:
+      # Group development dependencies
+      dev-dependencies:
+        patterns:
+          - "@types/*"
+          - "typescript"
+          - "eslint*"
+          - "prettier*"
+          - "jest*"
+          - "vitest*"
+          - "turbo*"
+          - "pnpm"
+        update-types:
+          - "minor"
+          - "patch"
+      # Group build and tooling dependencies
+      build-tools:
+        patterns:
+          - "vite*"
+          - "rollup*"
+          - "esbuild*"
+          - "@vitejs/*"
+          - "unbuild*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Shared Types Library
+  - package-ecosystem: "npm"
+    directory: "/libs/shared-types"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "09:30"
+      timezone: "UTC"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "shared-types"
+    commit-message:
+      prefix: "chore(shared-types)"
+    groups:
+      shared-types-deps:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Shared Utils Library
+  - package-ecosystem: "npm"
+    directory: "/libs/shared-utils"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "09:35"
+      timezone: "UTC"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "shared-utils"
+    commit-message:
+      prefix: "chore(shared-utils)"
+    groups:
+      shared-utils-deps:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Shared Config Library
+  - package-ecosystem: "npm"
+    directory: "/libs/shared-config"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "09:40"
+      timezone: "UTC"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "shared-config"
+    commit-message:
+      prefix: "chore(shared-config)"
+
+  # UI Components Library
+  - package-ecosystem: "npm"
+    directory: "/libs/ui-components"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "09:45"
+      timezone: "UTC"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "ui-components"
+    commit-message:
+      prefix: "chore(ui)"
+    groups:
+      ui-deps:
+        patterns:
+          - "react*"
+          - "@radix-ui/*"
+          - "lucide-react"
+          - "tailwindcss*"
+          - "@tailwindcss/*"
+          - "clsx"
+          - "class-variance-authority"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # API Client Library
+  - package-ecosystem: "npm"
+    directory: "/libs/api-client"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "09:50"
+      timezone: "UTC"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "api-client"
+    commit-message:
+      prefix: "chore(api-client)"
+
+  # Service Bootstrap Library
+  - package-ecosystem: "npm"
+    directory: "/libs/service-bootstrap"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "09:55"
+      timezone: "UTC"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "service-bootstrap"
+    commit-message:
+      prefix: "chore(bootstrap)"
+    groups:
+      bootstrap-deps:
+        patterns:
+          - "express*"
+          - "cors"
+          - "helmet"
+          - "compression"
+          - "morgan"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Database Migration Library
+  - package-ecosystem: "npm"
+    directory: "/libs/database-migration"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "10:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "database-migration"
+    commit-message:
+      prefix: "chore(db-migration)"
+    groups:
+      db-deps:
+        patterns:
+          - "pg*"
+          - "drizzle*"
+          - "@neondb/*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Multi-Tenancy Library
+  - package-ecosystem: "npm"
+    directory: "/libs/multi-tenancy"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "10:05"
+      timezone: "UTC"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "multi-tenancy"
+    commit-message:
+      prefix: "chore(multi-tenancy)"
+
+  # Plugin System Library
+  - package-ecosystem: "npm"
+    directory: "/libs/plugin-system"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "10:10"
+      timezone: "UTC"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "plugin-system"
+    commit-message:
+      prefix: "chore(plugins)"
+
+  # === MICROSERVICES ===
+
+  # API Gateway Service
+  - package-ecosystem: "npm"
+    directory: "/services/api-gateway"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "backend-team"
+    labels:
+      - "dependencies"
+      - "api-gateway"
+      - "microservice"
+    commit-message:
+      prefix: "chore(api-gateway)"
+    groups:
+      gateway-deps:
+        patterns:
+          - "express*"
+          - "http-proxy-middleware"
+          - "rate-limiter-flexible"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Auth Service
+  - package-ecosystem: "npm"
+    directory: "/services/auth"
+    schedule:
+      interval: "daily" # More frequent for security-critical auth service
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "security-team"
+      - "backend-team"
+    labels:
+      - "dependencies"
+      - "auth-service"
+      - "security"
+      - "microservice"
+    commit-message:
+      prefix: "chore(auth)"
+    groups:
+      auth-security-deps:
+        patterns:
+          - "bcrypt*"
+          - "jsonwebtoken"
+          - "passport*"
+          - "crypto*"
+          - "speakeasy"
+          - "qrcode"
+        update-types:
+          - "patch" # Only patch updates for security deps
+      auth-general-deps:
+        patterns:
+          - "express*"
+          - "joi"
+          - "validator"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Notification Service
+  - package-ecosystem: "npm"
+    directory: "/services/notification"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+      time: "09:30"
+      timezone: "UTC"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "notification-service"
+      - "microservice"
+    commit-message:
+      prefix: "chore(notifications)"
+
+  # === DOCKER DEPENDENCIES ===
+
+  # API Gateway Docker
+  - package-ecosystem: "docker"
+    directory: "/services/api-gateway"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 2
+    reviewers:
+      - "devops-team"
+    labels:
+      - "dependencies"
+      - "docker"
+      - "api-gateway"
+    commit-message:
+      prefix: "chore(docker-gateway)"
+    groups:
+      docker-base-images:
+        patterns:
+          - "node*"
+          - "alpine*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Auth Service Docker
+  - package-ecosystem: "docker"
+    directory: "/services/auth"
+    schedule:
+      interval: "daily" # Security-critical service gets daily Docker updates
+      time: "08:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 2
+    reviewers:
+      - "security-team"
+      - "devops-team"
+    labels:
+      - "dependencies"
+      - "docker"
+      - "auth-service"
+      - "security"
+    commit-message:
+      prefix: "chore(docker-auth)"
+
+  # === GITHUB ACTIONS ===
+
+  # GitHub Actions workflows
+  - package-ecosystem: "github-actions"
+    directory: "/.github/workflows"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "10:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "devops-team"
+    labels:
+      - "dependencies"
+      - "github-actions"
+      - "ci-cd"
+    commit-message:
+      prefix: "chore(ci)"
+    groups:
+      # Group action updates by category
+      security-actions:
+        patterns:
+          - "github/codeql-action"
+          - "aquasecurity/trivy-action"
+          - "semgrep/semgrep-action"
+          - "trufflesecurity/trufflehog"
+        update-types:
+          - "minor"
+          - "patch"
+      build-actions:
+        patterns:
+          - "actions/checkout"
+          - "actions/setup-node"
+          - "actions/cache"
+          - "actions/upload-artifact"
+          - "actions/download-artifact"
+        update-types:
+          - "minor"
+          - "patch"
+      deployment-actions:
+        patterns:
+          - "docker/setup-buildx-action"
+          - "docker/login-action"
+          - "docker/build-push-action"
+        update-types:
+          - "minor"
+          - "patch"
+
+# Additional security configuration
+# Enable security updates with higher priority
+auto-merge:
+  # Auto-merge patch updates that pass CI for non-critical dependencies
+  - match:
+      dependency_type: "indirect"
+      update_type: "security"
+  - match:
+      dependency_type: "direct"
+      update_type: "security"
+      dependency_name: "!bcrypt*,!jsonwebtoken,!passport*" # Exclude auth deps from auto-merge
+
+# Ignore specific dependencies that should be updated manually
+ignore:
+  # Major version updates should be reviewed manually
+  - dependency-name: "node"
+    update-types: ["version-update:semver-major"]
+  - dependency-name: "typescript"
+    update-types: ["version-update:semver-major"]
+  - dependency-name: "react*"
+    update-types: ["version-update:semver-major"]
+
+  # Critical security dependencies should be reviewed manually for major updates
+  - dependency-name: "bcrypt*"
+    update-types: ["version-update:semver-major"]
+  - dependency-name: "jsonwebtoken"
+    update-types: ["version-update:semver-major"]
+  - dependency-name: "passport*"
+    update-types: ["version-update:semver-major"]

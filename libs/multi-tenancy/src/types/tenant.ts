@@ -30,7 +30,7 @@ export interface ITenantSettings {
     customCss?: string;
     favicon?: string;
   };
-  
+
   // Localization
   locale: {
     language: string;
@@ -39,7 +39,7 @@ export interface ITenantSettings {
     dateFormat: string;
     numberFormat: string;
   };
-  
+
   // Security
   security: {
     passwordPolicy: {
@@ -55,7 +55,7 @@ export interface ITenantSettings {
     ipWhitelist: string[];
     allowedDomains: string[];
   };
-  
+
   // Features
   features: {
     apiAccess: boolean;
@@ -64,7 +64,7 @@ export interface ITenantSettings {
     advancedReporting: boolean;
     integrations: string[];
   };
-  
+
   // Notifications
   notifications: {
     email: {
@@ -122,7 +122,7 @@ export enum TenantPlan {
   STARTER = 'STARTER',
   PROFESSIONAL = 'PROFESSIONAL',
   ENTERPRISE = 'ENTERPRISE',
-  CUSTOM = 'CUSTOM'
+  CUSTOM = 'CUSTOM',
 }
 
 export enum TenantStatus {
@@ -131,7 +131,7 @@ export enum TenantStatus {
   SUSPENDED = 'SUSPENDED',
   CANCELLED = 'CANCELLED',
   PROVISIONING = 'PROVISIONING',
-  MIGRATING = 'MIGRATING'
+  MIGRATING = 'MIGRATING',
 }
 
 export enum TenantResolutionStrategy {
@@ -139,17 +139,18 @@ export enum TenantResolutionStrategy {
   DOMAIN = 'DOMAIN',
   HEADER = 'HEADER',
   PATH = 'PATH',
-  QUERY_PARAM = 'QUERY_PARAM'
+  QUERY_PARAM = 'QUERY_PARAM',
 }
 
 // Request/Response types
-export type CreateTenantRequest = Omit<ITenant, 
+export type CreateTenantRequest = Omit<
+  ITenant,
   'id' | 'usage' | 'createdAt' | 'updatedAt' | 'createdBy'
 >;
 
-export type UpdateTenantRequest = Partial<Omit<ITenant,
-  'id' | 'slug' | 'createdAt' | 'updatedAt' | 'createdBy'
->>;
+export type UpdateTenantRequest = Partial<
+  Omit<ITenant, 'id' | 'slug' | 'createdAt' | 'updatedAt' | 'createdBy'>
+>;
 
 export interface ITenantProvisioningRequest {
   name: string;
@@ -233,7 +234,12 @@ export interface ITenantAnalytics {
 
 // Webhook types
 export interface ITenantWebhook {
-  eventType: 'tenant.created' | 'tenant.updated' | 'tenant.suspended' | 'tenant.deleted' | 'tenant.limit.exceeded';
+  eventType:
+    | 'tenant.created'
+    | 'tenant.updated'
+    | 'tenant.suspended'
+    | 'tenant.deleted'
+    | 'tenant.limit.exceeded';
   tenant: ITenant;
   timestamp: string;
   changes?: Record<string, { from: any; to: any }>;

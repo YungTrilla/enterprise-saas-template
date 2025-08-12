@@ -27,49 +27,49 @@ tags:
 paths:
   # Authentication paths
   /auth/register:
-    $ref: './paths/auth.yaml#/paths/~1auth~1register'
+    $ref: "./paths/auth.yaml#/paths/~1auth~1register"
   /auth/login:
-    $ref: './paths/auth.yaml#/paths/~1auth~1login'
+    $ref: "./paths/auth.yaml#/paths/~1auth~1login"
   /auth/logout:
-    $ref: './paths/auth.yaml#/paths/~1auth~1logout'
+    $ref: "./paths/auth.yaml#/paths/~1auth~1logout"
   /auth/refresh:
-    $ref: './paths/auth.yaml#/paths/~1auth~1refresh'
+    $ref: "./paths/auth.yaml#/paths/~1auth~1refresh"
   /auth/verify-email:
-    $ref: './paths/auth.yaml#/paths/~1auth~1verify-email'
+    $ref: "./paths/auth.yaml#/paths/~1auth~1verify-email"
   /auth/forgot-password:
-    $ref: './paths/auth.yaml#/paths/~1auth~1forgot-password'
+    $ref: "./paths/auth.yaml#/paths/~1auth~1forgot-password"
   /auth/reset-password:
-    $ref: './paths/auth.yaml#/paths/~1auth~1reset-password'
+    $ref: "./paths/auth.yaml#/paths/~1auth~1reset-password"
   /auth/change-password:
-    $ref: './paths/auth.yaml#/paths/~1auth~1change-password'
+    $ref: "./paths/auth.yaml#/paths/~1auth~1change-password"
   /auth/mfa/enable:
-    $ref: './paths/auth.yaml#/paths/~1auth~1mfa~1enable'
+    $ref: "./paths/auth.yaml#/paths/~1auth~1mfa~1enable"
   /auth/mfa/verify:
-    $ref: './paths/auth.yaml#/paths/~1auth~1mfa~1verify'
+    $ref: "./paths/auth.yaml#/paths/~1auth~1mfa~1verify"
   # User paths
   /users:
-    $ref: './paths/users.yaml#/paths/~1users'
+    $ref: "./paths/users.yaml#/paths/~1users"
   /users/{userId}:
-    $ref: './paths/users.yaml#/paths/~1users~1{userId}'
+    $ref: "./paths/users.yaml#/paths/~1users~1{userId}"
   /users/{userId}/activate:
-    $ref: './paths/users.yaml#/paths/~1users~1{userId}~1activate'
+    $ref: "./paths/users.yaml#/paths/~1users~1{userId}~1activate"
   /users/{userId}/deactivate:
-    $ref: './paths/users.yaml#/paths/~1users~1{userId}~1deactivate'
+    $ref: "./paths/users.yaml#/paths/~1users~1{userId}~1deactivate"
   # Role paths
   /roles:
-    $ref: './paths/roles.yaml#/paths/~1roles'
+    $ref: "./paths/roles.yaml#/paths/~1roles"
   /roles/{roleId}:
-    $ref: './paths/roles.yaml#/paths/~1roles~1{roleId}'
+    $ref: "./paths/roles.yaml#/paths/~1roles~1{roleId}"
   # Schedule paths
   /schedules:
-    $ref: './paths/schedules.yaml#/paths/~1schedules'
+    $ref: "./paths/schedules.yaml#/paths/~1schedules"
   /schedules/{scheduleId}:
-    $ref: './paths/schedules.yaml#/paths/~1schedules~1{scheduleId}'
+    $ref: "./paths/schedules.yaml#/paths/~1schedules~1{scheduleId}"
   # Session paths
   /sessions:
-    $ref: './paths/sessions.yaml#/paths/~1sessions'
+    $ref: "./paths/sessions.yaml#/paths/~1sessions"
   /sessions/{sessionId}/revoke:
-    $ref: './paths/sessions.yaml#/paths/~1sessions~1{sessionId}~1revoke'
+    $ref: "./paths/sessions.yaml#/paths/~1sessions~1{sessionId}~1revoke"
 components:
   securitySchemes:
     bearerAuth:
@@ -77,9 +77,9 @@ components:
       scheme: bearer
       bearerFormat: JWT
   parameters:
-    $ref: './components/parameters.yaml#/components/parameters'
+    $ref: "./components/parameters.yaml#/components/parameters"
   schemas:
     # Import all schemas
-    $ref: './components/schemas/index.yaml#/components/schemas'
+    $ref: "./components/schemas/index.yaml#/components/schemas"
   responses:
-    $ref: './components/responses.yaml#/components/responses'
+    $ref: "./components/responses.yaml#/components/responses"

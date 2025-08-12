@@ -1,6 +1,7 @@
 # Service Migration Example
 
-This example shows how to migrate the Employee Service to use the service bootstrap utility.
+This example shows how to migrate the Employee Service to use the service
+bootstrap utility.
 
 ## Before (Manual Setup)
 
@@ -20,41 +21,43 @@ async function startServer() {
   await loadConfig();
   const config = getConfig();
   const logger = createLogger({ service: 'employee-service' });
-  
+
   const app = express();
-  
+
   // Security middleware
   app.set('trust proxy', true);
   app.use(helmet());
-  
+
   // CORS
-  app.use(cors({
-    origin: config.CORS_ORIGIN || '*',
-    credentials: true
-  }));
-  
+  app.use(
+    cors({
+      origin: config.CORS_ORIGIN || '*',
+      credentials: true,
+    })
+  );
+
   // Compression
   app.use(compression());
-  
+
   // Body parsing
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-  
+
   // Rate limiting
   const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 100,
-    message: 'Too many requests'
+    message: 'Too many requests',
   });
   app.use('/api/', limiter);
-  
+
   // Database
   const db = new Pool({
     connectionString: config.DATABASE_URL,
     min: 2,
-    max: 10
+    max: 10,
   });
-  
+
   // Request logging
   app.use((req, res, next) => {
     const start = Date.now();
@@ -63,12 +66,12 @@ async function startServer() {
         method: req.method,
         path: req.path,
         status: res.statusCode,
-        duration: Date.now() - start
+        duration: Date.now() - start,
       });
     });
     next();
   });
-  
+
   // Health check
   app.get('/health', async (req, res) => {
     try {
@@ -76,31 +79,31 @@ async function startServer() {
       res.json({
         status: 'healthy',
         service: 'employee-service',
-        version: '1.0.0'
+        version: '1.0.0',
       });
     } catch (error) {
       res.status(503).json({ status: 'unhealthy' });
     }
   });
-  
+
   // Routes
   app.use('/api/v1/time-entries', timeEntryRoutes);
-  
+
   // Error handling
   app.use((req, res) => {
     res.status(404).json({ error: 'Not found' });
   });
-  
+
   app.use((err, req, res, next) => {
     logger.error('Error', { error: err });
     res.status(500).json({ error: 'Internal server error' });
   });
-  
+
   // Start server
   const server = app.listen(config.PORT, () => {
     logger.info('Server started', { port: config.PORT });
   });
-  
+
   // Graceful shutdown
   process.on('SIGTERM', async () => {
     logger.info('SIGTERM received');
@@ -125,34 +128,37 @@ import { getEmployeeConfig } from './config';
 
 async function startServer() {
   const config = getEmployeeConfig();
-  
-  const { logger, start } = await bootstrapService({
-    name: 'employee-service',
-    version: '1.0.0',
-    port: config.PORT,
-    
-    database: {
-      enabled: true,
-      connectionString: config.DATABASE_URL
+
+  const { logger, start } = await bootstrapService(
+    {
+      name: 'employee-service',
+      version: '1.0.0',
+      port: config.PORT,
+
+      database: {
+        enabled: true,
+        connectionString: config.DATABASE_URL,
+      },
+
+      redis: {
+        enabled: true,
+        url: config.REDIS_URL,
+        optional: true,
+      },
+
+      rateLimit: {
+        enabled: true,
+        windowMs: 15 * 60 * 1000,
+        maxRequests: 100,
+      },
+
+      healthCheck: {
+        detailed: true,
+      },
     },
-    
-    redis: {
-      enabled: true,
-      url: config.REDIS_URL,
-      optional: true
-    },
-    
-    rateLimit: {
-      enabled: true,
-      windowMs: 15 * 60 * 1000,
-      maxRequests: 100
-    },
-    
-    healthCheck: {
-      detailed: true
-    }
-  }, setupRoutes);
-  
+    setupRoutes
+  );
+
   await start();
   logger.info('Employee service started successfully');
 }
@@ -168,10 +174,10 @@ import { timeEntryRoutes } from './time-entry.routes';
 
 export function setupRoutes(app: Application, deps: ServiceDependencies) {
   const { logger, db } = deps;
-  
+
   // Pass dependencies to route handlers
   app.use('/api/v1/time-entries', timeEntryRoutes(db, logger));
-  
+
   // Add any service-specific middleware or routes here
 }
 ```
@@ -189,6 +195,7 @@ export function setupRoutes(app: Application, deps: ServiceDependencies) {
 ## Migration Steps
 
 1. **Install the bootstrap utility**:
+
    ```bash
    pnpm add @abyss/service-bootstrap
    ```
@@ -221,7 +228,9 @@ export function setupRoutes(app: Application, deps: ServiceDependencies) {
 
 ```typescript
 // Before
-const db = new Pool({ /* config */ });
+const db = new Pool({
+  /* config */
+});
 router.get('/', async (req, res) => {
   const result = await db.query('SELECT * FROM users');
   res.json(result.rows);
@@ -230,13 +239,13 @@ router.get('/', async (req, res) => {
 // After
 export function createUserRoutes(db: Pool, logger: Logger) {
   const router = Router();
-  
+
   router.get('/', async (req, res) => {
     const result = await db.query('SELECT * FROM users');
     logger.info('Users fetched', { count: result.rowCount });
     res.json(result.rows);
   });
-  
+
   return router;
 }
 ```
@@ -246,11 +255,11 @@ export function createUserRoutes(db: Pool, logger: Logger) {
 ```typescript
 export function setupRoutes(app: Application, deps: ServiceDependencies) {
   const { logger } = deps;
-  
+
   // Add service-specific middleware
   app.use('/api/v1/protected', authenticateUser);
   app.use('/api/v1/admin', authorizeAdmin);
-  
+
   // Setup routes
   app.use('/api/v1/users', userRoutes);
 }
@@ -265,15 +274,15 @@ const config = {
     custom: async () => {
       // Check job queue
       const jobQueueHealthy = await checkJobQueue();
-      
+
       // Check external API
       const apiHealthy = await checkExternalAPI();
-      
+
       return {
         jobQueue: jobQueueHealthy ? 'healthy' : 'unhealthy',
-        externalAPI: apiHealthy ? 'healthy' : 'unhealthy'
+        externalAPI: apiHealthy ? 'healthy' : 'unhealthy',
       };
-    }
-  }
+    },
+  },
 };
 ```

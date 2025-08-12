@@ -1,6 +1,8 @@
 # Enterprise Multi-Tenancy Library
 
-A comprehensive multi-tenancy solution for the Enterprise SaaS Template, providing tenant isolation, resource management, and scalable architecture patterns.
+A comprehensive multi-tenancy solution for the Enterprise SaaS Template,
+providing tenant isolation, resource management, and scalable architecture
+patterns.
 
 ## 🏗️ Architecture Overview
 
@@ -15,7 +17,8 @@ A comprehensive multi-tenancy solution for the Enterprise SaaS Template, providi
 
 ### Multi-Tenancy Strategies
 
-- **Shared Database** - All tenants share the same database with tenant isolation
+- **Shared Database** - All tenants share the same database with tenant
+  isolation
 - **Separate Schema** - Each tenant has its own database schema
 - **Separate Database** - Each tenant has its own dedicated database
 - **Hybrid** - Combination of strategies based on tenant tier
@@ -32,11 +35,11 @@ pnpm add @template/multi-tenancy
 
 ```typescript
 import express from 'express';
-import { 
+import {
   createTenantResolverMiddleware,
   createTenantContextMiddleware,
   TenantResolutionStrategy,
-  DatabaseStorageProvider
+  DatabaseStorageProvider,
 } from '@template/multi-tenancy';
 
 const app = express();
@@ -47,31 +50,38 @@ const storageProvider = new DatabaseStorageProvider({
   port: 5432,
   database: 'tenants',
   username: 'user',
-  password: 'password'
+  password: 'password',
 });
 
 // Add tenant resolution middleware
-app.use(createTenantResolverMiddleware({
-  storageProvider,
-  strategy: [TenantResolutionStrategy.SUBDOMAIN, TenantResolutionStrategy.HEADER]
-}));
+app.use(
+  createTenantResolverMiddleware({
+    storageProvider,
+    strategy: [
+      TenantResolutionStrategy.SUBDOMAIN,
+      TenantResolutionStrategy.HEADER,
+    ],
+  })
+);
 
 // Add tenant context middleware
-app.use(createTenantContextMiddleware({
-  loadUser: true,
-  loadPermissions: true,
-  loadUsage: true
-}));
+app.use(
+  createTenantContextMiddleware({
+    loadUser: true,
+    loadPermissions: true,
+    loadUsage: true,
+  })
+);
 
 // Your application routes
 app.get('/api/data', (req, res) => {
   const tenant = req.tenant;
   const context = req.tenantContext;
-  
+
   // Use tenant-specific logic
   res.json({
     tenant: tenant.name,
-    usage: context.getUsagePercentage('apiCalls')
+    usage: context.getUsagePercentage('apiCalls'),
   });
 });
 ```
@@ -83,21 +93,26 @@ app.get('/api/data', (req, res) => {
 Identifies tenants from incoming requests using configurable strategies:
 
 ```typescript
-import { createTenantResolverMiddleware, TenantResolutionStrategy } from '@template/multi-tenancy';
+import {
+  createTenantResolverMiddleware,
+  TenantResolutionStrategy,
+} from '@template/multi-tenancy';
 
 // Multiple resolution strategies
-app.use(createTenantResolverMiddleware({
-  storageProvider,
-  strategy: [
-    TenantResolutionStrategy.SUBDOMAIN,    // tenant.example.com
-    TenantResolutionStrategy.DOMAIN,       // custom-domain.com
-    TenantResolutionStrategy.HEADER,       // X-Tenant-ID header
-    TenantResolutionStrategy.PATH,         // /tenant/slug/...
-    TenantResolutionStrategy.QUERY_PARAM   // ?tenant=slug
-  ],
-  required: true,
-  cache: { enabled: true, ttl: 300 }
-}));
+app.use(
+  createTenantResolverMiddleware({
+    storageProvider,
+    strategy: [
+      TenantResolutionStrategy.SUBDOMAIN, // tenant.example.com
+      TenantResolutionStrategy.DOMAIN, // custom-domain.com
+      TenantResolutionStrategy.HEADER, // X-Tenant-ID header
+      TenantResolutionStrategy.PATH, // /tenant/slug/...
+      TenantResolutionStrategy.QUERY_PARAM, // ?tenant=slug
+    ],
+    required: true,
+    cache: { enabled: true, ttl: 300 },
+  })
+);
 ```
 
 ### Tenant Context
@@ -107,23 +122,25 @@ Creates and manages tenant context with user information and permissions:
 ```typescript
 import { createTenantContextMiddleware } from '@template/multi-tenancy';
 
-app.use(createTenantContextMiddleware({
-  loadUser: true,
-  loadPermissions: true,
-  loadUsage: true,
-  getUserFromRequest: async (req) => {
-    // Extract user from JWT, session, etc.
-    return getUserFromToken(req.headers.authorization);
-  },
-  getPermissionsForUser: async (user, tenant) => {
-    // Load user permissions for this tenant
-    return await loadUserPermissions(user.id, tenant.id);
-  },
-  getUsageForTenant: async (tenant) => {
-    // Load current usage statistics
-    return await loadTenantUsage(tenant.id);
-  }
-}));
+app.use(
+  createTenantContextMiddleware({
+    loadUser: true,
+    loadPermissions: true,
+    loadUsage: true,
+    getUserFromRequest: async req => {
+      // Extract user from JWT, session, etc.
+      return getUserFromToken(req.headers.authorization);
+    },
+    getPermissionsForUser: async (user, tenant) => {
+      // Load user permissions for this tenant
+      return await loadUserPermissions(user.id, tenant.id);
+    },
+    getUsageForTenant: async tenant => {
+      // Load current usage statistics
+      return await loadTenantUsage(tenant.id);
+    },
+  })
+);
 ```
 
 ### Limits Enforcement
@@ -131,26 +148,24 @@ app.use(createTenantContextMiddleware({
 Enforce resource limits and quotas:
 
 ```typescript
-import { 
-  checkTenantLimit, 
-  trackApiUsage, 
+import {
+  checkTenantLimit,
+  trackApiUsage,
   checkUserLimit,
-  requireTenantFeature 
+  requireTenantFeature,
 } from '@template/multi-tenancy';
 
 // Track API usage
 app.use('/api', trackApiUsage());
 
 // Check specific limits before operations
-app.post('/api/users', 
-  checkUserLimit(),
-  async (req, res) => {
-    // Create user logic
-  }
-);
+app.post('/api/users', checkUserLimit(), async (req, res) => {
+  // Create user logic
+});
 
 // Require specific features
-app.get('/api/advanced-reports',
+app.get(
+  '/api/advanced-reports',
   requireTenantFeature('advanced_reports'),
   async (req, res) => {
     // Advanced reports logic
@@ -224,15 +239,15 @@ const tenant = await tenantService.createTenant({
   settings: {
     branding: {
       primaryColor: '#ff6b35',
-      logo: 'https://acme.com/logo.png'
-    }
-  }
+      logo: 'https://acme.com/logo.png',
+    },
+  },
 });
 
 // Update tenant
 await tenantService.updateTenant(tenant.id, {
   plan: TenantPlan.ENTERPRISE,
-  'limits.users': 500
+  'limits.users': 500,
 });
 
 // Get tenant with usage
@@ -248,7 +263,7 @@ const provisioningService = new TenantProvisioningService({
   storageProvider,
   autoProvision: true,
   createAdminUser: true,
-  sendWelcomeEmail: true
+  sendWelcomeEmail: true,
 });
 
 // Provision new tenant
@@ -259,8 +274,8 @@ const result = await provisioningService.provisionTenant({
   adminUser: {
     email: 'admin@newcompany.com',
     firstName: 'John',
-    lastName: 'Doe'
-  }
+    lastName: 'Doe',
+  },
 });
 
 console.log('Tenant ID:', result.tenant.id);
@@ -281,14 +296,14 @@ const usageService = new TenantUsageService(storageProvider);
 await usageService.updateUsage(tenantId, {
   apiCalls: 1,
   storage: fileSize,
-  bandwidth: requestSize + responseSize
+  bandwidth: requestSize + responseSize,
 });
 
 // Get usage statistics
 const usage = await usageService.getUsage(tenantId);
 const analytics = await usageService.getAnalytics(tenantId, {
   start: '2024-01-01',
-  end: '2024-01-31'
+  end: '2024-01-31',
 });
 
 // Check if approaching limits
@@ -300,30 +315,33 @@ const warnings = await usageService.getUsageWarnings(tenantId);
 ### Permission Checks
 
 ```typescript
-import { 
+import {
   requireTenantUser,
   requirePermission,
   requireAnyPermission,
-  requireAllPermissions
+  requireAllPermissions,
 } from '@template/multi-tenancy';
 
 // Require authenticated tenant user
 app.use('/api/admin', requireTenantUser());
 
 // Require specific permission
-app.delete('/api/users/:id', 
+app.delete(
+  '/api/users/:id',
   requirePermission('users:delete'),
   deleteUserHandler
 );
 
 // Require any of multiple permissions
-app.get('/api/reports',
+app.get(
+  '/api/reports',
   requireAnyPermission(['reports:basic', 'reports:advanced']),
   getReportsHandler
 );
 
 // Require all permissions
-app.post('/api/billing/charges',
+app.post(
+  '/api/billing/charges',
   requireAllPermissions(['billing:read', 'billing:write', 'admin:access']),
   createChargeHandler
 );
@@ -336,14 +354,14 @@ app.post('/api/billing/charges',
 app.get('/api/projects/:id', async (req, res) => {
   const { tenantContext } = req;
   const projectId = req.params.id;
-  
+
   // This query is automatically scoped to the current tenant
   const project = await getProject(projectId, tenantContext.tenant.id);
-  
+
   if (!project) {
     return res.status(404).json({ error: 'Project not found' });
   }
-  
+
   res.json(project);
 });
 ```
@@ -363,13 +381,13 @@ const provider = new DatabaseStorageProvider({
     username: 'user',
     password: 'password',
     ssl: true,
-    maxConnections: 10
+    maxConnections: 10,
   },
   cache: {
     enabled: true,
     ttl: 300,
-    maxEntries: 1000
-  }
+    maxEntries: 1000,
+  },
 });
 ```
 
@@ -384,8 +402,8 @@ const provider = new RedisStorageProvider({
     port: 6379,
     password: 'redis-password',
     db: 0,
-    keyPrefix: 'tenant:'
-  }
+    keyPrefix: 'tenant:',
+  },
 });
 ```
 
@@ -399,12 +417,14 @@ class CustomStorageProvider extends TenantStorageProvider {
     // Your custom implementation
     return await this.customStorage.find(tenantId);
   }
-  
-  async createTenant(tenant: Omit<ITenant, 'id' | 'createdAt' | 'updatedAt'>): Promise<ITenant> {
+
+  async createTenant(
+    tenant: Omit<ITenant, 'id' | 'createdAt' | 'updatedAt'>
+  ): Promise<ITenant> {
     // Your custom implementation
     return await this.customStorage.create(tenant);
   }
-  
+
   // Implement other required methods...
 }
 ```
@@ -419,9 +439,9 @@ app.get('/admin/tenant/:id/analytics', async (req, res) => {
   const analytics = await usageService.getAnalytics(req.params.id, {
     start: req.query.start,
     end: req.query.end,
-    metrics: ['users', 'apiCalls', 'storage', 'bandwidth']
+    metrics: ['users', 'apiCalls', 'storage', 'bandwidth'],
   });
-  
+
   res.json(analytics);
 });
 ```
@@ -432,11 +452,11 @@ app.get('/admin/tenant/:id/analytics', async (req, res) => {
 app.get('/health/tenants', async (req, res) => {
   const health = await storageProvider.healthCheck();
   const cacheStats = storageProvider.getCacheStats();
-  
+
   res.json({
     status: health.status,
     cache: cacheStats,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 });
 ```
@@ -474,7 +494,7 @@ app.use(async (req, res, next) => {
 const getDatabaseConnection = (tenantId: string) => {
   const config = {
     ...baseConfig,
-    database: `tenant_${tenantId}`
+    database: `tenant_${tenantId}`,
   };
   return knex(config);
 };
@@ -491,15 +511,15 @@ const resolverMiddleware = createTenantResolverMiddleware({
   onTenantNotFound: async (req, identifier) => {
     // Custom tenant lookup logic
     const tenant = await customTenantLookup(identifier);
-    
+
     if (tenant && tenant.status === 'PENDING') {
       // Auto-activate pending tenants
       await activateTenant(tenant.id);
       return { ...tenant, status: 'ACTIVE' };
     }
-    
+
     return tenant;
-  }
+  },
 });
 ```
 
@@ -509,13 +529,13 @@ const resolverMiddleware = createTenantResolverMiddleware({
 app.post('/api/tenant/:id/upgrade', async (req, res) => {
   const tenantId = req.params.id;
   const newPlan = req.body.plan;
-  
+
   // Update tenant plan and limits
   await tenantService.upgradePlan(tenantId, newPlan);
-  
+
   // Clear cache to pick up new limits
   await storageProvider.clearTenantCache(tenantId);
-  
+
   res.json({ success: true });
 });
 ```
@@ -528,7 +548,7 @@ import { TenantWebhookService } from '@template/multi-tenancy';
 const webhookService = new TenantWebhookService();
 
 // Register webhook handlers
-webhookService.on('tenant.created', async (tenant) => {
+webhookService.on('tenant.created', async tenant => {
   await sendWelcomeEmail(tenant);
   await setupDefaultData(tenant);
 });
@@ -548,7 +568,7 @@ import { MockStorageProvider } from '@template/multi-tenancy/testing';
 
 describe('Multi-tenant API', () => {
   let mockProvider: MockStorageProvider;
-  
+
   beforeEach(() => {
     mockProvider = new MockStorageProvider();
     mockProvider.addTenant({
@@ -558,19 +578,19 @@ describe('Multi-tenant API', () => {
       // ... other properties
     });
   });
-  
+
   it('should resolve tenant from subdomain', async () => {
     const req = createMockRequest({
-      headers: { host: 'test.example.com' }
+      headers: { host: 'test.example.com' },
     });
-    
+
     const middleware = createTenantResolverMiddleware({
       storageProvider: mockProvider,
-      strategy: TenantResolutionStrategy.SUBDOMAIN
+      strategy: TenantResolutionStrategy.SUBDOMAIN,
     });
-    
+
     await middleware(req, res, next);
-    
+
     expect(req.tenant).toBeDefined();
     expect(req.tenant.slug).toBe('test');
   });

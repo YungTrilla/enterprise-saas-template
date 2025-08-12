@@ -1,0 +1,121 @@
+# === BUILD OUTPUT ===
+node_modules/
+dist/
+build/
+.turbo/
+coverage/
+.next/
+out/
+
+# === GENERATED FILES ===
+generated/
+*.generated.ts
+*.generated.js
+*.d.ts
+!src/**/*.d.ts
+*.min.js
+*.min.css
+*.tsbuildinfo
+
+# === DATABASE & MIGRATIONS ===
+migrations/*.sql
+*.sql
+
+# === LOGS ===
+*.log
+logs/
+
+# === CACHE DIRECTORIES ===
+.cache/
+.parcel-cache/
+.vscode/settings.json
+.idea/
+
+# === STORYBOOK ===
+storybook-static/
+
+# === TESTING ===
+coverage/
+.nyc_output/
+junit.xml
+
+# === PACKAGE MANAGERS ===
+yarn.lock
+package-lock.json
+pnpm-lock.yaml
+.yarn/
+.pnpm-store/
+.pnpm-debug.log*
+
+# === VERSION CONTROL ===
+.git/
+.gitignore
+.eslintignore
+.prettierignore
+
+# === TEMPORARY FILES ===
+tmp/
+temp/
+*.tmp
+*.temp
+
+# === OS SPECIFIC ===
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# === DOCKER ===
+Dockerfile*
+.dockerignore
+
+# === ENVIRONMENT ===
+.env*
+!.env.example
+
+# === SPECIFIC FILES TO IGNORE ===
+# License and readme files (maintain original formatting)
+LICENSE
+LICENSE.md
+CHANGELOG.md
+TEMPLATE_USAGE_GUIDE.md
+EXTRACTION_SUMMARY.md
+
+# OpenAPI generated files
+openapi/generated/
+swagger-ui/
+
+# Documentation that should maintain specific formatting
+docs/SECURITY-SCANNING.md
+
+# Vendor files
+vendor/
+third-party/
+
+# Binary files
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.ico
+*.pdf
+*.woff
+*.woff2
+*.ttf
+*.eot
+
+# Compressed files
+*.zip
+*.tar
+*.gz
+*.bz2
+*.rar
+
+# Configuration files that need specific formatting
+turbo.json
+tsconfig.json
+jest.config.js
+vitest.config.ts
+
+# Scripts that may have specific formatting requirements
+scripts/*.sh

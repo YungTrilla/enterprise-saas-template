@@ -15,11 +15,11 @@ export async function hashPassword(password: string, costFactor: number = 12): P
   if (typeof password !== 'string' || password.length === 0) {
     throw new Error('Password must be a non-empty string');
   }
-  
+
   if (costFactor < 10 || costFactor > 15) {
     throw new Error('Cost factor must be between 10 and 15');
   }
-  
+
   return bcrypt.hash(password, costFactor);
 }
 
@@ -30,7 +30,7 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
   if (typeof password !== 'string' || typeof hash !== 'string') {
     return false;
   }
-  
+
   try {
     return await bcrypt.compare(password, hash);
   } catch (error) {
@@ -61,7 +61,7 @@ export function encryptData(data: string, secretKey: string): string {
   if (!data || !secretKey) {
     throw new Error('Data and secret key are required');
   }
-  
+
   try {
     const encrypted = CryptoJS.AES.encrypt(data, secretKey);
     return encrypted.toString();
@@ -77,15 +77,15 @@ export function decryptData(encryptedData: string, secretKey: string): string {
   if (!encryptedData || !secretKey) {
     throw new Error('Encrypted data and secret key are required');
   }
-  
+
   try {
     const decrypted = CryptoJS.AES.decrypt(encryptedData, secretKey);
     const decryptedString = decrypted.toString(CryptoJS.enc.Utf8);
-    
+
     if (!decryptedString) {
       throw new Error('Decryption failed - invalid key or corrupted data');
     }
-    
+
     return decryptedString;
   } catch (error) {
     throw new Error('Decryption failed');
@@ -119,7 +119,7 @@ export function generateSecureToken(length: number = 32): string {
   if (length < 8 || length > 128) {
     throw new Error('Token length must be between 8 and 128 characters');
   }
-  
+
   return crypto.randomBytes(length).toString('hex');
 }
 
@@ -159,7 +159,7 @@ export function generateResetToken(): {
   const token = generateSecureToken(24);
   const hash = crypto.createHash('sha256').update(token).digest('hex');
   const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
-  
+
   return { token, hash, expiresAt };
 }
 
@@ -189,7 +189,11 @@ export function generateJwtSecret(): string {
 /**
  * Create token payload with standard claims
  */
-export function createTokenPayload(userId: string, email: string, roles: string[] = []): {
+export function createTokenPayload(
+  userId: string,
+  email: string,
+  roles: string[] = []
+): {
   sub: string;
   email: string;
   roles: string[];
@@ -216,7 +220,7 @@ export function maskSensitiveData(data: any): any {
   if (typeof data !== 'object' || data === null) {
     return data;
   }
-  
+
   const sensitiveFields = [
     'password',
     'token',
@@ -227,15 +231,15 @@ export function maskSensitiveData(data: any): any {
     'credit_card',
     'creditCard',
     'ssn',
-    'social_security'
+    'social_security',
   ];
-  
+
   const masked = { ...data };
-  
+
   Object.keys(masked).forEach(key => {
     const lowerKey = key.toLowerCase();
     const isSensitive = sensitiveFields.some(field => lowerKey.includes(field));
-    
+
     if (isSensitive) {
       if (typeof masked[key] === 'string') {
         masked[key] = '*'.repeat(masked[key].length);
@@ -246,7 +250,7 @@ export function maskSensitiveData(data: any): any {
       masked[key] = maskSensitiveData(masked[key]);
     }
   });
-  
+
   return masked;
 }
 
@@ -257,12 +261,12 @@ export function maskEmail(email: string): string {
   if (typeof email !== 'string' || !email.includes('@')) {
     return '[INVALID EMAIL]';
   }
-  
+
   const [localPart, domain] = email.split('@');
   if (localPart.length <= 2) {
     return `${localPart}***@${domain}`;
   }
-  
+
   return `${localPart.substring(0, 2)}***@${domain}`;
 }
 
@@ -273,12 +277,12 @@ export function maskCreditCard(cardNumber: string): string {
   if (typeof cardNumber !== 'string') {
     return '[INVALID CARD]';
   }
-  
+
   const cleaned = cardNumber.replace(/\D/g, '');
   if (cleaned.length < 4) {
     return '*'.repeat(cleaned.length);
   }
-  
+
   const lastFour = cleaned.slice(-4);
   const masked = '*'.repeat(cleaned.length - 4);
   return masked + lastFour;
@@ -336,34 +340,37 @@ export function secureRandomInt(min: number, max: number): number {
   if (min >= max) {
     throw new Error('Min must be less than max');
   }
-  
+
   const range = max - min;
   const bitsNeeded = Math.ceil(Math.log2(range));
   const bytesNeeded = Math.ceil(bitsNeeded / 8);
   const maxValue = Math.pow(2, bitsNeeded);
-  
+
   let randomValue;
   do {
     const randomBytes = crypto.randomBytes(bytesNeeded);
     randomValue = randomBytes.readUIntBE(0, bytesNeeded) & (maxValue - 1);
   } while (randomValue >= range);
-  
+
   return min + randomValue;
 }
 
 /**
  * Generate secure random string with custom charset
  */
-export function secureRandomString(length: number, charset: string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'): string {
+export function secureRandomString(
+  length: number,
+  charset: string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+): string {
   if (length <= 0) {
     throw new Error('Length must be positive');
   }
-  
+
   let result = '';
   for (let i = 0; i < length; i++) {
     result += charset[secureRandomInt(0, charset.length)];
   }
-  
+
   return result;
 }
 

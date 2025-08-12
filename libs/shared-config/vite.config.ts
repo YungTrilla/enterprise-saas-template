@@ -13,17 +13,17 @@ export default defineConfig({
       entry: resolve(__dirname, 'src/index.ts'),
       name: 'AbyssSharedConfig',
       formats: ['es', 'cjs'],
-      fileName: (format) => `index.${format === 'es' ? 'esm' : format}.js`,
+      fileName: format => `index.${format === 'es' ? 'esm' : format}.js`,
     },
     rollupOptions: {
       external: ['dotenv', 'joi', 'zod', 'fs', 'path'],
       output: {
         globals: {
-          'dotenv': 'dotenv',
-          'joi': 'Joi',
-          'zod': 'zod',
-          'fs': 'fs',
-          'path': 'path',
+          dotenv: 'dotenv',
+          joi: 'Joi',
+          zod: 'zod',
+          fs: 'fs',
+          path: 'path',
         },
       },
     },

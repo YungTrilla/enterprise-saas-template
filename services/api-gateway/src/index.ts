@@ -13,11 +13,11 @@ import YAML from 'yaml';
 import fs from 'fs';
 import path from 'path';
 
-import { 
-  initializeGatewayConfig, 
-  initializeServiceRegistry, 
+import {
+  initializeGatewayConfig,
+  initializeServiceRegistry,
   getServiceInfo,
-  getGatewayConfig
+  getGatewayConfig,
 } from './config';
 import { HealthCheckService } from './services/health-check.service';
 import { correlationIdMiddleware } from './middleware/correlation.middleware';
@@ -42,7 +42,7 @@ async function startGateway() {
       version: serviceInfo.version,
       environment: serviceInfo.environment,
       port: serviceInfo.port,
-      registeredServices: Object.keys(serviceRegistry)
+      registeredServices: Object.keys(serviceRegistry),
     });
 
     // Initialize health check service
@@ -56,44 +56,48 @@ async function startGateway() {
     app.set('trust proxy', true);
 
     // Security middleware
-    app.use(helmet({
-      contentSecurityPolicy: {
-        directives: {
-          defaultSrc: ["'self'"],
-          styleSrc: ["'self'", "'unsafe-inline'"],
-          scriptSrc: ["'self'"],
-          imgSrc: ["'self'", "data:", "https:"],
+    app.use(
+      helmet({
+        contentSecurityPolicy: {
+          directives: {
+            defaultSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            scriptSrc: ["'self'"],
+            imgSrc: ["'self'", 'data:', 'https:'],
+          },
         },
-      },
-      hsts: {
-        maxAge: 31536000,
-        includeSubDomains: true,
-        preload: true
-      }
-    }));
+        hsts: {
+          maxAge: 31536000,
+          includeSubDomains: true,
+          preload: true,
+        },
+      })
+    );
 
     // CORS configuration
-    app.use(cors({
-      origin: config.corsOrigins,
-      credentials: true,
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-      allowedHeaders: [
-        'Origin',
-        'X-Requested-With',
-        'Content-Type',
-        'Accept',
-        'Authorization',
-        'X-Correlation-ID',
-        'X-Request-ID'
-      ],
-      exposedHeaders: [
-        'X-Correlation-ID',
-        'X-Request-ID',
-        'X-RateLimit-Limit',
-        'X-RateLimit-Remaining',
-        'X-RateLimit-Reset'
-      ]
-    }));
+    app.use(
+      cors({
+        origin: config.corsOrigins,
+        credentials: true,
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+        allowedHeaders: [
+          'Origin',
+          'X-Requested-With',
+          'Content-Type',
+          'Accept',
+          'Authorization',
+          'X-Correlation-ID',
+          'X-Request-ID',
+        ],
+        exposedHeaders: [
+          'X-Correlation-ID',
+          'X-Request-ID',
+          'X-RateLimit-Limit',
+          'X-RateLimit-Remaining',
+          'X-RateLimit-Reset',
+        ],
+      })
+    );
 
     // General middleware
     app.use(compression());
@@ -109,7 +113,7 @@ async function startGateway() {
     // Request logging
     app.use((req, res, next) => {
       const startTime = Date.now();
-      
+
       res.on('finish', () => {
         const duration = Date.now() - startTime;
         logger.http('HTTP Request', {
@@ -119,7 +123,7 @@ async function startGateway() {
           duration,
           ip: req.ip,
           userAgent: req.get('User-Agent'),
-          correlationId: req.correlationId
+          correlationId: req.correlationId,
         });
       });
 
@@ -134,15 +138,15 @@ async function startGateway() {
         success: false,
         error: {
           code: 'RATE_LIMIT_EXCEEDED',
-          message: 'Too many requests from this IP, please try again later.'
-        }
+          message: 'Too many requests from this IP, please try again later.',
+        },
       },
       standardHeaders: true,
       legacyHeaders: false,
-      keyGenerator: (req) => {
+      keyGenerator: req => {
         // Use user ID if authenticated, otherwise use IP
         return req.auth?.userId || req.ip;
-      }
+      },
     });
 
     // Apply rate limiting to API routes
@@ -162,7 +166,7 @@ async function startGateway() {
         }
       } catch (error) {
         logger.warn('Failed to load OpenAPI documentation', {
-          error: (error as Error).message
+          error: (error as Error).message,
         });
       }
     }
@@ -179,9 +183,9 @@ async function startGateway() {
         endpoints: {
           health: '/health',
           api: '/api/v1',
-          docs: config.enableSwaggerUI ? '/api/v1/docs' : undefined
+          docs: config.enableSwaggerUI ? '/api/v1/docs' : undefined,
         },
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     });
 
@@ -191,38 +195,39 @@ async function startGateway() {
         success: false,
         error: {
           code: 'NOT_FOUND',
-          message: 'Endpoint not found'
+          message: 'Endpoint not found',
         },
         correlationId: req.correlationId,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     });
 
     // Global error handler
-    app.use((error: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
-      logger.error('Unhandled error', {
-        error: error.message,
-        stack: error.stack,
-        url: req.url,
-        method: req.method,
-        correlationId: req.correlationId
-      });
+    app.use(
+      (error: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
+        logger.error('Unhandled error', {
+          error: error.message,
+          stack: error.stack,
+          url: req.url,
+          method: req.method,
+          correlationId: req.correlationId,
+        });
 
-      // Don't leak error details in production
-      const message = config.environment === 'production' 
-        ? 'An unexpected error occurred'
-        : error.message;
+        // Don't leak error details in production
+        const message =
+          config.environment === 'production' ? 'An unexpected error occurred' : error.message;
 
-      res.status(500).json({
-        success: false,
-        error: {
-          code: 'INTERNAL_SERVER_ERROR',
-          message
-        },
-        correlationId: req.correlationId,
-        timestamp: new Date().toISOString()
-      });
-    });
+        res.status(500).json({
+          success: false,
+          error: {
+            code: 'INTERNAL_SERVER_ERROR',
+            message,
+          },
+          correlationId: req.correlationId,
+          timestamp: new Date().toISOString(),
+        });
+      }
+    );
 
     // Start server
     const server = app.listen(serviceInfo.port, () => {
@@ -231,7 +236,7 @@ async function startGateway() {
         environment: serviceInfo.environment,
         version: serviceInfo.version,
         corsOrigins: config.corsOrigins,
-        services: Object.keys(serviceRegistry)
+        services: Object.keys(serviceRegistry),
       });
     });
 
@@ -250,7 +255,7 @@ async function startGateway() {
           process.exit(0);
         } catch (error) {
           logger.error('Error during graceful shutdown', {
-            error: (error as Error).message
+            error: (error as Error).message,
           });
           process.exit(1);
         }
@@ -268,10 +273,10 @@ async function startGateway() {
     process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
     // Handle uncaught exceptions
-    process.on('uncaughtException', (error) => {
+    process.on('uncaughtException', error => {
       logger.error('Uncaught exception', {
         error: error.message,
-        stack: error.stack
+        stack: error.stack,
       });
       process.exit(1);
     });
@@ -279,15 +284,14 @@ async function startGateway() {
     process.on('unhandledRejection', (reason, promise) => {
       logger.error('Unhandled rejection', {
         reason,
-        promise
+        promise,
       });
       process.exit(1);
     });
-
   } catch (error) {
     console.error('Failed to start API Gateway', {
       error: (error as Error).message,
-      stack: (error as Error).stack
+      stack: (error as Error).stack,
     });
     process.exit(1);
   }

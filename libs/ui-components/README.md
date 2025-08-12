@@ -4,7 +4,8 @@ Shared UI component library for Abyss Central suite with dark minimalist theme.
 
 ## Features
 
-- 🎨 **Dark Theme First** - Designed for the Abyss Central dark minimalist aesthetic
+- 🎨 **Dark Theme First** - Designed for the Abyss Central dark minimalist
+  aesthetic
 - 🔧 **TypeScript** - Full type safety and IntelliSense support
 - 🎯 **Accessible** - Built with accessibility best practices (WCAG 2.1)
 - 🎨 **Customizable** - Variants and styling options for different use cases
@@ -13,7 +14,8 @@ Shared UI component library for Abyss Central suite with dark minimalist theme.
 
 ## Installation
 
-This library is part of the Abyss Central monorepo and is used internally by the suite applications.
+This library is part of the Abyss Central monorepo and is used internally by the
+suite applications.
 
 ```bash
 # From any app within the monorepo
@@ -23,7 +25,14 @@ pnpm add @abyss/ui-components
 ## Usage
 
 ```tsx
-import { Button, Card, CardHeader, CardTitle, CardContent, DataTable } from '@abyss/ui-components';
+import {
+  Button,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  DataTable,
+} from '@abyss/ui-components';
 
 function MyComponent() {
   return (
@@ -32,7 +41,7 @@ function MyComponent() {
         <CardTitle>Dashboard</CardTitle>
       </CardHeader>
       <CardContent>
-        <Button variant="primary">Get Started</Button>
+        <Button variant='primary'>Get Started</Button>
       </CardContent>
     </Card>
   );
@@ -43,7 +52,8 @@ function MyComponent() {
 
 ### Core Components
 
-- **Button** - Interactive button with variants (default, destructive, outline, secondary, ghost, link, success, warning)
+- **Button** - Interactive button with variants (default, destructive, outline,
+  secondary, ghost, link, success, warning)
 - **Input** - Form input with error states, icons, and validation
 - **Textarea** - Multi-line text input with auto-resize option
 - **Select** - Dropdown select with search, multi-select, and custom rendering
@@ -73,6 +83,7 @@ function MyComponent() {
 ## Component Examples
 
 ### DataTable with Advanced Features
+
 ```tsx
 import { DataTable, Column, Badge } from '@abyss/ui-components';
 
@@ -80,13 +91,13 @@ const columns: Column<User>[] = [
   {
     id: 'name',
     header: 'Name',
-    accessor: (user) => `${user.firstName} ${user.lastName}`,
+    accessor: user => `${user.firstName} ${user.lastName}`,
     sortable: true,
   },
   {
     id: 'status',
     header: 'Status',
-    accessor: (user) => (
+    accessor: user => (
       <Badge variant={user.isActive ? 'success' : 'secondary'}>
         {user.isActive ? 'Active' : 'Inactive'}
       </Badge>
@@ -95,11 +106,11 @@ const columns: Column<User>[] = [
   {
     id: 'actions',
     header: 'Actions',
-    accessor: (user) => (
+    accessor: user => (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="sm">
-            <MoreHorizontal className="h-4 w-4" />
+          <Button variant='ghost' size='sm'>
+            <MoreHorizontal className='h-4 w-4' />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
@@ -119,9 +130,9 @@ const columns: Column<User>[] = [
 <DataTable
   data={users}
   columns={columns}
-  getRowId={(user) => user.id}
+  getRowId={user => user.id}
   searchable
-  searchPlaceholder="Search users..."
+  searchPlaceholder='Search users...'
   selectable
   selectedRows={selectedIds}
   onSelectRow={handleSelectRow}
@@ -129,10 +140,11 @@ const columns: Column<User>[] = [
   pageSize={20}
   loading={isLoading}
   stickyHeader
-/>
+/>;
 ```
 
 ### Select with Search and Multi-select
+
 ```tsx
 // Single select with search
 <Select
@@ -160,6 +172,7 @@ const columns: Column<User>[] = [
 ```
 
 ### Modal with Confirmation
+
 ```tsx
 import { Modal, ConfirmModal } from '@abyss/ui-components';
 
@@ -196,26 +209,28 @@ import { Modal, ConfirmModal } from '@abyss/ui-components';
 ```
 
 ### Tabs Navigation
+
 ```tsx
-<Tabs defaultValue="overview" onValueChange={setActiveTab}>
+<Tabs defaultValue='overview' onValueChange={setActiveTab}>
   <TabsList>
-    <TabsTrigger value="overview">Overview</TabsTrigger>
-    <TabsTrigger value="analytics">Analytics</TabsTrigger>
-    <TabsTrigger value="settings">Settings</TabsTrigger>
+    <TabsTrigger value='overview'>Overview</TabsTrigger>
+    <TabsTrigger value='analytics'>Analytics</TabsTrigger>
+    <TabsTrigger value='settings'>Settings</TabsTrigger>
   </TabsList>
-  <TabsContent value="overview">
+  <TabsContent value='overview'>
     <OverviewPanel />
   </TabsContent>
-  <TabsContent value="analytics">
+  <TabsContent value='analytics'>
     <AnalyticsPanel />
   </TabsContent>
-  <TabsContent value="settings">
+  <TabsContent value='settings'>
     <SettingsPanel />
   </TabsContent>
 </Tabs>
 ```
 
 ### Tooltips
+
 ```tsx
 <Tooltip content="This action requires admin privileges">
   <Button disabled>
@@ -235,6 +250,7 @@ import { Modal, ConfirmModal } from '@abyss/ui-components';
 ## Component Variants
 
 ### Button Variants
+
 - `default` - Primary action button
 - `destructive` - Dangerous actions (delete, remove)
 - `outline` - Secondary actions with border
@@ -245,6 +261,7 @@ import { Modal, ConfirmModal } from '@abyss/ui-components';
 - `warning` - Warning/caution actions
 
 ### Button Sizes
+
 - `sm` - Small button (32px height)
 - `default` - Default button (40px height)
 - `lg` - Large button (44px height)
@@ -252,6 +269,7 @@ import { Modal, ConfirmModal } from '@abyss/ui-components';
 - `icon` - Icon-only button (40x40px)
 
 ### Badge Variants
+
 - `default` - Standard badge
 - `secondary` - Muted badge
 - `destructive` - Error/danger state
@@ -262,7 +280,13 @@ import { Modal, ConfirmModal } from '@abyss/ui-components';
 ## Utilities
 
 ```tsx
-import { cn, generateId, formatFileSize, debounce, truncateText } from '@abyss/ui-components';
+import {
+  cn,
+  generateId,
+  formatFileSize,
+  debounce,
+  truncateText,
+} from '@abyss/ui-components';
 
 // Class name utility for conditional classes
 const className = cn(
@@ -287,7 +311,8 @@ truncateText('Long text here', 10); // "Long text..."
 
 ## Styling
 
-The library uses Tailwind CSS with CSS custom properties for theming. The dark theme is applied by default.
+The library uses Tailwind CSS with CSS custom properties for theming. The dark
+theme is applied by default.
 
 ### CSS Variables
 
@@ -313,12 +338,12 @@ The library uses Tailwind CSS with CSS custom properties for theming. The dark t
 All components are fully typed with TypeScript:
 
 ```tsx
-import type { 
-  ButtonProps, 
-  DataTableProps, 
+import type {
+  ButtonProps,
+  DataTableProps,
   Column,
   SelectOption,
-  ModalProps 
+  ModalProps,
 } from '@abyss/ui-components';
 
 // Type-safe column definitions
@@ -326,7 +351,7 @@ const columns: Column<MyDataType>[] = [
   {
     id: 'name',
     header: 'Name',
-    accessor: (row) => row.name,
+    accessor: row => row.name,
     sortable: true,
   },
 ];
@@ -341,6 +366,7 @@ const options: SelectOption[] = [
 ## Accessibility
 
 All components follow WCAG 2.1 guidelines:
+
 - Proper ARIA labels and roles
 - Keyboard navigation support
 - Focus management and trapping
@@ -368,7 +394,8 @@ pnpm lint
 
 ## Migration Guides
 
-See [docs/data-table-migration.md](./docs/data-table-migration.md) for examples of migrating from custom implementations to shared components.
+See [docs/data-table-migration.md](./docs/data-table-migration.md) for examples
+of migrating from custom implementations to shared components.
 
 ## Design Principles
 
@@ -381,6 +408,7 @@ See [docs/data-table-migration.md](./docs/data-table-migration.md) for examples 
 ## Contributing
 
 When adding new components:
+
 1. Follow the established component patterns
 2. Ensure accessibility compliance
 3. Add proper TypeScript types

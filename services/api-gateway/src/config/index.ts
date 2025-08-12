@@ -53,7 +53,7 @@ export async function initializeGatewayConfig(): Promise<IGatewayConfig> {
     enableHealthEndpoint: parseBoolean(validateEnvVar('ENABLE_HEALTH_ENDPOINT', 'true')),
     enableMetrics: parseBoolean(validateEnvVar('ENABLE_METRICS', 'true')),
     jwtPublicKey: process.env.JWT_PUBLIC_KEY,
-    redisEnabled: parseBoolean(validateEnvVar('REDIS_ENABLED', 'false'))
+    redisEnabled: parseBoolean(validateEnvVar('REDIS_ENABLED', 'false')),
   };
 
   return gatewayConfig;
@@ -80,15 +80,19 @@ export async function initializeServiceRegistry(): Promise<IServiceRegistry> {
       timeout: parseNumber(validateEnvVar('AUTH_SERVICE_TIMEOUT', '10000')),
       retries: parseNumber(validateEnvVar('AUTH_SERVICE_RETRIES', '3')),
       circuitBreakerThreshold: parseNumber(validateEnvVar('AUTH_CIRCUIT_BREAKER_THRESHOLD', '5')),
-      circuitBreakerTimeout: parseNumber(validateEnvVar('AUTH_CIRCUIT_BREAKER_TIMEOUT', '60000'))
+      circuitBreakerTimeout: parseNumber(validateEnvVar('AUTH_CIRCUIT_BREAKER_TIMEOUT', '60000')),
     },
     inventory: {
       url: validateEnvVar('INVENTORY_SERVICE_URL', 'http://localhost:3020'),
       healthEndpoint: '/health',
       timeout: parseNumber(validateEnvVar('INVENTORY_SERVICE_TIMEOUT', '10000')),
       retries: parseNumber(validateEnvVar('INVENTORY_SERVICE_RETRIES', '3')),
-      circuitBreakerThreshold: parseNumber(validateEnvVar('INVENTORY_CIRCUIT_BREAKER_THRESHOLD', '5')),
-      circuitBreakerTimeout: parseNumber(validateEnvVar('INVENTORY_CIRCUIT_BREAKER_TIMEOUT', '60000'))
+      circuitBreakerThreshold: parseNumber(
+        validateEnvVar('INVENTORY_CIRCUIT_BREAKER_THRESHOLD', '5')
+      ),
+      circuitBreakerTimeout: parseNumber(
+        validateEnvVar('INVENTORY_CIRCUIT_BREAKER_TIMEOUT', '60000')
+      ),
     },
     orders: {
       url: validateEnvVar('ORDERS_SERVICE_URL', 'http://localhost:3030'),
@@ -96,16 +100,20 @@ export async function initializeServiceRegistry(): Promise<IServiceRegistry> {
       timeout: parseNumber(validateEnvVar('ORDERS_SERVICE_TIMEOUT', '10000')),
       retries: parseNumber(validateEnvVar('ORDERS_SERVICE_RETRIES', '3')),
       circuitBreakerThreshold: parseNumber(validateEnvVar('ORDERS_CIRCUIT_BREAKER_THRESHOLD', '5')),
-      circuitBreakerTimeout: parseNumber(validateEnvVar('ORDERS_CIRCUIT_BREAKER_TIMEOUT', '60000'))
+      circuitBreakerTimeout: parseNumber(validateEnvVar('ORDERS_CIRCUIT_BREAKER_TIMEOUT', '60000')),
     },
     analytics: {
       url: validateEnvVar('ANALYTICS_SERVICE_URL', 'http://localhost:3040'),
       healthEndpoint: '/health',
       timeout: parseNumber(validateEnvVar('ANALYTICS_SERVICE_TIMEOUT', '30000')),
       retries: parseNumber(validateEnvVar('ANALYTICS_SERVICE_RETRIES', '2')),
-      circuitBreakerThreshold: parseNumber(validateEnvVar('ANALYTICS_CIRCUIT_BREAKER_THRESHOLD', '3')),
-      circuitBreakerTimeout: parseNumber(validateEnvVar('ANALYTICS_CIRCUIT_BREAKER_TIMEOUT', '120000'))
-    }
+      circuitBreakerThreshold: parseNumber(
+        validateEnvVar('ANALYTICS_CIRCUIT_BREAKER_THRESHOLD', '3')
+      ),
+      circuitBreakerTimeout: parseNumber(
+        validateEnvVar('ANALYTICS_CIRCUIT_BREAKER_TIMEOUT', '120000')
+      ),
+    },
   };
 
   return serviceRegistry;
@@ -120,14 +128,14 @@ export function getServiceRegistry(): IServiceRegistry {
 
 export function getServiceInfo(): IServiceInfo {
   const config = getGatewayConfig();
-  
+
   return {
     name: 'api-gateway',
     version: process.env.npm_package_version || '1.0.0',
     environment: config.environment,
     port: config.port,
     startTime: new Date().toISOString(),
-    apiPrefix: '/api/v1'
+    apiPrefix: '/api/v1',
   };
 }
 

@@ -13,11 +13,11 @@ function getMemoryUsage() {
   const used = process.memoryUsage();
   const total = require('os').totalmem();
   const percentage = (used.heapUsed / total) * 100;
-  
+
   return {
     used: Math.round(used.heapUsed / 1024 / 1024), // MB
     total: Math.round(total / 1024 / 1024), // MB
-    percentage: Math.round(percentage * 100) / 100
+    percentage: Math.round(percentage * 100) / 100,
   };
 }
 
@@ -37,7 +37,7 @@ export function createHealthCheckHandler(
       version: config.version,
       environment: config.environment || 'development',
       uptime: Math.floor((Date.now() - startTime) / 1000),
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     // Detailed health checks
@@ -46,10 +46,7 @@ export function createHealthCheckHandler(
 
       // Database check
       if (db) {
-        result.checks.database = await checkDatabaseHealth(
-          db,
-          config.database?.healthCheckQuery
-        );
+        result.checks.database = await checkDatabaseHealth(db, config.database?.healthCheckQuery);
         if (result.checks.database.status === 'disconnected') {
           result.status = 'unhealthy';
         }
@@ -73,8 +70,8 @@ export function createHealthCheckHandler(
           result.checks.custom = await config.healthCheck.custom();
         } catch (error) {
           result.status = 'unhealthy';
-          result.checks.custom = { 
-            error: error instanceof Error ? error.message : 'Custom health check failed' 
+          result.checks.custom = {
+            error: error instanceof Error ? error.message : 'Custom health check failed',
           };
         }
       }
@@ -96,7 +93,7 @@ export function setupHealthRoutes(
   redis?: Redis
 ): void {
   const healthPath = config.healthCheck?.path || '/health';
-  
+
   // Main health check endpoint
   app.get(healthPath, createHealthCheckHandler(config, startTime, db, redis));
 
@@ -128,7 +125,7 @@ export function setupHealthRoutes(
 
     res.status(ready ? 200 : 503).json({
       ready,
-      checks
+      checks,
     });
   });
 
@@ -138,7 +135,7 @@ export function setupHealthRoutes(
       service: config.name,
       version: config.version,
       environment: config.environment || 'development',
-      uptime: Math.floor((Date.now() - startTime) / 1000)
+      uptime: Math.floor((Date.now() - startTime) / 1000),
     });
   });
 }

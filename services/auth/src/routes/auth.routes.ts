@@ -26,10 +26,10 @@ export function authRoutes(authService: AuthService, authMiddleware: AuthMiddlew
         error: {
           code: 'VALIDATION_ERROR',
           message: 'Request validation failed',
-          details: errors.array()
+          details: errors.array(),
         },
         correlationId: req.correlationId,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     }
     next();
@@ -39,12 +39,16 @@ export function authRoutes(authService: AuthService, authMiddleware: AuthMiddlew
    * POST /login
    * Authenticate user with email and password
    */
-  router.post('/login',
+  router.post(
+    '/login',
     [
       body('email').isEmail().normalizeEmail().withMessage('Valid email is required'),
       body('password').isLength({ min: 1 }).withMessage('Password is required'),
-      body('mfaCode').optional().isLength({ min: 6, max: 8 }).withMessage('Invalid MFA code format'),
-      body('deviceFingerprint').optional().isString()
+      body('mfaCode')
+        .optional()
+        .isLength({ min: 6, max: 8 })
+        .withMessage('Invalid MFA code format'),
+      body('deviceFingerprint').optional().isString(),
     ],
     handleValidationErrors,
     authMiddleware.rateLimit(15 * 60 * 1000, 5, 'Too many login attempts'), // 5 attempts per 15 minutes
@@ -65,23 +69,22 @@ export function authRoutes(authService: AuthService, authMiddleware: AuthMiddlew
           success: true,
           data: result,
           correlationId: req.correlationId,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
-
       } catch (error) {
         logger.error('Login failed', {
           error: (error as Error).message,
-          correlationId: req.correlationId
+          correlationId: req.correlationId,
         });
 
         res.status(401).json({
           success: false,
           error: {
             code: 'LOGIN_FAILED',
-            message: (error as Error).message
+            message: (error as Error).message,
           },
           correlationId: req.correlationId,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       }
     }
@@ -91,14 +94,15 @@ export function authRoutes(authService: AuthService, authMiddleware: AuthMiddlew
    * POST /register
    * Register new user account
    */
-  router.post('/register',
+  router.post(
+    '/register',
     [
       body('email').isEmail().normalizeEmail().withMessage('Valid email is required'),
       body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
       body('firstName').trim().isLength({ min: 1 }).withMessage('First name is required'),
       body('lastName').trim().isLength({ min: 1 }).withMessage('Last name is required'),
       body('timezone').optional().isString(),
-      body('locale').optional().isString()
+      body('locale').optional().isString(),
     ],
     handleValidationErrors,
     authMiddleware.rateLimit(60 * 60 * 1000, 3, 'Too many registration attempts'), // 3 attempts per hour
@@ -109,7 +113,15 @@ export function authRoutes(authService: AuthService, authMiddleware: AuthMiddlew
         const userAgent = req.get('User-Agent') || '';
 
         const result = await authService.register(
-          { email, password, firstName, lastName, timezone, locale, correlationId: req.correlationId },
+          {
+            email,
+            password,
+            firstName,
+            lastName,
+            timezone,
+            locale,
+            correlationId: req.correlationId,
+          },
           ipAddress,
           userAgent,
           req.correlationId
@@ -119,23 +131,22 @@ export function authRoutes(authService: AuthService, authMiddleware: AuthMiddlew
           success: true,
           data: result,
           correlationId: req.correlationId,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
-
       } catch (error) {
         logger.error('Registration failed', {
           error: (error as Error).message,
-          correlationId: req.correlationId
+          correlationId: req.correlationId,
         });
 
         res.status(400).json({
           success: false,
           error: {
             code: 'REGISTRATION_FAILED',
-            message: (error as Error).message
+            message: (error as Error).message,
           },
           correlationId: req.correlationId,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       }
     }
@@ -145,10 +156,9 @@ export function authRoutes(authService: AuthService, authMiddleware: AuthMiddlew
    * POST /refresh
    * Refresh authentication tokens
    */
-  router.post('/refresh',
-    [
-      body('refreshToken').isString().isLength({ min: 1 }).withMessage('Refresh token is required')
-    ],
+  router.post(
+    '/refresh',
+    [body('refreshToken').isString().isLength({ min: 1 }).withMessage('Refresh token is required')],
     handleValidationErrors,
     authMiddleware.rateLimit(15 * 60 * 1000, 10), // 10 attempts per 15 minutes
     async (req, res) => {
@@ -156,33 +166,28 @@ export function authRoutes(authService: AuthService, authMiddleware: AuthMiddlew
         const { refreshToken } = req.body;
         const ipAddress = req.ip;
 
-        const result = await authService.refreshTokens(
-          refreshToken,
-          ipAddress,
-          req.correlationId
-        );
+        const result = await authService.refreshTokens(refreshToken, ipAddress, req.correlationId);
 
         res.json({
           success: true,
           data: result,
           correlationId: req.correlationId,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
-
       } catch (error) {
         logger.error('Token refresh failed', {
           error: (error as Error).message,
-          correlationId: req.correlationId
+          correlationId: req.correlationId,
         });
 
         res.status(401).json({
           success: false,
           error: {
             code: 'REFRESH_FAILED',
-            message: (error as Error).message
+            message: (error as Error).message,
           },
           correlationId: req.correlationId,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       }
     }
@@ -192,126 +197,115 @@ export function authRoutes(authService: AuthService, authMiddleware: AuthMiddlew
    * POST /logout
    * Logout and invalidate session
    */
-  router.post('/logout',
-    authMiddleware.requireAuth(),
-    async (req, res) => {
-      try {
-        const accessToken = req.headers.authorization?.substring(7) || '';
+  router.post('/logout', authMiddleware.requireAuth(), async (req, res) => {
+    try {
+      const accessToken = req.headers.authorization?.substring(7) || '';
 
-        await authService.logout(accessToken, req.correlationId);
+      await authService.logout(accessToken, req.correlationId);
 
-        res.json({
-          success: true,
-          message: 'Logged out successfully',
-          correlationId: req.correlationId,
-          timestamp: new Date().toISOString()
-        });
+      res.json({
+        success: true,
+        message: 'Logged out successfully',
+        correlationId: req.correlationId,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      logger.error('Logout failed', {
+        error: (error as Error).message,
+        correlationId: req.correlationId,
+      });
 
-      } catch (error) {
-        logger.error('Logout failed', {
-          error: (error as Error).message,
-          correlationId: req.correlationId
-        });
-
-        res.status(400).json({
-          success: false,
-          error: {
-            code: 'LOGOUT_FAILED',
-            message: (error as Error).message
-          },
-          correlationId: req.correlationId,
-          timestamp: new Date().toISOString()
-        });
-      }
+      res.status(400).json({
+        success: false,
+        error: {
+          code: 'LOGOUT_FAILED',
+          message: (error as Error).message,
+        },
+        correlationId: req.correlationId,
+        timestamp: new Date().toISOString(),
+      });
     }
-  );
+  });
 
   /**
    * GET /me
    * Get current user profile
    */
-  router.get('/me',
-    authMiddleware.requireAuth(),
-    async (req, res) => {
-      try {
-        res.json({
-          success: true,
-          data: {
-            userId: req.auth!.userId,
-            email: req.auth!.email,
-            roles: req.auth!.roles,
-            permissions: req.auth!.permissions,
-            sessionId: req.auth!.sessionId
-          },
-          correlationId: req.correlationId,
-          timestamp: new Date().toISOString()
-        });
+  router.get('/me', authMiddleware.requireAuth(), async (req, res) => {
+    try {
+      res.json({
+        success: true,
+        data: {
+          userId: req.auth!.userId,
+          email: req.auth!.email,
+          roles: req.auth!.roles,
+          permissions: req.auth!.permissions,
+          sessionId: req.auth!.sessionId,
+        },
+        correlationId: req.correlationId,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      logger.error('Get user profile failed', {
+        error: (error as Error).message,
+        correlationId: req.correlationId,
+      });
 
-      } catch (error) {
-        logger.error('Get user profile failed', {
-          error: (error as Error).message,
-          correlationId: req.correlationId
-        });
-
-        res.status(500).json({
-          success: false,
-          error: {
-            code: 'PROFILE_FETCH_FAILED',
-            message: 'Failed to get user profile'
-          },
-          correlationId: req.correlationId,
-          timestamp: new Date().toISOString()
-        });
-      }
+      res.status(500).json({
+        success: false,
+        error: {
+          code: 'PROFILE_FETCH_FAILED',
+          message: 'Failed to get user profile',
+        },
+        correlationId: req.correlationId,
+        timestamp: new Date().toISOString(),
+      });
     }
-  );
+  });
 
   /**
    * POST /mfa/setup
    * Setup MFA for user
    */
-  router.post('/mfa/setup',
-    authMiddleware.requireAuth(),
-    async (req, res) => {
-      try {
-        const result = await authService.setupMfa(
-          req.auth!.userId,
-          req.correlationId
-        );
+  router.post('/mfa/setup', authMiddleware.requireAuth(), async (req, res) => {
+    try {
+      const result = await authService.setupMfa(req.auth!.userId, req.correlationId);
 
-        res.json({
-          success: true,
-          data: result,
-          correlationId: req.correlationId,
-          timestamp: new Date().toISOString()
-        });
+      res.json({
+        success: true,
+        data: result,
+        correlationId: req.correlationId,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      logger.error('MFA setup failed', {
+        error: (error as Error).message,
+        correlationId: req.correlationId,
+      });
 
-      } catch (error) {
-        logger.error('MFA setup failed', {
-          error: (error as Error).message,
-          correlationId: req.correlationId
-        });
-
-        res.status(400).json({
-          success: false,
-          error: {
-            code: 'MFA_SETUP_FAILED',
-            message: (error as Error).message
-          },
-          correlationId: req.correlationId,
-          timestamp: new Date().toISOString()
-        });
-      }
+      res.status(400).json({
+        success: false,
+        error: {
+          code: 'MFA_SETUP_FAILED',
+          message: (error as Error).message,
+        },
+        correlationId: req.correlationId,
+        timestamp: new Date().toISOString(),
+      });
     }
-  );
+  });
 
   /**
    * POST /mfa/verify
    * Verify and enable MFA
    */
-  router.post('/mfa/verify',
+  router.post(
+    '/mfa/verify',
     [
-      body('code').isString().isLength({ min: 6, max: 8 }).withMessage('Valid MFA code is required')
+      body('code')
+        .isString()
+        .isLength({ min: 6, max: 8 })
+        .withMessage('Valid MFA code is required'),
     ],
     handleValidationErrors,
     authMiddleware.requireAuth(),
@@ -329,23 +323,22 @@ export function authRoutes(authService: AuthService, authMiddleware: AuthMiddlew
           success: true,
           message: 'MFA enabled successfully',
           correlationId: req.correlationId,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
-
       } catch (error) {
         logger.error('MFA verification failed', {
           error: (error as Error).message,
-          correlationId: req.correlationId
+          correlationId: req.correlationId,
         });
 
         res.status(400).json({
           success: false,
           error: {
             code: 'MFA_VERIFICATION_FAILED',
-            message: (error as Error).message
+            message: (error as Error).message,
           },
           correlationId: req.correlationId,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       }
     }
@@ -355,50 +348,47 @@ export function authRoutes(authService: AuthService, authMiddleware: AuthMiddlew
    * POST /verify-token
    * Verify access token validity
    */
-  router.post('/verify-token',
-    authMiddleware.requireAuth(),
-    async (req, res) => {
-      try {
-        res.json({
-          success: true,
-          data: {
-            valid: true,
-            userId: req.auth!.userId,
-            email: req.auth!.email,
-            roles: req.auth!.roles,
-            permissions: req.auth!.permissions,
-            sessionId: req.auth!.sessionId
-          },
-          correlationId: req.correlationId,
-          timestamp: new Date().toISOString()
-        });
-
-      } catch (error) {
-        res.status(401).json({
-          success: false,
-          data: {
-            valid: false
-          },
-          error: {
-            code: 'INVALID_TOKEN',
-            message: 'Token is invalid or expired'
-          },
-          correlationId: req.correlationId,
-          timestamp: new Date().toISOString()
-        });
-      }
+  router.post('/verify-token', authMiddleware.requireAuth(), async (req, res) => {
+    try {
+      res.json({
+        success: true,
+        data: {
+          valid: true,
+          userId: req.auth!.userId,
+          email: req.auth!.email,
+          roles: req.auth!.roles,
+          permissions: req.auth!.permissions,
+          sessionId: req.auth!.sessionId,
+        },
+        correlationId: req.correlationId,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      res.status(401).json({
+        success: false,
+        data: {
+          valid: false,
+        },
+        error: {
+          code: 'INVALID_TOKEN',
+          message: 'Token is invalid or expired',
+        },
+        correlationId: req.correlationId,
+        timestamp: new Date().toISOString(),
+      });
     }
-  );
+  });
 
   /**
    * GET /permissions/check
    * Check if user has specific permission
    */
-  router.get('/permissions/check',
+  router.get(
+    '/permissions/check',
     [
       body('resource').isString().isLength({ min: 1 }).withMessage('Resource is required'),
       body('action').isString().isLength({ min: 1 }).withMessage('Action is required'),
-      body('conditions').optional().isObject()
+      body('conditions').optional().isObject(),
     ],
     handleValidationErrors,
     authMiddleware.requireAuth(),
@@ -409,21 +399,20 @@ export function authRoutes(authService: AuthService, authMiddleware: AuthMiddlew
           success: true,
           data: {
             allowed: false, // Placeholder
-            message: 'Permission check not implemented'
+            message: 'Permission check not implemented',
           },
           correlationId: req.correlationId,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
-
       } catch (error) {
         res.status(500).json({
           success: false,
           error: {
             code: 'PERMISSION_CHECK_FAILED',
-            message: 'Failed to check permissions'
+            message: 'Failed to check permissions',
           },
           correlationId: req.correlationId,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       }
     }

@@ -1,0 +1,409 @@
+name: CI/CD Pipeline
+
+# Trigger on main branches and PRs for comprehensive validation
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+# Environment variables for consistency across jobs
+env:
+  NODE_VERSION: "20.x" # LTS version for stability
+  PNPM_VERSION: "8.15.0" # Lock version for consistency
+  FORCE_COLOR: 1 # Colorized output for better debugging
+
+# Set minimal permissions for security
+permissions:
+  contents: read
+  actions: read
+  security-events: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  # Pre-flight check: Fast validation of basic project health
+  preflight:
+    name: Preflight Checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      cache-key: ${{ steps.cache-key.outputs.key }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full history for better caching
+
+      - name: Generate cache key
+        id: cache-key
+        run: |
+          echo "key=${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}" >> $GITHUB_OUTPUT
+
+      - name: Validate workspace configuration
+        run: |
+          if [[ ! -f "pnpm-workspace.yaml" ]]; then
+            echo "❌ pnpm-workspace.yaml not found"
+            exit 1
+          fi
+          if [[ ! -f "package.json" ]]; then
+            echo "❌ package.json not found"
+            exit 1
+          fi
+          echo "✅ Workspace configuration valid"
+
+  # Install and cache dependencies
+  dependencies:
+    name: Install Dependencies
+    runs-on: ubuntu-latest
+    needs: preflight
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --prefer-offline
+
+      - name: Cache node_modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            **/node_modules
+            ~/.pnpm-store
+          key: ${{ needs.preflight.outputs.cache-key }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+  # Linting: Code quality and style consistency
+  lint:
+    name: Code Linting
+    runs-on: ubuntu-latest
+    needs: [preflight, dependencies]
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Restore dependencies cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            **/node_modules
+            ~/.pnpm-store
+          key: ${{ needs.preflight.outputs.cache-key }}
+
+      - name: Install dependencies (if cache miss)
+        run: pnpm install --frozen-lockfile --prefer-offline
+
+      - name: Run ESLint
+        run: |
+          echo "🔍 Running ESLint across all packages..."
+          pnpm run lint 2>&1 | tee eslint-results.txt || true
+          if [[ ${PIPESTATUS[0]} -ne 0 ]]; then
+            echo "❌ ESLint found issues"
+            cat eslint-results.txt
+            exit 1
+          fi
+          echo "✅ ESLint passed"
+
+      - name: Check code formatting
+        run: |
+          echo "🎨 Checking Prettier formatting..."
+          pnpm run format:check || {
+            echo "❌ Code formatting issues found"
+            echo "💡 Run 'pnpm run format' to fix formatting issues"
+            exit 1
+          }
+          echo "✅ Code formatting is consistent"
+
+  # Type checking: Ensure TypeScript correctness
+  typecheck:
+    name: Type Checking
+    runs-on: ubuntu-latest
+    needs: [preflight, dependencies]
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Restore dependencies cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            **/node_modules
+            ~/.pnpm-store
+          key: ${{ needs.preflight.outputs.cache-key }}
+
+      - name: Install dependencies (if cache miss)
+        run: pnpm install --frozen-lockfile --prefer-offline
+
+      - name: Build shared libraries
+        run: |
+          echo "🏗️ Building shared libraries first..."
+          pnpm run build:libs
+          echo "✅ Shared libraries built"
+
+      - name: Run TypeScript type checking
+        run: |
+          echo "🔍 Running TypeScript type checking..."
+          pnpm run typecheck
+          echo "✅ TypeScript type checking passed"
+
+  # Testing: Comprehensive test suite with service dependencies
+  test:
+    name: Test Suite
+    runs-on: ubuntu-latest
+    needs: [preflight, dependencies]
+    timeout-minutes: 20
+
+    # Service dependencies for integration tests
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: template_test
+          POSTGRES_HOST_AUTH_METHOD: trust
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+          --tmpfs /var/lib/postgresql/data
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Restore dependencies cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            **/node_modules
+            ~/.pnpm-store
+          key: ${{ needs.preflight.outputs.cache-key }}
+
+      - name: Install dependencies (if cache miss)
+        run: pnpm install --frozen-lockfile --prefer-offline
+
+      - name: Build shared libraries for testing
+        run: pnpm run build:libs
+
+      - name: Wait for services to be ready
+        run: |
+          echo "🔄 Waiting for PostgreSQL..."
+          until pg_isready -h localhost -p 5432 -U test_user; do sleep 1; done
+          echo "🔄 Waiting for Redis..."
+          until redis-cli -h localhost -p 6379 ping; do sleep 1; done
+          echo "✅ All services ready"
+
+      - name: Run test suite
+        env:
+          # Test database configuration
+          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/template_test
+          REDIS_URL: redis://localhost:6379
+          # Test JWT secrets
+          JWT_SECRET: test-jwt-secret-for-ci-pipeline-only
+          JWT_REFRESH_SECRET: test-refresh-secret-for-ci-pipeline-only
+          # Environment
+          NODE_ENV: test
+          CI: true
+        run: |
+          echo "🧪 Running comprehensive test suite..."
+          pnpm run test --verbose
+          echo "✅ All tests passed"
+
+      - name: Upload test coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-coverage
+          path: coverage/
+          retention-days: 30
+
+  # Build: Comprehensive build validation
+  build:
+    name: Build Validation
+    runs-on: ubuntu-latest
+    needs: [preflight, dependencies]
+    timeout-minutes: 15
+    strategy:
+      matrix:
+        package:
+          - "@template/shared-types"
+          - "@template/shared-utils"
+          - "@template/shared-config"
+          - "@template/ui-components"
+          - "@template/api-client"
+          - "@template/service-bootstrap"
+          - "@template/database-migration"
+          - "@template/multi-tenancy"
+          - "@template/plugin-system"
+        include:
+          - package: "auth-service"
+            path: "services/auth"
+          - package: "api-gateway"
+            path: "services/api-gateway"
+          - package: "notification-service"
+            path: "services/notification"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Restore dependencies cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            **/node_modules
+            ~/.pnpm-store
+          key: ${{ needs.preflight.outputs.cache-key }}
+
+      - name: Install dependencies (if cache miss)
+        run: pnpm install --frozen-lockfile --prefer-offline
+
+      - name: Build package
+        run: |
+          echo "🏗️ Building ${{ matrix.package }}..."
+          pnpm run build --filter="${{ matrix.package }}"
+          echo "✅ ${{ matrix.package }} built successfully"
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ matrix.package }}
+          path: |
+            **/dist/
+            **/build/
+          retention-days: 7
+
+  # Final validation: All checks passed
+  validation-complete:
+    name: Validation Complete ✅
+    runs-on: ubuntu-latest
+    needs: [lint, typecheck, test, build]
+    if: always()
+    timeout-minutes: 2
+    steps:
+      - name: Check all jobs status
+        run: |
+          echo "📊 Pipeline Results:"
+          echo "==================="
+
+          if [[ "${{ needs.lint.result }}" == "success" ]]; then
+            echo "✅ Linting: PASSED"
+          else
+            echo "❌ Linting: FAILED"
+          fi
+
+          if [[ "${{ needs.typecheck.result }}" == "success" ]]; then
+            echo "✅ Type Checking: PASSED"
+          else
+            echo "❌ Type Checking: FAILED"
+          fi
+
+          if [[ "${{ needs.test.result }}" == "success" ]]; then
+            echo "✅ Testing: PASSED"
+          else
+            echo "❌ Testing: FAILED"
+          fi
+
+          if [[ "${{ needs.build.result }}" == "success" ]]; then
+            echo "✅ Build: PASSED"
+          else
+            echo "❌ Build: FAILED"
+          fi
+
+          echo "==================="
+
+          # Fail if any critical job failed
+          if [[ "${{ needs.lint.result }}" != "success" ]] || 
+             [[ "${{ needs.typecheck.result }}" != "success" ]] || 
+             [[ "${{ needs.test.result }}" != "success" ]] || 
+             [[ "${{ needs.build.result }}" != "success" ]]; then
+            echo "🚨 Pipeline failed - check individual job results"
+            exit 1
+          fi
+
+          echo "🎉 All validations passed! Ready for deployment."
+
+      - name: Post success comment on PR
+        if: github.event_name == 'pull_request' && success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '🎉 **CI Pipeline Passed!** All quality checks, tests, and builds completed successfully. This PR is ready for review.'
+            })

@@ -32,21 +32,21 @@ export async function createDatabaseConnection(
     await pool.query('SELECT NOW()');
     logger.info('Database connection established', {
       service: config.name,
-      database: poolConfig.connectionString?.split('@')[1]?.split('/')[1]?.split('?')[0]
+      database: poolConfig.connectionString?.split('@')[1]?.split('/')[1]?.split('?')[0],
     });
   } catch (error) {
-    logger.error('Failed to connect to database', { 
+    logger.error('Failed to connect to database', {
       service: config.name,
-      error: error instanceof Error ? error.message : 'Unknown error' 
+      error: error instanceof Error ? error.message : 'Unknown error',
     });
     throw error;
   }
 
   // Handle pool errors
-  pool.on('error', (err) => {
+  pool.on('error', err => {
     logger.error('Unexpected database pool error', {
       service: config.name,
-      error: err.message
+      error: err.message,
     });
   });
 
@@ -62,7 +62,7 @@ export async function checkDatabaseHealth(
 ): Promise<{ status: 'connected' | 'disconnected'; latency?: number }> {
   const query = healthCheckQuery || 'SELECT 1';
   const start = Date.now();
-  
+
   try {
     await pool.query(query);
     const latency = Date.now() - start;
@@ -86,7 +86,7 @@ export async function closeDatabaseConnection(
     logger.info('Database connections closed');
   } catch (error) {
     logger.error('Error closing database connections', {
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : 'Unknown error',
     });
   }
 }

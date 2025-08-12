@@ -95,14 +95,21 @@ export class ExampleServiceClient extends BaseServiceClient {
   /**
    * Get all examples with pagination
    */
-  async getAll(page?: number, limit?: number, filters?: ExampleSearchFilters): Promise<ApiResponse<ExampleEntity[]>> {
+  async getAll(
+    page?: number,
+    limit?: number,
+    filters?: ExampleSearchFilters
+  ): Promise<ApiResponse<ExampleEntity[]>> {
     return this.getPaginated<ExampleEntity>('/examples', page, limit, filters);
   }
 
   /**
    * Search examples
    */
-  async search(query: string, filters?: ExampleSearchFilters): Promise<ApiResponse<ExampleEntity[]>> {
+  async search(
+    query: string,
+    filters?: ExampleSearchFilters
+  ): Promise<ApiResponse<ExampleEntity[]>> {
     return this.search<ExampleEntity>('/examples', query, filters);
   }
 
@@ -113,21 +120,32 @@ export class ExampleServiceClient extends BaseServiceClient {
   /**
    * Get examples by category
    */
-  async getByCategory(category: string, page?: number, limit?: number): Promise<ApiResponse<ExampleEntity[]>> {
+  async getByCategory(
+    category: string,
+    page?: number,
+    limit?: number
+  ): Promise<ApiResponse<ExampleEntity[]>> {
     return this.getPaginated<ExampleEntity>('/examples', page, limit, { category });
   }
 
   /**
    * Get examples by status
    */
-  async getByStatus(status: 'draft' | 'active' | 'inactive', page?: number, limit?: number): Promise<ApiResponse<ExampleEntity[]>> {
+  async getByStatus(
+    status: 'draft' | 'active' | 'inactive',
+    page?: number,
+    limit?: number
+  ): Promise<ApiResponse<ExampleEntity[]>> {
     return this.getPaginated<ExampleEntity>('/examples', page, limit, { status });
   }
 
   /**
    * Update example status
    */
-  async updateStatus(id: string, status: 'draft' | 'active' | 'inactive'): Promise<ApiResponse<ExampleEntity>> {
+  async updateStatus(
+    id: string,
+    status: 'draft' | 'active' | 'inactive'
+  ): Promise<ApiResponse<ExampleEntity>> {
     return this.patch<ExampleEntity>(`/examples/${id}/status`, { status });
   }
 
@@ -159,7 +177,9 @@ export class ExampleServiceClient extends BaseServiceClient {
   /**
    * Bulk update examples
    */
-  async bulkUpdate(updates: Array<{id: string} & UpdateExampleRequest>): Promise<ApiResponse<ExampleEntity[]>> {
+  async bulkUpdate(
+    updates: Array<{ id: string } & UpdateExampleRequest>
+  ): Promise<ApiResponse<ExampleEntity[]>> {
     return this.bulkOperation('/examples', updates, 'update');
   }
 
@@ -173,14 +193,20 @@ export class ExampleServiceClient extends BaseServiceClient {
   /**
    * Import examples from file
    */
-  async import(file: File, options?: { skipDuplicates?: boolean }): Promise<ApiResponse<{ imported: number; errors: any[] }>> {
+  async import(
+    file: File,
+    options?: { skipDuplicates?: boolean }
+  ): Promise<ApiResponse<{ imported: number; errors: any[] }>> {
     return this.uploadFile('/examples/import', file, options);
   }
 
   /**
    * Export examples to file
    */
-  async export(filters?: ExampleSearchFilters, format?: 'csv' | 'json' | 'xlsx'): Promise<ApiResponse<Blob>> {
+  async export(
+    filters?: ExampleSearchFilters,
+    format?: 'csv' | 'json' | 'xlsx'
+  ): Promise<ApiResponse<Blob>> {
     return this.download('/examples/export', { filters, format: format || 'csv' });
   }
 
@@ -200,16 +226,18 @@ export class ExampleServiceClient extends BaseServiceClient {
    */
   async getActivityReport(startDate: string, endDate: string): Promise<ApiResponse<any>> {
     return this.get('/examples/reports/activity', {
-      params: { startDate, endDate }
+      params: { startDate, endDate },
     });
   }
 
   /**
    * Get trending categories
    */
-  async getTrendingCategories(period: 'week' | 'month' | 'quarter'): Promise<ApiResponse<Array<{ category: string; count: number; growth: number }>>> {
+  async getTrendingCategories(
+    period: 'week' | 'month' | 'quarter'
+  ): Promise<ApiResponse<Array<{ category: string; count: number; growth: number }>>> {
     return this.get('/examples/reports/trending-categories', {
-      params: { period }
+      params: { period },
     });
   }
 
@@ -234,9 +262,11 @@ export class ExampleServiceClient extends BaseServiceClient {
   /**
    * Get popular tags
    */
-  async getPopularTags(limit?: number): Promise<ApiResponse<Array<{ tag: string; count: number }>>> {
+  async getPopularTags(
+    limit?: number
+  ): Promise<ApiResponse<Array<{ tag: string; count: number }>>> {
     return this.get('/examples/tags/popular', {
-      params: { limit: limit || 20 }
+      params: { limit: limit || 20 },
     });
   }
 

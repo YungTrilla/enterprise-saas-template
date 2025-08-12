@@ -3,8 +3,8 @@ jest.mock('@template/shared-config', () => ({
   loadConfig: jest.fn().mockResolvedValue(undefined),
   getConfig: jest.fn().mockReturnValue({
     NODE_ENV: 'test',
-    LOG_LEVEL: 'error'
-  })
+    LOG_LEVEL: 'error',
+  }),
 }));
 
 jest.mock('@template/shared-utils', () => ({
@@ -14,7 +14,7 @@ jest.mock('@template/shared-utils', () => ({
   }),
   notFoundHandler: jest.fn((req: any, res: any) => {
     res.status(404).json({ error: 'Not found' });
-  })
+  }),
 }));
 
 // Suppress console output during tests

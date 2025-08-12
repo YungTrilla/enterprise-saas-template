@@ -1,0 +1,335 @@
+name: ❓ Question & Help
+description: Ask a question or get help with using the Enterprise SaaS Template
+title: "[Question]: "
+labels: ["question", "help-wanted"]
+projects: ["enterprise-saas-template/1"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## ❓ Question & Help
+
+        Welcome! We're here to help you succeed with the Enterprise SaaS Template.
+
+        **Before asking your question, please:**
+        - 📚 Check the [documentation](../../README.md)
+        - 🔍 Search existing issues and discussions
+        - 💬 Consider using [GitHub Discussions](../../discussions) for broader questions
+
+        For urgent support, contact: support@enterprise-saas-template.com
+
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: Prerequisites
+      description: Please confirm you have done the following
+      options:
+        - label: I have searched existing issues and discussions
+          required: true
+        - label: I have read the relevant documentation
+          required: true
+        - label: I have tried to solve this myself first
+          required: true
+
+  - type: dropdown
+    id: question-category
+    attributes:
+      label: 🏷️ Question Category
+      description: What category does your question fall into?
+      options:
+        - "🚀 Getting Started - Installation, setup, first steps"
+        - "🏗️ Architecture - Understanding system design and patterns"
+        - "🔧 Development - Coding, debugging, development workflow"
+        - "🔐 Authentication - User auth, security, permissions"
+        - "📡 API Usage - Using APIs, endpoints, integrations"
+        - "💾 Database - Data modeling, queries, migrations"
+        - "🎨 Frontend - React, UI components, user experience"
+        - "🐳 Deployment - Docker, hosting, production setup"
+        - "🧪 Testing - Writing tests, test strategies, debugging"
+        - "⚡ Performance - Optimization, scaling, monitoring"
+        - "🔒 Security - Security best practices, vulnerabilities"
+        - "🔌 Integrations - Third-party services, APIs, webhooks"
+        - "📊 Monitoring - Logging, metrics, observability"
+        - "🛠️ DevOps - CI/CD, automation, infrastructure"
+        - "🏢 Enterprise - Enterprise features, compliance, scaling"
+        - "Other"
+      default: 15
+    validations:
+      required: true
+
+  - type: textarea
+    id: question-summary
+    attributes:
+      label: ❓ Question Summary
+      description: What is your main question or what help do you need?
+      placeholder: |
+        Clearly state your question:
+        - What are you trying to achieve?
+        - What specific problem are you facing?
+        - What outcome are you looking for?
+    validations:
+      required: true
+
+  - type: textarea
+    id: context-background
+    attributes:
+      label: 🔍 Context & Background
+      description: Provide context about your situation and what you're working on
+      placeholder: |
+        Help us understand your context:
+        - What project are you working on?
+        - What is your experience level with similar technologies?
+        - What business requirements are you trying to meet?
+        - Any relevant constraints or requirements?
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-tried
+    attributes:
+      label: 🔄 What I've Tried
+      description: What have you already attempted to solve this?
+      placeholder: |
+        Describe what you've already tried:
+        - Documentation sections you've read
+        - Code you've written or modified
+        - Troubleshooting steps you've taken
+        - Error messages you've encountered
+        - Solutions you've found online that didn't work
+      value: |
+        **Documentation Read:**
+        - 
+
+        **Code Attempts:**
+        - 
+
+        **Troubleshooting Steps:**
+        - 
+
+        **Error Messages:**
+        -
+    validations:
+      required: true
+
+  - type: textarea
+    id: current-setup
+    attributes:
+      label: 🌍 Current Setup
+      description: Describe your current environment and configuration
+      value: |
+        **Environment:**
+        - OS: [e.g., macOS 13.0, Windows 11, Ubuntu 22.04]
+        - Node.js Version: [e.g., 18.17.0]
+        - pnpm Version: [e.g., 8.15.0]
+        - Template Version: [e.g., 1.0.0]
+
+        **Database:**
+        - Type: [e.g., PostgreSQL 15.4]
+        - Hosting: [e.g., local, AWS RDS, Docker]
+
+        **Deployment:**
+        - Environment: [e.g., local development, staging, production]
+        - Platform: [e.g., Docker, AWS, GCP, local]
+
+        **Additional Services:**
+        - Redis: [version and setup]
+        - Email Service: [provider]
+        - File Storage: [provider]
+        - Other: [any other relevant services]
+    validations:
+      required: true
+
+  - type: textarea
+    id: code-examples
+    attributes:
+      label: 💻 Relevant Code
+      description: Share relevant code snippets, configurations, or error messages
+      placeholder: |
+        Include relevant code (remove sensitive information):
+        - Configuration files
+        - Code that isn't working as expected
+        - Error messages or stack traces
+        - API requests/responses
+
+        Please format code properly using markdown code blocks
+      render: typescript
+    validations:
+      required: false
+
+  - type: textarea
+    id: expected-outcome
+    attributes:
+      label: ✅ Expected Outcome
+      description: What outcome or behavior are you expecting?
+      placeholder: |
+        Describe what you expect to happen:
+        - What should the code do?
+        - What response should you receive?
+        - What behavior should you see?
+        - What goal are you trying to achieve?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual-outcome
+    attributes:
+      label: ❌ Actual Outcome
+      description: What is actually happening instead?
+      placeholder: |
+        Describe what's actually happening:
+        - Error messages you're seeing
+        - Unexpected behavior
+        - Missing functionality
+        - Performance issues
+    validations:
+      required: false
+
+  - type: dropdown
+    id: urgency-level
+    attributes:
+      label: ⏰ Urgency Level
+      description: How urgent is getting help with this question?
+      options:
+        - "🔴 Critical - Blocking production or major milestone"
+        - "🟠 High - Blocking development progress"
+        - "🟡 Medium - Impacting efficiency but not blocking"
+        - "🟢 Low - General learning or improvement"
+      default: 2
+    validations:
+      required: true
+
+  - type: dropdown
+    id: help-type
+    attributes:
+      label: 🤝 Type of Help Needed
+      description: What kind of help would be most useful?
+      multiple: true
+      options:
+        - "📚 Documentation - Point me to relevant docs"
+        - "💡 Guidance - Advice on approach or best practices"
+        - "🔧 Code Review - Review my code and suggest improvements"
+        - "🐛 Debugging - Help identify and fix issues"
+        - "🏗️ Architecture - Design and architectural advice"
+        - "📖 Examples - Working code examples"
+        - "🎓 Tutorial - Step-by-step guidance"
+        - "🔍 Troubleshooting - Help diagnose problems"
+        - "⚡ Performance - Optimization suggestions"
+        - "🔒 Security - Security best practices"
+    validations:
+      required: true
+
+  - type: textarea
+    id: learning-goals
+    attributes:
+      label: 🎯 Learning Goals
+      description: What are you hoping to learn or understand better?
+      placeholder: |
+        Help us understand your learning objectives:
+        - What concepts do you want to understand?
+        - What skills are you trying to develop?
+        - What knowledge gaps are you trying to fill?
+        - How does this relate to your overall project goals?
+    validations:
+      required: false
+
+  - type: dropdown
+    id: experience-level
+    attributes:
+      label: 📊 Experience Level
+      description: What's your experience level with the relevant technologies?
+      options:
+        - "🌱 Beginner - New to most of these technologies"
+        - "📈 Intermediate - Some experience with similar projects"
+        - "🚀 Advanced - Experienced with most technologies"
+        - "🎯 Expert - Very experienced, specific advanced question"
+      default: 1
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-resources
+    attributes:
+      label: 📚 Additional Resources Consulted
+      description: What other resources have you consulted?
+      placeholder: |
+        Other resources you've checked:
+        - Stack Overflow posts
+        - GitHub issues in other projects
+        - Blog posts or tutorials
+        - Official documentation from other tools
+        - Community forums or discussions
+    validations:
+      required: false
+
+  - type: textarea
+    id: deadline-constraints
+    attributes:
+      label: ⏰ Timeline & Constraints
+      description: Are there any timeline constraints or deadlines?
+      placeholder: |
+        Timeline information:
+        - Project deadlines
+        - Business requirements
+        - Learning timeline
+        - Any specific constraints affecting your timeline
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: follow-up-preference
+    attributes:
+      label: 📞 Follow-up Preference
+      description: How would you prefer to receive follow-up help?
+      options:
+        - label: GitHub issue comments (default)
+        - label: GitHub Discussions for broader community input
+        - label: Email follow-up for detailed guidance
+        - label: Live discussion/pair programming session
+        - label: Documentation contribution after resolution
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: 📎 Additional Context
+      description: Any additional information that might be helpful
+      placeholder: |
+        Additional context:
+        - Screenshots or diagrams
+        - Links to relevant external resources
+        - Business context or requirements
+        - Team or organizational constraints
+        - Previous related issues or discussions
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: contribution-interest
+    attributes:
+      label: 🤝 Contribution Interest
+      description: After getting help, would you be interested in contributing back?
+      options:
+        - label: I'd like to contribute documentation improvements based on this
+        - label: I'd be interested in helping other users with similar questions
+        - label: I could contribute code improvements if relevant
+        - label: I'd like to help improve the onboarding experience
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+
+        ## 💡 Getting the Best Help
+
+        **For faster responses:**
+        - 🔍 Use specific, descriptive titles
+        - 📝 Provide clear, detailed information
+        - 💻 Include relevant code and error messages
+        - 🌍 Describe your environment and setup
+
+        **Community support:**
+        - 💬 [GitHub Discussions](../../discussions) for open-ended questions
+        - 📧 support@enterprise-saas-template.com for urgent issues
+        - 🎓 [Documentation](../../README.md) for comprehensive guides
+
+        Thank you for being part of our community! 🚀

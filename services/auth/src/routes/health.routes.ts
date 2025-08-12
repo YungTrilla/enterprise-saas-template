@@ -18,7 +18,7 @@ router.get('/', (req, res) => {
     status: 'healthy',
     service: getServiceInfo(),
     timestamp: new Date().toISOString(),
-    correlationId: req.correlationId
+    correlationId: req.correlationId,
   });
 });
 
@@ -27,23 +27,23 @@ router.get('/', (req, res) => {
  */
 router.get('/detailed', async (req, res) => {
   const serviceInfo = getServiceInfo();
-  
+
   try {
     // Check database connectivity
     const dbHealth = await checkDatabaseHealth();
-    
+
     // Check memory usage
     const memoryUsage = process.memoryUsage();
     const memoryUsageMB = {
       rss: Math.round(memoryUsage.rss / 1024 / 1024),
       heapTotal: Math.round(memoryUsage.heapTotal / 1024 / 1024),
       heapUsed: Math.round(memoryUsage.heapUsed / 1024 / 1024),
-      external: Math.round(memoryUsage.external / 1024 / 1024)
+      external: Math.round(memoryUsage.external / 1024 / 1024),
     };
 
     // Check uptime
     const uptime = Math.floor(process.uptime());
-    
+
     res.json({
       success: true,
       status: 'healthy',
@@ -53,16 +53,15 @@ router.get('/detailed', async (req, res) => {
         memory: memoryUsageMB,
         uptime: {
           seconds: uptime,
-          human: `${Math.floor(uptime / 3600)}h ${Math.floor((uptime % 3600) / 60)}m ${uptime % 60}s`
+          human: `${Math.floor(uptime / 3600)}h ${Math.floor((uptime % 3600) / 60)}m ${uptime % 60}s`,
         },
         nodeVersion: process.version,
         platform: process.platform,
-        arch: process.arch
+        arch: process.arch,
       },
       timestamp: new Date().toISOString(),
-      correlationId: req.correlationId
+      correlationId: req.correlationId,
     });
-
   } catch (error) {
     res.status(503).json({
       success: false,
@@ -70,10 +69,10 @@ router.get('/detailed', async (req, res) => {
       service: serviceInfo,
       error: {
         code: 'HEALTH_CHECK_FAILED',
-        message: (error as Error).message
+        message: (error as Error).message,
       },
       timestamp: new Date().toISOString(),
-      correlationId: req.correlationId
+      correlationId: req.correlationId,
     });
   }
 });
@@ -85,13 +84,13 @@ router.get('/ready', async (req, res) => {
   try {
     // Check if service is ready to accept requests
     const dbHealth = await checkDatabaseHealth();
-    
+
     if (dbHealth.status === 'healthy') {
       res.json({
         success: true,
         status: 'ready',
         timestamp: new Date().toISOString(),
-        correlationId: req.correlationId
+        correlationId: req.correlationId,
       });
     } else {
       res.status(503).json({
@@ -99,7 +98,7 @@ router.get('/ready', async (req, res) => {
         status: 'not_ready',
         reason: 'Database not available',
         timestamp: new Date().toISOString(),
-        correlationId: req.correlationId
+        correlationId: req.correlationId,
       });
     }
   } catch (error) {
@@ -108,7 +107,7 @@ router.get('/ready', async (req, res) => {
       status: 'not_ready',
       reason: (error as Error).message,
       timestamp: new Date().toISOString(),
-      correlationId: req.correlationId
+      correlationId: req.correlationId,
     });
   }
 });
@@ -121,7 +120,7 @@ router.get('/live', (req, res) => {
     success: true,
     status: 'alive',
     timestamp: new Date().toISOString(),
-    correlationId: req.correlationId
+    correlationId: req.correlationId,
   });
 });
 

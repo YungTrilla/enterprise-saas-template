@@ -20,7 +20,7 @@ components:
         position:
           type: string
         role:
-          $ref: './role.yaml#/components/schemas/Role'
+          $ref: "./role.yaml#/components/schemas/Role"
         isActive:
           type: boolean
         isVerified:
@@ -85,6 +85,6 @@ components:
         data:
           type: array
           items:
-            $ref: '#/components/schemas/User'
+            $ref: "#/components/schemas/User"
         pagination:
-          $ref: './common.yaml#/components/schemas/PaginationMeta'
+          $ref: "./common.yaml#/components/schemas/PaginationMeta"

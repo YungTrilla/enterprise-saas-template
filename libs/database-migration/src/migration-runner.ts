@@ -41,22 +41,14 @@ export class MigrationRunner {
       // Check for conflicts
       if (status.conflicts.length > 0 && !options.force) {
         throw new Error(
-          `Migration conflicts detected: ${status.conflicts
-            .map(c => c.details)
-            .join(', ')}`
+          `Migration conflicts detected: ${status.conflicts.map(c => c.details).join(', ')}`
         );
       }
 
       if (direction === 'up') {
-        migrationsRun = await this.runUpMigrations(
-          status.pending,
-          options
-        );
+        migrationsRun = await this.runUpMigrations(status.pending, options);
       } else {
-        migrationsRun = await this.runDownMigrations(
-          status.applied,
-          options
-        );
+        migrationsRun = await this.runDownMigrations(status.applied, options);
       }
 
       return {
@@ -101,10 +93,7 @@ export class MigrationRunner {
     return count;
   }
 
-  private async runDownMigrations(
-    migrations: any[],
-    options: IMigrationOptions
-  ): Promise<number> {
+  private async runDownMigrations(migrations: any[], options: IMigrationOptions): Promise<number> {
     let count = 0;
     const toRun = migrations.slice().reverse();
 
@@ -116,13 +105,11 @@ export class MigrationRunner {
       }
 
       // Load the migration file to get the down function
-      const migrationFiles = await import('./utils').then(utils => 
+      const migrationFiles = await import('./utils').then(utils =>
         utils.getMigrationFiles(this.config.migrationsPath)
       );
-      
-      const matchingFile = migrationFiles.find(file => 
-        file.includes(record.id)
-      );
+
+      const matchingFile = migrationFiles.find(file => file.includes(record.id));
 
       if (!matchingFile) {
         throw new Error(`Migration file not found for ${record.id}`);
@@ -150,7 +137,7 @@ export class MigrationRunner {
     correlationId?: CorrelationId
   ): Promise<void> {
     const startTime = Date.now();
-    
+
     this.config.logger?.info(`Running migration ${direction}: ${migration.id}`, {
       correlationId,
     });
@@ -168,31 +155,23 @@ export class MigrationRunner {
 
       if (direction === 'up') {
         const checksum = await calculateChecksum(migration.up.toString());
-        await this.manager.recordMigration(
-          migration,
-          executionTime,
-          checksum,
-          correlationId
-        );
+        await this.manager.recordMigration(migration, executionTime, checksum, correlationId);
       }
 
-      this.config.logger?.info(
-        `Migration ${direction} completed: ${migration.id}`,
-        { executionTime, correlationId }
-      );
+      this.config.logger?.info(`Migration ${direction} completed: ${migration.id}`, {
+        executionTime,
+        correlationId,
+      });
     } catch (error) {
-      this.config.logger?.error(
-        `Migration ${direction} failed: ${migration.id}`,
-        { error, correlationId }
-      );
+      this.config.logger?.error(`Migration ${direction} failed: ${migration.id}`, {
+        error,
+        correlationId,
+      });
       throw error;
     }
   }
 
-  private filterMigrations(
-    migrations: IMigration[],
-    options: IMigrationOptions
-  ): IMigration[] {
+  private filterMigrations(migrations: IMigration[], options: IMigrationOptions): IMigration[] {
     if (options.target) {
       const targetIndex = migrations.findIndex(m => m.id === options.target);
       if (targetIndex >= 0) {

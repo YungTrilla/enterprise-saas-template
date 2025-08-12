@@ -12,7 +12,7 @@ import {
   IChangePasswordRequest,
   IForgotPasswordRequest,
   IResetPasswordRequest,
-  IAuthConfig
+  IAuthConfig,
 } from '../types/auth';
 import { JwtService } from './jwt.service';
 import { PasswordService } from './password.service';
@@ -62,7 +62,10 @@ export class AuthAccountService {
 
     try {
       // Check if user already exists
-      const existingUser = await this.authRepository.getUserByEmail(registerRequest.email, correlationId);
+      const existingUser = await this.authRepository.getUserByEmail(
+        registerRequest.email,
+        correlationId
+      );
       if (existingUser) {
         throw new Error('User with this email already exists');
       }
@@ -74,7 +77,10 @@ export class AuthAccountService {
       }
 
       // Hash password
-      const passwordHash = await this.passwordService.hashPassword(registerRequest.password, correlationId);
+      const passwordHash = await this.passwordService.hashPassword(
+        registerRequest.password,
+        correlationId
+      );
 
       // Generate email verification token
       const emailVerificationToken = this.jwtService.generateSecureToken();
@@ -94,13 +100,15 @@ export class AuthAccountService {
         failedLoginAttempts: 0,
         mfaEnabled: false,
         emailVerificationToken: hashedEmailToken,
-        emailVerificationExpiresAt: new Date(Date.now() + this.config.security.emailVerificationExpiration).toISOString(),
+        emailVerificationExpiresAt: new Date(
+          Date.now() + this.config.security.emailVerificationExpiration
+        ).toISOString(),
         timezone: registerRequest.timezone || 'UTC',
         locale: registerRequest.locale || 'en',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         createdBy: userId,
-        updatedBy: userId
+        updatedBy: userId,
       };
 
       // Save user to database
@@ -126,19 +134,18 @@ export class AuthAccountService {
 
       this.logger.info('User registration successful', {
         userId,
-        email: user.email
+        email: user.email,
       });
 
       return {
         user: this.sanitizeUser(user),
         message: 'Registration successful. Please check your email to verify your account.',
-        emailVerificationRequired: true
+        emailVerificationRequired: true,
       };
-
     } catch (error) {
       this.logger.error('Registration failed', {
         email: registerRequest.email,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       throw error;
     }
@@ -189,21 +196,33 @@ export class AuthAccountService {
       }
 
       // Hash new password
-      const newPasswordHash = await this.passwordService.hashPassword(request.newPassword, correlationId);
+      const newPasswordHash = await this.passwordService.hashPassword(
+        request.newPassword,
+        correlationId
+      );
 
       // Update password
-      await this.authRepository.updateUser(userId, {
-        passwordHash: newPasswordHash,
-        lastPasswordChangeAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        updatedBy: userId
-      }, correlationId);
+      await this.authRepository.updateUser(
+        userId,
+        {
+          passwordHash: newPasswordHash,
+          lastPasswordChangeAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          updatedBy: userId,
+        },
+        correlationId
+      );
 
       // Store in password history
       await this.passwordService.addToPasswordHistory(userId, newPasswordHash, correlationId);
 
       // Revoke all sessions
-      await this.authRepository.revokeAllUserSessions(userId, userId, 'Password changed', correlationId);
+      await this.authRepository.revokeAllUserSessions(
+        userId,
+        userId,
+        'Password changed',
+        correlationId
+      );
 
       // Audit trail
       await this.auditService.logAuthEvent(
@@ -218,11 +237,10 @@ export class AuthAccountService {
       );
 
       this.logger.info('Password changed successfully', { userId });
-
     } catch (error) {
       this.logger.error('Password change failed', {
         userId,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       throw error;
     }
@@ -240,10 +258,12 @@ export class AuthAccountService {
 
     try {
       const user = await this.authRepository.getUserByEmail(request.email, correlationId);
-      
+
       // Don't reveal if user exists or not
       if (!user) {
-        this.logger.info('Password reset requested for non-existent email', { email: request.email });
+        this.logger.info('Password reset requested for non-existent email', {
+          email: request.email,
+        });
         return;
       }
 
@@ -252,12 +272,18 @@ export class AuthAccountService {
       const hashedResetToken = this.jwtService.hashToken(resetToken);
 
       // Store reset token
-      await this.authRepository.updateUser(user.id, {
-        passwordResetToken: hashedResetToken,
-        passwordResetExpiresAt: new Date(Date.now() + this.config.security.passwordResetExpiration).toISOString(),
-        updatedAt: new Date().toISOString(),
-        updatedBy: user.id
-      }, correlationId);
+      await this.authRepository.updateUser(
+        user.id,
+        {
+          passwordResetToken: hashedResetToken,
+          passwordResetExpiresAt: new Date(
+            Date.now() + this.config.security.passwordResetExpiration
+          ).toISOString(),
+          updatedAt: new Date().toISOString(),
+          updatedBy: user.id,
+        },
+        correlationId
+      );
 
       // Send reset email (would integrate with email service)
       await this.sendPasswordResetEmailToUser(user.email, resetToken);
@@ -276,13 +302,12 @@ export class AuthAccountService {
 
       this.logger.info('Password reset email sent', {
         userId: user.id,
-        email: user.email
+        email: user.email,
       });
-
     } catch (error) {
       this.logger.error('Password reset request failed', {
         email: request.email,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       throw error;
     }
@@ -300,9 +325,12 @@ export class AuthAccountService {
 
     try {
       const hashedToken = this.jwtService.hashToken(request.token);
-      
+
       // Find user by reset token
-      const user = await this.authRepository.getUserByPasswordResetToken(hashedToken, correlationId);
+      const user = await this.authRepository.getUserByPasswordResetToken(
+        hashedToken,
+        correlationId
+      );
       if (!user) {
         throw new Error('Invalid or expired reset token');
       }
@@ -319,23 +347,35 @@ export class AuthAccountService {
       }
 
       // Hash new password
-      const newPasswordHash = await this.passwordService.hashPassword(request.newPassword, correlationId);
+      const newPasswordHash = await this.passwordService.hashPassword(
+        request.newPassword,
+        correlationId
+      );
 
       // Update password and clear reset token
-      await this.authRepository.updateUser(user.id, {
-        passwordHash: newPasswordHash,
-        passwordResetToken: null,
-        passwordResetExpiresAt: null,
-        lastPasswordChangeAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        updatedBy: user.id
-      }, correlationId);
+      await this.authRepository.updateUser(
+        user.id,
+        {
+          passwordHash: newPasswordHash,
+          passwordResetToken: null,
+          passwordResetExpiresAt: null,
+          lastPasswordChangeAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          updatedBy: user.id,
+        },
+        correlationId
+      );
 
       // Store in password history
       await this.passwordService.addToPasswordHistory(user.id, newPasswordHash, correlationId);
 
       // Revoke all sessions
-      await this.authRepository.revokeAllUserSessions(user.id, user.id, 'Password reset', correlationId);
+      await this.authRepository.revokeAllUserSessions(
+        user.id,
+        user.id,
+        'Password reset',
+        correlationId
+      );
 
       // Audit trail
       await this.auditService.logAuthEvent(
@@ -350,10 +390,9 @@ export class AuthAccountService {
       );
 
       this.logger.info('Password reset successful', { userId: user.id });
-
     } catch (error) {
       this.logger.error('Password reset failed', {
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       throw error;
     }
@@ -362,17 +401,17 @@ export class AuthAccountService {
   /**
    * Verify email address
    */
-  async verifyEmail(
-    token: string,
-    correlationId: CorrelationId
-  ): Promise<void> {
+  async verifyEmail(token: string, correlationId: CorrelationId): Promise<void> {
     this.logger.setCorrelationId(correlationId);
 
     try {
       const hashedToken = this.jwtService.hashToken(token);
-      
+
       // Find user by verification token
-      const user = await this.authRepository.getUserByEmailVerificationToken(hashedToken, correlationId);
+      const user = await this.authRepository.getUserByEmailVerificationToken(
+        hashedToken,
+        correlationId
+      );
       if (!user) {
         throw new Error('Invalid or expired verification token');
       }
@@ -383,14 +422,18 @@ export class AuthAccountService {
       }
 
       // Verify email
-      await this.authRepository.updateUser(user.id, {
-        isEmailVerified: true,
-        emailVerifiedAt: new Date().toISOString(),
-        emailVerificationToken: null,
-        emailVerificationExpiresAt: null,
-        updatedAt: new Date().toISOString(),
-        updatedBy: user.id
-      }, correlationId);
+      await this.authRepository.updateUser(
+        user.id,
+        {
+          isEmailVerified: true,
+          emailVerifiedAt: new Date().toISOString(),
+          emailVerificationToken: null,
+          emailVerificationExpiresAt: null,
+          updatedAt: new Date().toISOString(),
+          updatedBy: user.id,
+        },
+        correlationId
+      );
 
       // Audit trail
       await this.auditService.logAuthEvent(
@@ -406,12 +449,11 @@ export class AuthAccountService {
 
       this.logger.info('Email verified successfully', {
         userId: user.id,
-        email: user.email
+        email: user.email,
       });
-
     } catch (error) {
       this.logger.error('Email verification failed', {
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       throw error;
     }
@@ -420,10 +462,7 @@ export class AuthAccountService {
   /**
    * Resend email verification
    */
-  async resendVerificationEmail(
-    email: string,
-    correlationId: CorrelationId
-  ): Promise<void> {
+  async resendVerificationEmail(email: string, correlationId: CorrelationId): Promise<void> {
     this.logger.setCorrelationId(correlationId);
 
     try {
@@ -441,25 +480,30 @@ export class AuthAccountService {
       const hashedEmailToken = this.jwtService.hashToken(emailVerificationToken);
 
       // Update verification token
-      await this.authRepository.updateUser(user.id, {
-        emailVerificationToken: hashedEmailToken,
-        emailVerificationExpiresAt: new Date(Date.now() + this.config.security.emailVerificationExpiration).toISOString(),
-        updatedAt: new Date().toISOString(),
-        updatedBy: user.id
-      }, correlationId);
+      await this.authRepository.updateUser(
+        user.id,
+        {
+          emailVerificationToken: hashedEmailToken,
+          emailVerificationExpiresAt: new Date(
+            Date.now() + this.config.security.emailVerificationExpiration
+          ).toISOString(),
+          updatedAt: new Date().toISOString(),
+          updatedBy: user.id,
+        },
+        correlationId
+      );
 
       // Send verification email
       await this.sendEmailVerification(user.email, emailVerificationToken);
 
       this.logger.info('Verification email resent', {
         userId: user.id,
-        email: user.email
+        email: user.email,
       });
-
     } catch (error) {
       this.logger.error('Resend verification failed', {
         email,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       throw error;
     }

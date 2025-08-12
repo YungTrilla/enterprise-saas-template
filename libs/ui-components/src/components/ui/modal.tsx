@@ -104,17 +104,17 @@ export const Modal: React.FC<ModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
-      role="dialog"
-      aria-modal="true"
+      className='fixed inset-0 z-50 flex items-center justify-center'
+      role='dialog'
+      aria-modal='true'
       aria-labelledby={title ? 'modal-title' : undefined}
       aria-describedby={description ? 'modal-description' : undefined}
     >
       {/* Overlay */}
       <div
-        className="fixed inset-0 bg-black/50 animate-in fade-in-0"
+        className='fixed inset-0 bg-black/50 animate-in fade-in-0'
         onClick={closeOnOverlayClick ? onClose : undefined}
-        aria-hidden="true"
+        aria-hidden='true'
       />
 
       {/* Modal */}
@@ -130,43 +130,32 @@ export const Modal: React.FC<ModalProps> = ({
       >
         {/* Header */}
         {(title || showCloseButton) && (
-          <div className="flex items-start justify-between p-6 border-b">
+          <div className='flex items-start justify-between p-6 border-b'>
             <div>
               {title && (
-                <h2 id="modal-title" className="text-lg font-semibold">
+                <h2 id='modal-title' className='text-lg font-semibold'>
                   {title}
                 </h2>
               )}
               {description && (
-                <p id="modal-description" className="mt-1 text-sm text-muted-foreground">
+                <p id='modal-description' className='mt-1 text-sm text-muted-foreground'>
                   {description}
                 </p>
               )}
             </div>
             {showCloseButton && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onClose}
-                className="ml-4"
-              >
-                <X className="h-4 w-4" />
+              <Button variant='ghost' size='sm' onClick={onClose} className='ml-4'>
+                <X className='h-4 w-4' />
               </Button>
             )}
           </div>
         )}
 
         {/* Content */}
-        <div className="p-6 max-h-[calc(100vh-200px)] overflow-y-auto">
-          {children}
-        </div>
+        <div className='p-6 max-h-[calc(100vh-200px)] overflow-y-auto'>{children}</div>
 
         {/* Footer */}
-        {footer && (
-          <div className="flex items-center justify-end gap-2 p-6 border-t">
-            {footer}
-          </div>
-        )}
+        {footer && <div className='flex items-center justify-end gap-2 p-6 border-t'>{footer}</div>}
       </div>
     </div>
   );
@@ -198,7 +187,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
       onClose={onClose}
       footer={
         <>
-          <Button variant="outline" onClick={onClose} disabled={loading}>
+          <Button variant='outline' onClick={onClose} disabled={loading}>
             {cancelText}
           </Button>
           <Button
@@ -216,7 +205,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
         </>
       }
     >
-      <p className="text-sm">{message}</p>
+      <p className='text-sm'>{message}</p>
     </Modal>
   );
 };

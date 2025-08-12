@@ -16,7 +16,7 @@ export async function createRedisConnection(
   if (!config.redis.url) {
     if (config.redis.optional) {
       logger.warn('Redis URL not provided, skipping Redis connection', {
-        service: config.name
+        service: config.name,
       });
       return undefined;
     }
@@ -26,7 +26,7 @@ export async function createRedisConnection(
   const redis = new Redis(config.redis.url, {
     maxRetriesPerRequest: 3,
     enableReadyCheck: true,
-    reconnectOnError: (err) => {
+    reconnectOnError: err => {
       const targetError = 'READONLY';
       if (err.message.includes(targetError)) {
         return true;
@@ -38,14 +38,14 @@ export async function createRedisConnection(
   // Handle connection events
   redis.on('connect', () => {
     logger.info('Redis connection established', {
-      service: config.name
+      service: config.name,
     });
   });
 
-  redis.on('error', (err) => {
+  redis.on('error', err => {
     logger.error('Redis connection error', {
       service: config.name,
-      error: err.message
+      error: err.message,
     });
     if (!config.redis.optional) {
       throw err;
@@ -54,7 +54,7 @@ export async function createRedisConnection(
 
   redis.on('close', () => {
     logger.warn('Redis connection closed', {
-      service: config.name
+      service: config.name,
     });
   });
 
@@ -66,7 +66,7 @@ export async function createRedisConnection(
     if (config.redis.optional) {
       logger.warn('Failed to connect to Redis, continuing without cache', {
         service: config.name,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
       redis.disconnect();
       return undefined;
@@ -82,7 +82,7 @@ export async function checkRedisHealth(
   redis: Redis
 ): Promise<{ status: 'connected' | 'disconnected'; latency?: number }> {
   const start = Date.now();
-  
+
   try {
     await redis.ping();
     const latency = Date.now() - start;
@@ -106,7 +106,7 @@ export async function closeRedisConnection(
     logger.info('Redis connection closed');
   } catch (error) {
     logger.error('Error closing Redis connection', {
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : 'Unknown error',
     });
   }
 }

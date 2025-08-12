@@ -44,14 +44,9 @@ export class GatewayAuthMiddleware {
 
       try {
         const token = this.extractToken(req);
-        
+
         if (!token) {
-          return this.handleAuthError(
-            res,
-            'Missing authentication token',
-            401,
-            req.correlationId
-          );
+          return this.handleAuthError(res, 'Missing authentication token', 401, req.correlationId);
         }
 
         // Verify token with auth service
@@ -60,21 +55,16 @@ export class GatewayAuthMiddleware {
           {},
           {
             headers: {
-              'Authorization': `Bearer ${token}`,
-              'X-Correlation-ID': req.correlationId
+              Authorization: `Bearer ${token}`,
+              'X-Correlation-ID': req.correlationId,
             },
             timeout: 5000,
-            validateStatus: () => true
+            validateStatus: () => true,
           }
         );
 
         if (response.status !== 200 || !response.data.success) {
-          return this.handleAuthError(
-            res,
-            'Invalid or expired token',
-            401,
-            req.correlationId
-          );
+          return this.handleAuthError(res, 'Invalid or expired token', 401, req.correlationId);
         }
 
         // Add auth context to request
@@ -89,15 +79,14 @@ export class GatewayAuthMiddleware {
 
         this.logger.debug('Token verified successfully', {
           userId: req.auth.userId,
-          correlationId: req.correlationId
+          correlationId: req.correlationId,
         });
 
         next();
-
       } catch (error) {
         this.logger.error('Token verification failed', {
           error: (error as Error).message,
-          correlationId: req.correlationId
+          correlationId: req.correlationId,
         });
 
         if (axios.isAxiosError(error) && error.code === 'ECONNREFUSED') {
@@ -105,19 +94,14 @@ export class GatewayAuthMiddleware {
             success: false,
             error: {
               code: 'AUTH_SERVICE_UNAVAILABLE',
-              message: 'Authentication service is temporarily unavailable'
+              message: 'Authentication service is temporarily unavailable',
             },
             correlationId: req.correlationId,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
           });
         }
 
-        return this.handleAuthError(
-          res,
-          'Authentication failed',
-          500,
-          req.correlationId
-        );
+        return this.handleAuthError(res, 'Authentication failed', 500, req.correlationId);
       }
     };
   }
@@ -128,12 +112,7 @@ export class GatewayAuthMiddleware {
   requireRoles(requiredRoles: string[], requireAll: boolean = false) {
     return async (req: Request, res: Response, next: NextFunction) => {
       if (!req.auth) {
-        return this.handleAuthError(
-          res,
-          'Authentication required',
-          401,
-          req.correlationId
-        );
+        return this.handleAuthError(res, 'Authentication required', 401, req.correlationId);
       }
 
       const hasRequiredRoles = requireAll
@@ -145,7 +124,7 @@ export class GatewayAuthMiddleware {
           userId: req.auth.userId,
           requiredRoles,
           userRoles: req.auth.roles,
-          correlationId: req.correlationId
+          correlationId: req.correlationId,
         });
 
         return this.handleAuthError(
@@ -166,12 +145,7 @@ export class GatewayAuthMiddleware {
   requirePermissions(requiredPermissions: string[], requireAll: boolean = true) {
     return async (req: Request, res: Response, next: NextFunction) => {
       if (!req.auth) {
-        return this.handleAuthError(
-          res,
-          'Authentication required',
-          401,
-          req.correlationId
-        );
+        return this.handleAuthError(res, 'Authentication required', 401, req.correlationId);
       }
 
       const hasRequiredPermissions = requireAll
@@ -183,7 +157,7 @@ export class GatewayAuthMiddleware {
           userId: req.auth.userId,
           requiredPermissions,
           userPermissions: req.auth.permissions,
-          correlationId: req.correlationId
+          correlationId: req.correlationId,
         });
 
         return this.handleAuthError(
@@ -203,7 +177,7 @@ export class GatewayAuthMiddleware {
    */
   private extractToken(req: Request): string | null {
     const authHeader = req.headers.authorization;
-    
+
     if (authHeader && authHeader.startsWith('Bearer ')) {
       return authHeader.substring(7);
     }
@@ -228,12 +202,10 @@ export class GatewayAuthMiddleware {
       '/api/v1/auth/forgot-password',
       '/api/v1/auth/reset-password',
       '/api/v1/docs',
-      '/api/v1/openapi.json'
+      '/api/v1/openapi.json',
     ];
 
-    return publicPaths.some(publicPath => 
-      path === publicPath || path.startsWith(publicPath + '/')
-    );
+    return publicPaths.some(publicPath => path === publicPath || path.startsWith(publicPath + '/'));
   }
 
   /**
@@ -249,10 +221,10 @@ export class GatewayAuthMiddleware {
       success: false,
       error: {
         code: statusCode === 401 ? 'AUTHENTICATION_REQUIRED' : 'AUTHORIZATION_FAILED',
-        message
+        message,
       },
       correlationId,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 }

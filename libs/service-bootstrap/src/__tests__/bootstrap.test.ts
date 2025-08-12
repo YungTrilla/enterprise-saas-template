@@ -8,26 +8,26 @@ jest.mock('../database', () => ({
   createDatabaseConnection: jest.fn().mockResolvedValue({
     query: jest.fn(),
     end: jest.fn(),
-    on: jest.fn()
+    on: jest.fn(),
   }),
-  checkDatabaseHealth: jest.fn().mockResolvedValue({ 
-    status: 'connected', 
-    latency: 5 
+  checkDatabaseHealth: jest.fn().mockResolvedValue({
+    status: 'connected',
+    latency: 5,
   }),
-  closeDatabaseConnection: jest.fn().mockResolvedValue(undefined)
+  closeDatabaseConnection: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock('../redis', () => ({
   createRedisConnection: jest.fn().mockResolvedValue({
     ping: jest.fn(),
     disconnect: jest.fn(),
-    on: jest.fn()
+    on: jest.fn(),
   }),
-  checkRedisHealth: jest.fn().mockResolvedValue({ 
-    status: 'connected', 
-    latency: 2 
+  checkRedisHealth: jest.fn().mockResolvedValue({
+    status: 'connected',
+    latency: 2,
   }),
-  closeRedisConnection: jest.fn().mockResolvedValue(undefined)
+  closeRedisConnection: jest.fn().mockResolvedValue(undefined),
 }));
 
 describe('bootstrapService', () => {
@@ -35,7 +35,7 @@ describe('bootstrapService', () => {
     name: 'test-service',
     version: '1.0.0',
     environment: 'test',
-    port: 3000
+    port: 3000,
   };
 
   afterEach(() => {
@@ -55,7 +55,7 @@ describe('bootstrapService', () => {
         expect.any(Object),
         expect.objectContaining({
           logger: expect.any(Object),
-          config: baseConfig
+          config: baseConfig,
         })
       );
     });
@@ -63,32 +63,32 @@ describe('bootstrapService', () => {
     it('should create health check endpoints', async () => {
       const result = await bootstrapService(baseConfig, () => {});
       const response = await request(result.app).get('/health');
-      
+
       expect(response.status).toBe(200);
       expect(response.body).toMatchObject({
         status: 'healthy',
         service: 'test-service',
         version: '1.0.0',
-        environment: 'test'
+        environment: 'test',
       });
     });
 
     it('should create service info endpoint', async () => {
       const result = await bootstrapService(baseConfig, () => {});
       const response = await request(result.app).get('/api/v1/info');
-      
+
       expect(response.status).toBe(200);
       expect(response.body).toMatchObject({
         service: 'test-service',
         version: '1.0.0',
-        environment: 'test'
+        environment: 'test',
       });
     });
 
     it('should handle 404 routes', async () => {
       const result = await bootstrapService(baseConfig, () => {});
       const response = await request(result.app).get('/non-existent');
-      
+
       expect(response.status).toBe(404);
       expect(response.body).toMatchObject({ error: 'Not found' });
     });
@@ -100,15 +100,15 @@ describe('bootstrapService', () => {
         ...baseConfig,
         cors: {
           enabled: true,
-          origins: ['http://localhost:3001']
-        }
+          origins: ['http://localhost:3001'],
+        },
       };
-      
+
       const result = await bootstrapService(config, () => {});
       const response = await request(result.app)
         .options('/api/v1/test')
         .set('Origin', 'http://localhost:3001');
-      
+
       expect(response.headers['access-control-allow-origin']).toBe('http://localhost:3001');
     });
 
@@ -118,25 +118,25 @@ describe('bootstrapService', () => {
         rateLimit: {
           enabled: true,
           windowMs: 100,
-          maxRequests: 2
-        }
+          maxRequests: 2,
+        },
       };
-      
-      const result = await bootstrapService(config, (app) => {
+
+      const result = await bootstrapService(config, app => {
         app.get('/test', (req, res) => res.json({ ok: true }));
       });
 
       // Make requests up to the limit
       await request(result.app).get('/test');
       await request(result.app).get('/test');
-      
+
       // This should be rate limited
       const response = await request(result.app).get('/test');
       expect(response.status).toBe(429);
     });
 
     it('should add correlation ID to requests', async () => {
-      const result = await bootstrapService(baseConfig, (app) => {
+      const result = await bootstrapService(baseConfig, app => {
         app.get('/test', (req, res) => {
           res.json({ correlationId: req.correlationId });
         });
@@ -148,7 +148,7 @@ describe('bootstrapService', () => {
     });
 
     it('should preserve existing correlation ID', async () => {
-      const result = await bootstrapService(baseConfig, (app) => {
+      const result = await bootstrapService(baseConfig, app => {
         app.get('/test', (req, res) => {
           res.json({ correlationId: req.correlationId });
         });
@@ -157,7 +157,7 @@ describe('bootstrapService', () => {
       const response = await request(result.app)
         .get('/test')
         .set('x-correlation-id', 'existing-id');
-      
+
       expect(response.body.correlationId).toBe('existing-id');
       expect(response.headers['x-correlation-id']).toBe('existing-id');
     });
@@ -169,8 +169,8 @@ describe('bootstrapService', () => {
         ...baseConfig,
         database: {
           enabled: true,
-          connectionString: 'postgresql://test'
-        }
+          connectionString: 'postgresql://test',
+        },
       };
 
       const result = await bootstrapService(config, () => {});
@@ -181,8 +181,8 @@ describe('bootstrapService', () => {
       const config = {
         ...baseConfig,
         database: {
-          enabled: false
-        }
+          enabled: false,
+        },
       };
 
       const result = await bootstrapService(config, () => {});
@@ -194,20 +194,20 @@ describe('bootstrapService', () => {
         ...baseConfig,
         database: {
           enabled: true,
-          connectionString: 'postgresql://test'
+          connectionString: 'postgresql://test',
         },
         healthCheck: {
-          detailed: true
-        }
+          detailed: true,
+        },
       };
 
       const result = await bootstrapService(config, () => {});
       const response = await request(result.app).get('/health');
-      
+
       expect(response.body.checks).toHaveProperty('database');
       expect(response.body.checks.database).toMatchObject({
         status: 'connected',
-        latency: 5
+        latency: 5,
       });
     });
   });
@@ -218,8 +218,8 @@ describe('bootstrapService', () => {
         ...baseConfig,
         redis: {
           enabled: true,
-          url: 'redis://localhost'
-        }
+          url: 'redis://localhost',
+        },
       };
 
       const result = await bootstrapService(config, () => {});
@@ -235,8 +235,8 @@ describe('bootstrapService', () => {
         redis: {
           enabled: true,
           url: 'redis://localhost',
-          optional: true
-        }
+          optional: true,
+        },
       };
 
       const result = await bootstrapService(config, () => {});
@@ -254,7 +254,7 @@ describe('bootstrapService', () => {
 
       const result = await bootstrapService(baseConfig, setupRoutes);
       const response = await request(result.app).get('/custom');
-      
+
       expect(response.status).toBe(200);
       expect(response.body).toMatchObject({ message: 'Custom route' });
     });
@@ -265,23 +265,23 @@ describe('bootstrapService', () => {
         ...baseConfig,
         database: {
           enabled: true,
-          connectionString: 'postgresql://test'
+          connectionString: 'postgresql://test',
         },
         redis: {
           enabled: true,
-          url: 'redis://localhost'
-        }
+          url: 'redis://localhost',
+        },
       };
 
       await bootstrapService(config, setupRoutes);
-      
+
       expect(setupRoutes).toHaveBeenCalledWith(
         expect.any(Object),
         expect.objectContaining({
           logger: expect.any(Object),
           db: expect.any(Object),
           redis: expect.any(Object),
-          config: config
+          config: config,
         })
       );
     });
@@ -291,7 +291,7 @@ describe('bootstrapService', () => {
     it('should provide liveness probe', async () => {
       const result = await bootstrapService(baseConfig, () => {});
       const response = await request(result.app).get('/health/live');
-      
+
       expect(response.status).toBe(200);
       expect(response.body).toMatchObject({ status: 'alive' });
     });
@@ -301,19 +301,19 @@ describe('bootstrapService', () => {
         ...baseConfig,
         database: {
           enabled: true,
-          connectionString: 'postgresql://test'
-        }
+          connectionString: 'postgresql://test',
+        },
       };
 
       const result = await bootstrapService(config, () => {});
       const response = await request(result.app).get('/health/ready');
-      
+
       expect(response.status).toBe(200);
       expect(response.body).toMatchObject({
         ready: true,
         checks: {
-          database: 'connected'
-        }
+          database: 'connected',
+        },
       });
     });
 
@@ -323,13 +323,13 @@ describe('bootstrapService', () => {
         ...baseConfig,
         healthCheck: {
           detailed: true,
-          custom: customHealthCheck
-        }
+          custom: customHealthCheck,
+        },
       };
 
       const result = await bootstrapService(config, () => {});
       const response = await request(result.app).get('/health');
-      
+
       expect(customHealthCheck).toHaveBeenCalled();
       expect(response.body.checks.custom).toMatchObject({ custom: 'ok' });
     });
@@ -337,7 +337,7 @@ describe('bootstrapService', () => {
 
   describe('Error Handling', () => {
     it('should handle route errors', async () => {
-      const result = await bootstrapService(baseConfig, (app) => {
+      const result = await bootstrapService(baseConfig, app => {
         app.get('/error', (req, res, next) => {
           next(new Error('Test error'));
         });
@@ -349,7 +349,7 @@ describe('bootstrapService', () => {
     });
 
     it('should handle async route errors', async () => {
-      const result = await bootstrapService(baseConfig, (app) => {
+      const result = await bootstrapService(baseConfig, app => {
         app.get('/async-error', async (req, res) => {
           throw new Error('Async error');
         });

@@ -1,0 +1,44 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Enterprise SaaS Template - Pre-push Quality Gate
+# This hook ensures comprehensive quality before pushing code
+
+echo "🔍 Running pre-push quality checks..."
+echo "📦 This may take a few moments..."
+
+# Run basic validation first (lint, typecheck, test)
+echo "🔧 Running core validation..."
+pnpm run validate
+
+# Check if basic validation was successful
+if [ $? -ne 0 ]; then
+  echo "❌ Core validation failed!"
+  echo "Please fix the issues above before pushing."
+  echo ""
+  echo "💡 Quick fixes:"
+  echo "  - Run 'pnpm run lint:fix' to auto-fix linting issues"
+  echo "  - Run 'pnpm run format' to format code"
+  echo "  - Run 'pnpm run typecheck' to check TypeScript errors"
+  echo "  - Run 'pnpm test' to run tests"
+  exit 1
+fi
+
+# Run comprehensive quality gates in strict mode for push
+echo "🏗️  Running comprehensive quality gates (strict mode)..."
+./scripts/quality-gates.sh --all --strict
+
+# Check if quality gates passed in strict mode
+if [ $? -ne 0 ]; then
+  echo "❌ Quality gates failed in strict mode!"
+  echo "Please address the quality issues above before pushing."
+  echo ""
+  echo "💡 Options:"
+  echo "  - Fix the issues and try again"
+  echo "  - Run './scripts/quality-gates.sh --all' to see details"
+  echo "  - Use 'git push --no-verify' to bypass (not recommended for production)"
+  exit 1
+fi
+
+echo "✅ All pre-push quality checks passed!"
+echo "🚀 Push proceeding..."

@@ -14,9 +14,9 @@ export abstract class BaseServiceClient {
     this.serviceName = serviceName;
     this.baseURL = config.baseURL;
     this.httpClient = new HttpClient(config);
-    
+
     // Add service-specific request interceptor
-    this.httpClient.addRequestInterceptor((config) => {
+    this.httpClient.addRequestInterceptor(config => {
       // Add service identifier to headers
       config.headers = {
         ...config.headers,
@@ -27,12 +27,12 @@ export abstract class BaseServiceClient {
     });
 
     // Add structured logging interceptor
-    this.httpClient.addResponseInterceptor((response) => {
+    this.httpClient.addResponseInterceptor(response => {
       this.logRequest('SUCCESS', response.config, response);
       return response;
     });
 
-    this.httpClient.addErrorInterceptor((error) => {
+    this.httpClient.addErrorInterceptor(error => {
       this.logRequest('ERROR', error.config, null, error);
       return Promise.reject(error);
     });
@@ -62,12 +62,7 @@ export abstract class BaseServiceClient {
   /**
    * Log requests for monitoring and debugging
    */
-  private logRequest(
-    status: 'SUCCESS' | 'ERROR',
-    config: any,
-    response?: any,
-    error?: any
-  ): void {
+  private logRequest(status: 'SUCCESS' | 'ERROR', config: any, response?: any, error?: any): void {
     const logEntry = {
       timestamp: new Date().toISOString(),
       service: this.serviceName,
@@ -97,21 +92,33 @@ export abstract class BaseServiceClient {
   /**
    * Standard POST request with service-specific error handling
    */
-  protected async post<T>(endpoint: string, data?: any, config?: ApiRequestConfig): Promise<ApiResponse<T>> {
+  protected async post<T>(
+    endpoint: string,
+    data?: any,
+    config?: ApiRequestConfig
+  ): Promise<ApiResponse<T>> {
     return this.httpClient.post<T>(endpoint, data, config);
   }
 
   /**
    * Standard PUT request with service-specific error handling
    */
-  protected async put<T>(endpoint: string, data?: any, config?: ApiRequestConfig): Promise<ApiResponse<T>> {
+  protected async put<T>(
+    endpoint: string,
+    data?: any,
+    config?: ApiRequestConfig
+  ): Promise<ApiResponse<T>> {
     return this.httpClient.put<T>(endpoint, data, config);
   }
 
   /**
    * Standard PATCH request with service-specific error handling
    */
-  protected async patch<T>(endpoint: string, data?: any, config?: ApiRequestConfig): Promise<ApiResponse<T>> {
+  protected async patch<T>(
+    endpoint: string,
+    data?: any,
+    config?: ApiRequestConfig
+  ): Promise<ApiResponse<T>> {
     return this.httpClient.patch<T>(endpoint, data, config);
   }
 
@@ -164,7 +171,7 @@ export abstract class BaseServiceClient {
   ): Promise<ApiResponse<any>> {
     const formData = new FormData();
     formData.append('file', file);
-    
+
     if (metadata) {
       Object.entries(metadata).forEach(([key, value]) => {
         formData.append(key, value);

@@ -7,10 +7,12 @@ const inputVariants = cva(
   {
     variants: {
       variant: {
-        default: 'border-input hover:border-primary/50 focus-visible:ring-primary focus-visible:border-primary',
+        default:
+          'border-input hover:border-primary/50 focus-visible:ring-primary focus-visible:border-primary',
         error: 'border-destructive focus-visible:ring-destructive hover:border-destructive/70',
         success: 'border-success focus-visible:ring-success hover:border-success/70',
-        glass: 'bg-background/50 backdrop-blur-sm border-border/50 hover:border-primary/50 focus-visible:ring-primary',
+        glass:
+          'bg-background/50 backdrop-blur-sm border-border/50 hover:border-primary/50 focus-visible:ring-primary',
       },
       inputSize: {
         sm: 'h-8 text-xs',
@@ -36,36 +38,36 @@ export interface InputProps
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ 
-    className, 
-    type, 
-    variant, 
-    inputSize,
-    leftIcon,
-    rightIcon,
-    error,
-    label,
-    helperText,
-    id,
-    ...props 
-  }, ref) => {
+  (
+    {
+      className,
+      type,
+      variant,
+      inputSize,
+      leftIcon,
+      rightIcon,
+      error,
+      label,
+      helperText,
+      id,
+      ...props
+    },
+    ref
+  ) => {
     const inputId = id || `input-${Math.random().toString(36).substr(2, 9)}`;
     const hasError = Boolean(error);
     const finalVariant = hasError ? 'error' : variant;
 
     return (
-      <div className="w-full">
+      <div className='w-full'>
         {label && (
-          <label 
-            htmlFor={inputId}
-            className="block text-sm font-medium text-foreground mb-2"
-          >
+          <label htmlFor={inputId} className='block text-sm font-medium text-foreground mb-2'>
             {label}
           </label>
         )}
-        <div className="relative">
+        <div className='relative'>
           {leftIcon && (
-            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">
+            <div className='absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground'>
               {leftIcon}
             </div>
           )}
@@ -81,16 +83,15 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             {...props}
           />
           {rightIcon && (
-            <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">
+            <div className='absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground'>
               {rightIcon}
             </div>
           )}
         </div>
         {(error || helperText) && (
-          <p className={cn(
-            'mt-2 text-xs',
-            hasError ? 'text-destructive' : 'text-muted-foreground'
-          )}>
+          <p
+            className={cn('mt-2 text-xs', hasError ? 'text-destructive' : 'text-muted-foreground')}
+          >
             {error || helperText}
           </p>
         )}

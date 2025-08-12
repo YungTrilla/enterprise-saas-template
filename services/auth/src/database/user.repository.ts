@@ -14,8 +14,8 @@ export class UserRepository {
   }
 
   async query<T = unknown>(
-    query: string, 
-    values: unknown[] = [], 
+    query: string,
+    values: unknown[] = [],
     correlationId?: CorrelationId
   ): Promise<T[]> {
     const client = await this.pool.connect();
@@ -23,9 +23,9 @@ export class UserRepository {
       const result = await client.query(query, values);
       return result.rows;
     } catch (error) {
-      this.logger.error('Query execution failed', { 
-        error: (error as Error).message, 
-        correlationId 
+      this.logger.error('Query execution failed', {
+        error: (error as Error).message,
+        correlationId,
       });
       throw error;
     } finally {
@@ -34,8 +34,8 @@ export class UserRepository {
   }
 
   private async executeQuery<T = unknown>(
-    query: string, 
-    values: unknown[] = [], 
+    query: string,
+    values: unknown[] = [],
     correlationId?: CorrelationId
   ): Promise<T[]> {
     return this.query<T>(query, values, correlationId);
@@ -173,7 +173,8 @@ export class UserRepository {
 
     // Role filtering
     if (filter.roles && filter.roles.length > 0) {
-      joinClause = 'INNER JOIN user_roles ur ON u.id = ur.user_id INNER JOIN roles r ON ur.role_id = r.id';
+      joinClause =
+        'INNER JOIN user_roles ur ON u.id = ur.user_id INNER JOIN roles r ON ur.role_id = r.id';
       if (Array.isArray(filter.roles)) {
         whereClause += ` AND r.name = ANY($${paramIndex}::text[])`;
         values.push(filter.roles);
@@ -186,7 +187,11 @@ export class UserRepository {
 
     // Count query
     const countQuery = `SELECT COUNT(DISTINCT u.id) FROM users u ${joinClause} ${whereClause}`;
-    const countResult = await this.executeQuery<{ count: string }>(countQuery, values, correlationId);
+    const countResult = await this.executeQuery<{ count: string }>(
+      countQuery,
+      values,
+      correlationId
+    );
     const total = parseInt(countResult[0].count, 10);
 
     // Data query
@@ -236,7 +241,7 @@ export class UserRepository {
         AND deleted_at IS NULL
         AND is_active = true
     `;
-    
+
     const result = await this.pool.query(query, [updatedBy, userIds]);
     return result.rowCount || 0;
   }

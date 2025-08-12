@@ -54,9 +54,9 @@ describe('RbacCoreService', () => {
 
       mockAuthRepository.getUserRoles.mockRejectedValue(new Error('Database error'));
 
-      await expect(
-        rbacCoreService.getUserRoles(userId, correlationId)
-      ).rejects.toThrow('Database error');
+      await expect(rbacCoreService.getUserRoles(userId, correlationId)).rejects.toThrow(
+        'Database error'
+      );
     });
   });
 

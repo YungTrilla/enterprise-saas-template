@@ -7,7 +7,11 @@ import request from 'supertest';
 import { authRoutes } from '../auth.routes';
 import { AuthService } from '../../services/auth.service';
 import { AuthMiddleware } from '../../middleware/auth.middleware';
-import { createMockUser, createMockAuthConfig, createCorrelationId } from '../../__tests__/utils/test-helpers';
+import {
+  createMockUser,
+  createMockAuthConfig,
+  createCorrelationId,
+} from '../../__tests__/utils/test-helpers';
 import { ILoginRequest } from '../../types/auth';
 
 describe('Auth Routes', () => {
@@ -41,7 +45,7 @@ describe('Auth Routes', () => {
         req.user = { id: 'user-123', email: 'test@example.com' };
         next();
       }),
-      authorize: jest.fn((permissions) => (req, res, next) => next()),
+      authorize: jest.fn(permissions => (req, res, next) => next()),
       requireMfa: jest.fn((req, res, next) => next()),
       correlationId: jest.fn((req, res, next) => {
         req.correlationId = createCorrelationId();
@@ -75,10 +79,7 @@ describe('Auth Routes', () => {
 
       mockAuthService.login.mockResolvedValue(mockResponse);
 
-      const response = await request(app)
-        .post('/api/v1/auth/login')
-        .send(loginRequest)
-        .expect(200);
+      const response = await request(app).post('/api/v1/auth/login').send(loginRequest).expect(200);
 
       expect(response.body).toMatchObject({
         success: true,
@@ -108,10 +109,7 @@ describe('Auth Routes', () => {
 
       mockAuthService.login.mockRejectedValue(new Error('Invalid email or password'));
 
-      const response = await request(app)
-        .post('/api/v1/auth/login')
-        .send(loginRequest)
-        .expect(401);
+      const response = await request(app).post('/api/v1/auth/login').send(loginRequest).expect(401);
 
       expect(response.body).toMatchObject({
         success: false,

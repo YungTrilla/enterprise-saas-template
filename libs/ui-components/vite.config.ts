@@ -15,7 +15,7 @@ export default defineConfig({
       entry: resolve(__dirname, 'src/index.ts'),
       name: 'AbyssUIComponents',
       formats: ['es', 'cjs'],
-      fileName: (format) => `index.${format === 'es' ? 'esm' : format}.js`,
+      fileName: format => `index.${format === 'es' ? 'esm' : format}.js`,
     },
     rollupOptions: {
       external: ['react', 'react-dom'],

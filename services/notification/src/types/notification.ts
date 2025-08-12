@@ -44,13 +44,13 @@ export interface NotificationResponse {
 
 export type NotificationType = 'email' | 'sms' | 'push';
 
-export type NotificationStatus = 
-  | 'pending' 
-  | 'scheduled' 
-  | 'sending' 
-  | 'sent' 
-  | 'delivered' 
-  | 'failed' 
+export type NotificationStatus =
+  | 'pending'
+  | 'scheduled'
+  | 'sending'
+  | 'sent'
+  | 'delivered'
+  | 'failed'
   | 'cancelled';
 
 export type NotificationPriority = 'low' | 'normal' | 'high' | 'urgent';

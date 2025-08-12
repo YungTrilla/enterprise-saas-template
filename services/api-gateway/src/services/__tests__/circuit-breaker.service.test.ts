@@ -39,17 +39,17 @@ describe('CircuitBreakerService', () => {
 
       // Fail 3 times to reach threshold
       for (let i = 0; i < 3; i++) {
-        await expect(
-          circuitBreaker.execute(serviceName, mockFailingFunction)
-        ).rejects.toThrow('failure');
+        await expect(circuitBreaker.execute(serviceName, mockFailingFunction)).rejects.toThrow(
+          'failure'
+        );
       }
 
       expect(mockFailingFunction).toHaveBeenCalledTimes(3);
 
       // Circuit should now be open
-      await expect(
-        circuitBreaker.execute(serviceName, mockFailingFunction)
-      ).rejects.toThrow('Service failing-service is currently unavailable (circuit open)');
+      await expect(circuitBreaker.execute(serviceName, mockFailingFunction)).rejects.toThrow(
+        'Service failing-service is currently unavailable (circuit open)'
+      );
 
       // Function should not be called when circuit is open
       expect(mockFailingFunction).toHaveBeenCalledTimes(3);
@@ -60,9 +60,7 @@ describe('CircuitBreakerService', () => {
 
       // Open the circuit
       for (let i = 0; i < 3; i++) {
-        await expect(
-          circuitBreaker.execute(serviceName, mockFailingFunction)
-        ).rejects.toThrow();
+        await expect(circuitBreaker.execute(serviceName, mockFailingFunction)).rejects.toThrow();
       }
 
       // Circuit is now open
@@ -73,9 +71,9 @@ describe('CircuitBreakerService', () => {
       await new Promise(resolve => setTimeout(resolve, 1100));
 
       // Try to execute - should enter half-open state
-      await expect(
-        circuitBreaker.execute(serviceName, mockFailingFunction)
-      ).rejects.toThrow('failure');
+      await expect(circuitBreaker.execute(serviceName, mockFailingFunction)).rejects.toThrow(
+        'failure'
+      );
 
       const state2 = circuitBreaker.getState(serviceName);
       expect(state2.state).toBe('open'); // Back to open after failure in half-open
@@ -93,9 +91,7 @@ describe('CircuitBreakerService', () => {
 
       // Open the circuit
       for (let i = 0; i < 3; i++) {
-        await expect(
-          circuitBreaker.execute(serviceName, conditionalFunction)
-        ).rejects.toThrow();
+        await expect(circuitBreaker.execute(serviceName, conditionalFunction)).rejects.toThrow();
       }
 
       // Circuit is open
@@ -118,9 +114,7 @@ describe('CircuitBreakerService', () => {
 
       // Make service1 fail
       for (let i = 0; i < 3; i++) {
-        await expect(
-          circuitBreaker.execute(service1, mockFailingFunction)
-        ).rejects.toThrow();
+        await expect(circuitBreaker.execute(service1, mockFailingFunction)).rejects.toThrow();
       }
 
       // Service1 should be open
@@ -151,9 +145,7 @@ describe('CircuitBreakerService', () => {
 
       // Execute some successful and failed requests
       await circuitBreaker.execute(serviceName, mockSuccessFunction);
-      await expect(
-        circuitBreaker.execute(serviceName, mockFailingFunction)
-      ).rejects.toThrow();
+      await expect(circuitBreaker.execute(serviceName, mockFailingFunction)).rejects.toThrow();
       await circuitBreaker.execute(serviceName, mockSuccessFunction);
 
       const state = circuitBreaker.getState(serviceName);
@@ -168,9 +160,7 @@ describe('CircuitBreakerService', () => {
       // Execute on multiple services
       await circuitBreaker.execute('service1', mockSuccessFunction);
       await circuitBreaker.execute('service2', mockSuccessFunction);
-      await expect(
-        circuitBreaker.execute('service3', mockFailingFunction)
-      ).rejects.toThrow();
+      await expect(circuitBreaker.execute('service3', mockFailingFunction)).rejects.toThrow();
 
       const states = circuitBreaker.getAllStates();
 
@@ -188,9 +178,7 @@ describe('CircuitBreakerService', () => {
 
       // Make it fail
       for (let i = 0; i < 3; i++) {
-        await expect(
-          circuitBreaker.execute(serviceName, mockFailingFunction)
-        ).rejects.toThrow();
+        await expect(circuitBreaker.execute(serviceName, mockFailingFunction)).rejects.toThrow();
       }
 
       expect(circuitBreaker.getState(serviceName).state).toBe('open');
@@ -216,14 +204,14 @@ describe('CircuitBreakerService', () => {
       const serviceName = 'custom-service';
 
       // Should open after just one failure
-      await expect(
-        customBreaker.execute(serviceName, mockFailingFunction)
-      ).rejects.toThrow('failure');
+      await expect(customBreaker.execute(serviceName, mockFailingFunction)).rejects.toThrow(
+        'failure'
+      );
 
       // Circuit should be open
-      await expect(
-        customBreaker.execute(serviceName, mockFailingFunction)
-      ).rejects.toThrow('Service custom-service is currently unavailable (circuit open)');
+      await expect(customBreaker.execute(serviceName, mockFailingFunction)).rejects.toThrow(
+        'Service custom-service is currently unavailable (circuit open)'
+      );
     });
   });
 
@@ -233,9 +221,9 @@ describe('CircuitBreakerService', () => {
         throw new Error('sync error');
       });
 
-      await expect(
-        circuitBreaker.execute('sync-error-service', syncErrorFunction)
-      ).rejects.toThrow('sync error');
+      await expect(circuitBreaker.execute('sync-error-service', syncErrorFunction)).rejects.toThrow(
+        'sync error'
+      );
     });
 
     it('should pass through successful values of any type', async () => {

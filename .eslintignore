@@ -1,0 +1,100 @@
+# === BUILD OUTPUT ===
+node_modules/
+dist/
+build/
+.turbo/
+coverage/
+.next/
+out/
+
+# === GENERATED FILES ===
+generated/
+*.generated.ts
+*.generated.js
+*.d.ts
+!src/**/*.d.ts
+*.min.js
+*.min.css
+*.tsbuildinfo
+
+# === DATABASE & MIGRATIONS ===
+migrations/*.js
+migrations/*.sql
+*.sql
+
+# === LOGS ===
+*.log
+logs/
+
+# === CACHE DIRECTORIES ===
+.cache/
+.parcel-cache/
+.vscode/
+.idea/
+
+# === STORYBOOK ===
+storybook-static/
+.storybook/public/
+
+# === TESTING ===
+coverage/
+.nyc_output/
+junit.xml
+
+# === CONFIGURATION (AUTO-GENERATED) ===
+webpack.config.js
+rollup.config.js
+vite.config.js.timestamp-*
+
+# === DOCKER ===
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# === ENVIRONMENT ===
+.env*
+!.env.example
+
+# === PACKAGE MANAGERS ===
+yarn.lock
+package-lock.json
+.yarn/
+.pnpm-store/
+.pnpm-debug.log*
+
+# === DOCUMENTATION ===
+docs/build/
+*.md
+!src/**/*.md
+
+# === VERSION CONTROL ===
+.git/
+.gitignore
+
+# === TEMPORARY FILES ===
+tmp/
+temp/
+*.tmp
+*.temp
+
+# === OS SPECIFIC ===
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# === OPENAPI/SWAGGER ===
+openapi/generated/
+swagger-ui/
+
+# === SCRIPTS (IF THEY'RE SHELL SCRIPTS) ===
+scripts/*.sh
+!scripts/*.js
+!scripts/*.ts
+
+# === SPECIFIC TEMPLATE FILES ===
+CHANGELOG.md
+LICENSE
+TEMPLATE_USAGE_GUIDE.md
+EXTRACTION_SUMMARY.md
+CONTRIBUTING.md

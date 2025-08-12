@@ -9,37 +9,37 @@ export interface ITenantStorageProvider {
    * Get tenant by ID
    */
   getTenantById(tenantId: string): Promise<ITenant | null>;
-  
+
   /**
    * Get tenant by slug
    */
   getTenantBySlug(slug: string): Promise<ITenant | null>;
-  
+
   /**
    * Get tenant by domain
    */
   getTenantByDomain(domain: string): Promise<ITenant | null>;
-  
+
   /**
    * Get tenant by subdomain
    */
   getTenantBySubdomain(subdomain: string): Promise<ITenant | null>;
-  
+
   /**
    * Create new tenant
    */
   createTenant(tenant: Omit<ITenant, 'id' | 'createdAt' | 'updatedAt'>): Promise<ITenant>;
-  
+
   /**
    * Update existing tenant
    */
   updateTenant(tenantId: string, updates: Partial<ITenant>): Promise<ITenant | null>;
-  
+
   /**
    * Delete tenant
    */
   deleteTenant(tenantId: string): Promise<boolean>;
-  
+
   /**
    * List tenants with pagination
    */
@@ -57,22 +57,22 @@ export interface ITenantStorageProvider {
       totalPages: number;
     };
   }>;
-  
+
   /**
    * Cache tenant data
    */
   cacheTenant(tenant: ITenant, ttlSeconds?: number): Promise<void>;
-  
+
   /**
    * Get cached tenant
    */
   getCachedTenant(tenantId: string): Promise<ITenant | null>;
-  
+
   /**
    * Clear tenant cache
    */
   clearTenantCache(tenantId: string): Promise<void>;
-  
+
   /**
    * Health check
    */
@@ -91,7 +91,7 @@ export interface IStorageConfig {
     maxConnections: number;
     connectionTimeoutMs: number;
   };
-  
+
   // Redis configuration
   redis?: {
     host: string;
@@ -101,7 +101,7 @@ export interface IStorageConfig {
     keyPrefix: string;
     ttl: number;
   };
-  
+
   // Cache configuration
   cache?: {
     enabled: boolean;

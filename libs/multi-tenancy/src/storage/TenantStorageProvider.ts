@@ -1,6 +1,6 @@
 /**
  * Base Tenant Storage Provider
- * 
+ *
  * Abstract base class for tenant storage implementations.
  * Provides common functionality and interface definition.
  */
@@ -14,11 +14,13 @@ export abstract class TenantStorageProvider implements ITenantStorageProvider {
   protected cacheTtl: number;
   protected maxCacheEntries: number;
 
-  constructor(options: {
-    cacheEnabled?: boolean;
-    cacheTtl?: number;
-    maxCacheEntries?: number;
-  } = {}) {
+  constructor(
+    options: {
+      cacheEnabled?: boolean;
+      cacheTtl?: number;
+      maxCacheEntries?: number;
+    } = {}
+  ) {
     this.cacheEnabled = options.cacheEnabled ?? true;
     this.cacheTtl = options.cacheTtl ?? 300000; // 5 minutes
     this.maxCacheEntries = options.maxCacheEntries ?? 1000;
@@ -72,17 +74,17 @@ export abstract class TenantStorageProvider implements ITenantStorageProvider {
       ttl,
       createdAt: now,
       accessCount: 0,
-      lastAccessed: now
+      lastAccessed: now,
     };
 
     // Cache by multiple keys for fast lookup
     this.cache.set(`id:${tenant.id}`, cacheEntry);
     this.cache.set(`slug:${tenant.slug}`, cacheEntry);
-    
+
     if (tenant.domain) {
       this.cache.set(`domain:${tenant.domain}`, cacheEntry);
     }
-    
+
     if (tenant.subdomain) {
       this.cache.set(`subdomain:${tenant.subdomain}`, cacheEntry);
     }
@@ -120,7 +122,7 @@ export abstract class TenantStorageProvider implements ITenantStorageProvider {
 
     // Find and remove all cache entries for this tenant
     const keysToDelete: string[] = [];
-    
+
     for (const [key, entry] of this.cache.entries()) {
       if (entry.data.id === tenantId) {
         keysToDelete.push(key);
@@ -160,7 +162,7 @@ export abstract class TenantStorageProvider implements ITenantStorageProvider {
       tenantId: entry.data.id,
       accessCount: entry.accessCount,
       age: now - entry.createdAt,
-      ttl: entry.ttl
+      ttl: entry.ttl,
     }));
 
     // Calculate hit rate (simplified)
@@ -171,7 +173,7 @@ export abstract class TenantStorageProvider implements ITenantStorageProvider {
       size: this.cache.size,
       maxSize: this.maxCacheEntries,
       hitRate,
-      entries
+      entries,
     };
   }
 

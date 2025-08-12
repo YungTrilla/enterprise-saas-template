@@ -4,7 +4,7 @@ import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
 import { Button } from './button';
 import { Input } from './input';
 import { Badge } from './badge';
-import { Skeleton } from './skeleton';
+import { Skeleton, SkeletonTableRow } from './skeleton';
 
 export interface Column<T> {
   id: string;
@@ -111,9 +111,7 @@ export function DataTable<T>({
   const totalPages = Math.ceil(data.length / pageSize);
 
   // Handle select all
-  const isAllSelected = selectable && 
-    data.length > 0 && 
-    selectedRows.length === data.length;
+  const isAllSelected = selectable && data.length > 0 && selectedRows.length === data.length;
 
   const handleSelectAll = () => {
     if (onSelectAll) {
@@ -136,18 +134,18 @@ export function DataTable<T>({
 
   const getSortIcon = (columnId: string) => {
     if (sortColumn !== columnId) {
-      return <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />;
+      return <ChevronsUpDown className='h-4 w-4 text-muted-foreground' />;
     }
     if (sortDirection === 'asc') {
-      return <ChevronUp className="h-4 w-4" />;
+      return <ChevronUp className='h-4 w-4' />;
     }
-    return <ChevronDown className="h-4 w-4" />;
+    return <ChevronDown className='h-4 w-4' />;
   };
 
   if (loading) {
     return (
       <div className={cn('w-full', className)}>
-        <div className="space-y-2">
+        <div className='space-y-2'>
           {Array.from({ length: 5 }).map((_, i) => (
             <SkeletonTableRow key={i} columns={columns.length} />
           ))}
@@ -159,40 +157,42 @@ export function DataTable<T>({
   return (
     <div className={cn('w-full', className)}>
       {searchable && (
-        <div className="mb-4">
+        <div className='mb-4'>
           <Input
-            type="search"
+            type='search'
             placeholder={searchPlaceholder}
             value={searchQuery}
             onChange={handleSearchChange}
-            className="max-w-sm"
+            className='max-w-sm'
           />
         </div>
       )}
 
-      <div className="relative overflow-x-auto rounded-lg border">
-        <table className="w-full text-sm text-left">
-          <thead className={cn(
-            'text-xs uppercase bg-muted/50',
-            stickyHeader && 'sticky top-0 z-10',
-            headerClassName
-          )}>
+      <div className='relative overflow-x-auto rounded-lg border'>
+        <table className='w-full text-sm text-left'>
+          <thead
+            className={cn(
+              'text-xs uppercase bg-muted/50',
+              stickyHeader && 'sticky top-0 z-10',
+              headerClassName
+            )}
+          >
             <tr>
               {selectable && (
-                <th scope="col" className="p-4">
+                <th scope='col' className='p-4'>
                   <input
-                    type="checkbox"
+                    type='checkbox'
                     checked={isAllSelected}
                     onChange={handleSelectAll}
-                    className="w-4 h-4 rounded border-gray-300"
-                    aria-label="Select all rows"
+                    className='w-4 h-4 rounded border-gray-300'
+                    aria-label='Select all rows'
                   />
                 </th>
               )}
-              {columns.map((column) => (
+              {columns.map(column => (
                 <th
                   key={column.id}
-                  scope="col"
+                  scope='col'
                   className={cn(
                     'px-6 py-3',
                     column.align === 'center' && 'text-center',
@@ -202,11 +202,13 @@ export function DataTable<T>({
                   style={{ width: column.width }}
                   onClick={() => column.sortable && handleSort(column.id)}
                 >
-                  <div className={cn(
-                    'flex items-center gap-2',
-                    column.align === 'center' && 'justify-center',
-                    column.align === 'right' && 'justify-end'
-                  )}>
+                  <div
+                    className={cn(
+                      'flex items-center gap-2',
+                      column.align === 'center' && 'justify-center',
+                      column.align === 'right' && 'justify-end'
+                    )}
+                  >
                     {column.header}
                     {column.sortable && getSortIcon(column.id)}
                   </div>
@@ -219,18 +221,17 @@ export function DataTable<T>({
               <tr>
                 <td
                   colSpan={columns.length + (selectable ? 1 : 0)}
-                  className="px-6 py-8 text-center text-muted-foreground"
+                  className='px-6 py-8 text-center text-muted-foreground'
                 >
                   {emptyMessage}
                 </td>
               </tr>
             ) : (
-              paginatedData.map((row) => {
+              paginatedData.map(row => {
                 const rowId = getRowId(row);
                 const isSelected = selectedRows.includes(rowId);
-                const rowClassValue = typeof rowClassName === 'function' 
-                  ? rowClassName(row) 
-                  : rowClassName;
+                const rowClassValue =
+                  typeof rowClassName === 'function' ? rowClassName(row) : rowClassName;
 
                 return (
                   <tr
@@ -244,17 +245,17 @@ export function DataTable<T>({
                     onClick={() => onRowClick?.(row)}
                   >
                     {selectable && (
-                      <td className="p-4" onClick={(e) => e.stopPropagation()}>
+                      <td className='p-4' onClick={e => e.stopPropagation()}>
                         <input
-                          type="checkbox"
+                          type='checkbox'
                           checked={isSelected}
                           onChange={() => onSelectRow?.(rowId)}
-                          className="w-4 h-4 rounded border-gray-300"
+                          className='w-4 h-4 rounded border-gray-300'
                           aria-label={`Select row ${rowId}`}
                         />
                       </td>
                     )}
-                    {columns.map((column) => (
+                    {columns.map(column => (
                       <td
                         key={column.id}
                         className={cn(
@@ -275,28 +276,28 @@ export function DataTable<T>({
       </div>
 
       {totalPages > 1 && (
-        <div className="flex items-center justify-between mt-4">
-          <div className="text-sm text-muted-foreground">
-            Showing {((currentPage - 1) * pageSize) + 1} to{' '}
+        <div className='flex items-center justify-between mt-4'>
+          <div className='text-sm text-muted-foreground'>
+            Showing {(currentPage - 1) * pageSize + 1} to{' '}
             {Math.min(currentPage * pageSize, data.length)} of {data.length} entries
           </div>
-          <div className="flex items-center gap-2">
+          <div className='flex items-center gap-2'>
             <Button
-              variant="outline"
-              size="sm"
+              variant='outline'
+              size='sm'
               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
             >
               Previous
             </Button>
-            <div className="flex items-center gap-1">
+            <div className='flex items-center gap-1'>
               {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
                 const pageNumber = i + 1;
                 return (
                   <Button
                     key={pageNumber}
                     variant={currentPage === pageNumber ? 'default' : 'outline'}
-                    size="sm"
+                    size='sm'
                     onClick={() => setCurrentPage(pageNumber)}
                   >
                     {pageNumber}
@@ -305,8 +306,8 @@ export function DataTable<T>({
               })}
             </div>
             <Button
-              variant="outline"
-              size="sm"
+              variant='outline'
+              size='sm'
               onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
               disabled={currentPage === totalPages}
             >

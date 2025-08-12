@@ -58,12 +58,16 @@ export class AuthMfaService {
       const hashedBackupCodes = this.mfaService.hashBackupCodes(mfaSetup.backupCodes);
 
       // Store MFA secret and backup codes (but don't enable MFA yet)
-      await this.authRepository.updateUser(userId, {
-        mfaSecret: mfaSetup.secret,
-        mfaBackupCodes: hashedBackupCodes,
-        updatedAt: new Date().toISOString(),
-        updatedBy: userId
-      }, correlationId);
+      await this.authRepository.updateUser(
+        userId,
+        {
+          mfaSecret: mfaSetup.secret,
+          mfaBackupCodes: hashedBackupCodes,
+          updatedAt: new Date().toISOString(),
+          updatedBy: userId,
+        },
+        correlationId
+      );
 
       // Audit trail
       await this.auditService.logAuthEvent(
@@ -79,19 +83,18 @@ export class AuthMfaService {
 
       this.logger.info('MFA setup initiated', {
         userId,
-        backupCodeCount: mfaSetup.backupCodes.length
+        backupCodeCount: mfaSetup.backupCodes.length,
       });
 
       return {
         secret: mfaSetup.secret,
         qrCodeUrl: mfaSetup.qrCodeUrl,
-        backupCodes: mfaSetup.backupCodes
+        backupCodes: mfaSetup.backupCodes,
       };
-
     } catch (error) {
       this.logger.error('MFA setup failed', {
         userId,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       throw error;
     }
@@ -118,22 +121,22 @@ export class AuthMfaService {
       }
 
       // Verify the code
-      const isValid = this.mfaService.verifyTotpCode(
-        user.mfaSecret,
-        request.code,
-        correlationId
-      );
+      const isValid = this.mfaService.verifyTotpCode(user.mfaSecret, request.code, correlationId);
 
       if (!isValid) {
         throw new Error('Invalid MFA code');
       }
 
       // Enable MFA
-      await this.authRepository.updateUser(userId, {
-        mfaEnabled: true,
-        updatedAt: new Date().toISOString(),
-        updatedBy: userId
-      }, correlationId);
+      await this.authRepository.updateUser(
+        userId,
+        {
+          mfaEnabled: true,
+          updatedAt: new Date().toISOString(),
+          updatedBy: userId,
+        },
+        correlationId
+      );
 
       // Audit trail
       await this.auditService.logAuthEvent(
@@ -148,13 +151,12 @@ export class AuthMfaService {
       );
 
       this.logger.info('MFA enabled successfully', {
-        userId
+        userId,
       });
-
     } catch (error) {
       this.logger.error('MFA verification failed', {
         userId,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       throw error;
     }
@@ -177,24 +179,24 @@ export class AuthMfaService {
       }
 
       // Verify the code before disabling
-      const isValid = this.mfaService.verifyTotpCode(
-        user.mfaSecret!,
-        request.code,
-        correlationId
-      );
+      const isValid = this.mfaService.verifyTotpCode(user.mfaSecret!, request.code, correlationId);
 
       if (!isValid) {
         throw new Error('Invalid MFA code');
       }
 
       // Disable MFA
-      await this.authRepository.updateUser(userId, {
-        mfaEnabled: false,
-        mfaSecret: null,
-        mfaBackupCodes: [],
-        updatedAt: new Date().toISOString(),
-        updatedBy: userId
-      }, correlationId);
+      await this.authRepository.updateUser(
+        userId,
+        {
+          mfaEnabled: false,
+          mfaSecret: null,
+          mfaBackupCodes: [],
+          updatedAt: new Date().toISOString(),
+          updatedBy: userId,
+        },
+        correlationId
+      );
 
       // Audit trail
       await this.auditService.logAuthEvent(
@@ -209,13 +211,12 @@ export class AuthMfaService {
       );
 
       this.logger.info('MFA disabled successfully', {
-        userId
+        userId,
       });
-
     } catch (error) {
       this.logger.error('MFA disable failed', {
         userId,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       throw error;
     }
@@ -238,11 +239,7 @@ export class AuthMfaService {
       }
 
       // Verify the code before regenerating
-      const isValid = this.mfaService.verifyTotpCode(
-        user.mfaSecret!,
-        request.code,
-        correlationId
-      );
+      const isValid = this.mfaService.verifyTotpCode(user.mfaSecret!, request.code, correlationId);
 
       if (!isValid) {
         throw new Error('Invalid MFA code');
@@ -253,11 +250,15 @@ export class AuthMfaService {
       const hashedBackupCodes = this.mfaService.hashBackupCodes(backupCodes);
 
       // Update backup codes
-      await this.authRepository.updateUser(userId, {
-        mfaBackupCodes: hashedBackupCodes,
-        updatedAt: new Date().toISOString(),
-        updatedBy: userId
-      }, correlationId);
+      await this.authRepository.updateUser(
+        userId,
+        {
+          mfaBackupCodes: hashedBackupCodes,
+          updatedAt: new Date().toISOString(),
+          updatedBy: userId,
+        },
+        correlationId
+      );
 
       // Audit trail
       await this.auditService.logAuthEvent(
@@ -273,15 +274,14 @@ export class AuthMfaService {
 
       this.logger.info('Backup codes regenerated', {
         userId,
-        codeCount: backupCodes.length
+        codeCount: backupCodes.length,
       });
 
       return backupCodes;
-
     } catch (error) {
       this.logger.error('Backup code regeneration failed', {
         userId,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       throw error;
     }

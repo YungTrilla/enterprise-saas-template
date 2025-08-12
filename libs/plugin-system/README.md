@@ -1,18 +1,24 @@
 # Enterprise Plugin System
 
-A comprehensive plugin architecture for the Enterprise SaaS Template, enabling dynamic extension of functionality through secure, sandboxed plugins.
+A comprehensive plugin architecture for the Enterprise SaaS Template, enabling
+dynamic extension of functionality through secure, sandboxed plugins.
 
 ## 🎯 Overview
 
 The plugin system provides a complete framework for:
 
 - **Dynamic Plugin Loading** - Install, activate, and manage plugins at runtime
-- **Secure Execution** - Sandboxed environment with permission-based access control
-- **Hook System** - Extensible hooks for intercepting and extending application behavior
-- **Plugin Marketplace** - Built-in marketplace for discovering and installing plugins
-- **Dependency Management** - Automatic resolution and management of plugin dependencies
+- **Secure Execution** - Sandboxed environment with permission-based access
+  control
+- **Hook System** - Extensible hooks for intercepting and extending application
+  behavior
+- **Plugin Marketplace** - Built-in marketplace for discovering and installing
+  plugins
+- **Dependency Management** - Automatic resolution and management of plugin
+  dependencies
 - **Version Control** - Plugin versioning, updates, and rollback capabilities
-- **Performance Monitoring** - Real-time tracking of plugin performance and usage
+- **Performance Monitoring** - Real-time tracking of plugin performance and
+  usage
 
 ## 🏗️ Architecture
 
@@ -72,7 +78,7 @@ pnpm add @template/plugin-system
 ### Basic Setup
 
 ```typescript
-import { 
+import {
   PluginManager,
   PluginLoader,
   PluginExecutor,
@@ -81,11 +87,13 @@ import {
   PluginValidator,
   SecurityScanner,
   PermissionManager,
-  DependencyResolver
+  DependencyResolver,
 } from '@template/plugin-system';
 
 // Initialize components
-const storage = new DatabaseStorage({ /* db config */ });
+const storage = new DatabaseStorage({
+  /* db config */
+});
 const loader = new PluginLoader();
 const executor = new PluginExecutor({ enableSandbox: true });
 const hooks = new HookSystem();
@@ -105,7 +113,7 @@ const pluginManager = new PluginManager({
   permissionManager: permissions,
   dependencyResolver: resolver,
   enableSandbox: true,
-  maxConcurrentPlugins: 50
+  maxConcurrentPlugins: 50,
 });
 
 // Initialize
@@ -246,7 +254,7 @@ await pluginManager.installPlugin({
   source: PluginSource.MARKETPLACE,
   identifier: 'awesome-analytics-plugin',
   version: '1.2.0',
-  autoActivate: true
+  autoActivate: true,
 });
 
 // From file
@@ -255,15 +263,15 @@ await pluginManager.installPlugin({
   identifier: '/path/to/plugin.zip',
   config: {
     apiKey: 'your-api-key',
-    enabled: true
-  }
+    enabled: true,
+  },
 });
 
 // From Git repository
 await pluginManager.installPlugin({
   source: PluginSource.GIT_REPOSITORY,
   identifier: 'https://github.com/user/plugin.git',
-  version: 'v1.0.0'
+  version: 'v1.0.0',
 });
 ```
 
@@ -280,18 +288,18 @@ await pluginManager.deactivatePlugin('plugin-id');
 await pluginManager.updatePlugin({
   pluginId: 'plugin-id',
   version: '1.3.0',
-  preserveData: true
+  preserveData: true,
 });
 
 // Uninstall plugin
 await pluginManager.uninstallPlugin('plugin-id', {
-  preserveData: false
+  preserveData: false,
 });
 
 // List plugins
 const plugins = await pluginManager.listPlugins({
   status: PluginStatus.ACTIVE,
-  category: 'INTEGRATION'
+  category: 'INTEGRATION',
 });
 ```
 
@@ -344,7 +352,7 @@ app.post('/api/users', async (req, res) => {
 });
 
 // Register application hooks
-hooks.register('custom.orderProcessed', 'core', async (order) => {
+hooks.register('custom.orderProcessed', 'core', async order => {
   console.log('Order processed:', order.id);
 });
 ```
@@ -398,8 +406,8 @@ const executor = new PluginExecutor({
   restrictions: {
     network: true,
     filesystem: true,
-    subprocess: true
-  }
+    subprocess: true,
+  },
 });
 ```
 
@@ -412,11 +420,11 @@ const scanner = new SecurityScanner({
     'no-eval',
     'no-function-constructor',
     'no-require-bypass',
-    'no-malicious-patterns'
+    'no-malicious-patterns',
   ],
   customRules: [
     // Custom security rules
-  ]
+  ],
 });
 
 const scanResult = await scanner.scanPlugin(pluginData);
@@ -487,7 +495,7 @@ import { PluginMarketplace } from '@template/plugin-system';
 
 const marketplace = new PluginMarketplace({
   apiUrl: 'https://marketplace.template.com',
-  apiKey: 'your-api-key'
+  apiKey: 'your-api-key',
 });
 
 // Search plugins
@@ -496,7 +504,7 @@ const plugins = await marketplace.search({
   tags: ['reporting', 'dashboard'],
   verified: true,
   free: false,
-  rating: 4.0
+  rating: 4.0,
 });
 
 // Get plugin details
@@ -506,7 +514,7 @@ const plugin = await marketplace.getPlugin('plugin-id');
 await pluginManager.installPlugin({
   source: PluginSource.MARKETPLACE,
   identifier: plugin.id,
-  version: plugin.latestVersion
+  version: plugin.latestVersion,
 });
 ```
 
@@ -521,8 +529,8 @@ await marketplace.publishPlugin({
   documentation: 'README.md',
   license: 'MIT',
   pricing: {
-    type: 'free' // or 'paid', 'subscription'
-  }
+    type: 'free', // or 'paid', 'subscription'
+  },
 });
 ```
 
@@ -535,35 +543,35 @@ import { PluginTester } from '@template/plugin-system/testing';
 
 describe('My Plugin', () => {
   let tester: PluginTester;
-  
+
   beforeEach(async () => {
     tester = new PluginTester({
       pluginPath: './path/to/plugin',
-      mockServices: true
+      mockServices: true,
     });
     await tester.setup();
   });
-  
+
   afterEach(async () => {
     await tester.cleanup();
   });
-  
+
   it('should initialize correctly', async () => {
     const result = await tester.activate();
     expect(result.success).toBe(true);
   });
-  
+
   it('should handle hooks', async () => {
     await tester.activate();
     const result = await tester.executeHook('beforeRequest', mockRequest);
     expect(result).toBeDefined();
   });
-  
+
   it('should respect permissions', async () => {
     await tester.activate();
-    await expect(
-      tester.executeFunction('accessRestrictedAPI')
-    ).rejects.toThrow('Permission denied');
+    await expect(tester.executeFunction('accessRestrictedAPI')).rejects.toThrow(
+      'Permission denied'
+    );
   });
 });
 ```

@@ -1,9 +1,9 @@
 /**
  * Enterprise SaaS Template - Shared Types Library
- * 
+ *
  * This library contains all shared TypeScript type definitions used across
  * the Enterprise SaaS Template services and applications.
- * 
+ *
  * Following the data exchange standards:
  * - JSON format for all data interchange
  * - camelCase field naming convention
@@ -21,26 +21,24 @@ export * from './examples';
 export * from './notifications';
 
 // Export types for commonly needed entities
-export type { 
+export type {
   IUser,
   IRole,
   IPermission,
   IUserSession,
   IUserProfile,
-  IUserPreferences
+  IUserPreferences,
 } from './common';
 
-export {
-  UserStatus,
-  UserType,
-  RoleType,
-  PermissionScope
-} from './common';
+export { UserStatus, UserType, RoleType, PermissionScope } from './common';
 
 // Type utilities and helpers
 export type RequiredFields<T, K extends keyof T> = T & Required<Pick<T, K>>;
 export type OptionalFields<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
-export type WithoutAuditFields<T> = Omit<T, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy'>;
+export type WithoutAuditFields<T> = Omit<
+  T,
+  'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy'
+>;
 export type CreateRequest<T> = WithoutAuditFields<T>;
 export type UpdateRequest<T> = Partial<WithoutAuditFields<T>>;
 
@@ -324,7 +322,7 @@ export enum TenantStatus {
   ACTIVE = 'ACTIVE',
   SUSPENDED = 'SUSPENDED',
   TRIAL = 'TRIAL',
-  CANCELLED = 'CANCELLED'
+  CANCELLED = 'CANCELLED',
 }
 
 // Version info

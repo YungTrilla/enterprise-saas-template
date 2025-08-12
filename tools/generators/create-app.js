@@ -23,7 +23,10 @@ function toCamelCase(str) {
 }
 
 function toKebabCase(str) {
-  return str.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase().replace(/[\s_]/g, '-');
+  return str
+    .replace(/([a-z])([A-Z])/g, '$1-$2')
+    .toLowerCase()
+    .replace(/[\s_]/g, '-');
 }
 
 function createDirectory(dirPath) {
@@ -1515,7 +1518,7 @@ http {
 function generateReadme(appName) {
   const pascalName = toPascalCase(appName);
   const kebabName = toKebabCase(appName);
-  
+
   return `# ${pascalName}
 
 ${pascalName} application built with the Enterprise SaaS Template.
@@ -1694,7 +1697,7 @@ This project is part of the Enterprise SaaS Template.
 // Main function
 function createApp() {
   const args = process.argv.slice(2);
-  
+
   if (args.length === 0) {
     console.error('❌ Error: Application name is required');
     console.log('Usage: node create-app.js <app-name>');
@@ -1705,14 +1708,14 @@ function createApp() {
   const appName = args[0];
   const kebabName = toKebabCase(appName);
   const pascalName = toPascalCase(appName);
-  
+
   console.log(`🚀 Creating ${pascalName} Application...`);
-  
+
   // Create directory structure
   const appDir = path.join(APPS_DIR, kebabName);
   const srcDir = path.join(appDir, 'src');
   const publicDir = path.join(appDir, 'public');
-  
+
   createDirectory(appDir);
   createDirectory(srcDir);
   createDirectory(publicDir);
@@ -1755,7 +1758,10 @@ function createApp() {
   writeFile(path.join(srcDir, 'services', 'authService.ts'), generateAuthService());
 
   // Generate components
-  writeFile(path.join(srcDir, 'components', 'layout', 'MainLayout.tsx'), generateMainLayout(appName));
+  writeFile(
+    path.join(srcDir, 'components', 'layout', 'MainLayout.tsx'),
+    generateMainLayout(appName)
+  );
 
   // Generate pages
   writeFile(path.join(srcDir, 'pages', 'Dashboard.tsx'), generateDashboard(appName));

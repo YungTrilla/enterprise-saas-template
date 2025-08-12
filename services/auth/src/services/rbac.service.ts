@@ -4,12 +4,7 @@
  */
 
 import { EntityId, CorrelationId } from '@template/shared-types';
-import {
-  IRole,
-  IPermission,
-  IPermissionCheck,
-  IAuthorizationResult
-} from '../types/auth';
+import { IRole, IPermission, IPermissionCheck, IAuthorizationResult } from '../types/auth';
 import { AuthRepository } from '../database/repository';
 import { RbacCoreService } from './rbac-core.service';
 import { RbacRoleService } from './rbac-role.service';
@@ -22,7 +17,7 @@ export class RbacService {
 
   constructor() {
     const authRepository = new AuthRepository();
-    
+
     // Initialize specialized services
     this.rbacCoreService = new RbacCoreService(authRepository);
     this.rbacRoleService = new RbacRoleService(authRepository);
@@ -102,7 +97,13 @@ export class RbacService {
     createdBy: EntityId,
     correlationId: CorrelationId
   ): Promise<IRole> {
-    return this.rbacRoleService.createRole(name, description, permissions, createdBy, correlationId);
+    return this.rbacRoleService.createRole(
+      name,
+      description,
+      permissions,
+      createdBy,
+      correlationId
+    );
   }
 
   async updateRole(
@@ -122,10 +123,7 @@ export class RbacService {
     return this.rbacRoleService.deleteRole(roleId, deletedBy, correlationId);
   }
 
-  async listRoles(
-    includeSystem: boolean,
-    correlationId: CorrelationId
-  ): Promise<IRole[]> {
+  async listRoles(includeSystem: boolean, correlationId: CorrelationId): Promise<IRole[]> {
     return this.rbacRoleService.listRoles(includeSystem, correlationId);
   }
 

@@ -141,14 +141,14 @@ export const Tooltip: React.FC<TooltipProps> = ({
         ref={triggerRef}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
-        className="inline-block"
+        className='inline-block'
       >
         {children}
       </div>
       {isVisible && (
         <div
           ref={tooltipRef}
-          role="tooltip"
+          role='tooltip'
           className={cn(
             'fixed z-50 px-3 py-1.5 text-xs rounded-md',
             'bg-popover text-popover-foreground shadow-md',

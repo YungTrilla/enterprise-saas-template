@@ -101,7 +101,7 @@ describe('PasswordService', () => {
       const correlationId = createCorrelationId();
 
       jest.spyOn(bcrypt, 'hash');
-      
+
       await passwordService.hashPassword(password, correlationId);
 
       expect(bcrypt.hash).toHaveBeenCalledWith(password, mockConfig.password.saltRounds);
@@ -170,10 +170,12 @@ describe('PasswordService', () => {
       const correlationId = createCorrelationId();
 
       const mockAuthRepository = {
-        getPasswordHistory: jest.fn().mockResolvedValue([
-          { passwordHash: await bcrypt.hash('OldPassword1!', 10) },
-          { passwordHash: await bcrypt.hash('OldPassword2!', 10) },
-        ]),
+        getPasswordHistory: jest
+          .fn()
+          .mockResolvedValue([
+            { passwordHash: await bcrypt.hash('OldPassword1!', 10) },
+            { passwordHash: await bcrypt.hash('OldPassword2!', 10) },
+          ]),
       };
 
       (passwordService as any).authRepository = mockAuthRepository;
@@ -236,7 +238,7 @@ describe('PasswordService', () => {
 
     it('should generate unique passwords', () => {
       const passwords = new Set();
-      
+
       for (let i = 0; i < 10; i++) {
         passwords.add(passwordService.generateRandomPassword());
       }

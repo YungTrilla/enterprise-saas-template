@@ -22,28 +22,28 @@ tags:
     description: Service proxy endpoints
 paths:
   /health:
-    $ref: './paths/health.yaml#/paths/~1health'
+    $ref: "./paths/health.yaml#/paths/~1health"
   /health/live:
-    $ref: './paths/health.yaml#/paths/~1health~1live'
+    $ref: "./paths/health.yaml#/paths/~1health~1live"
   /health/ready:
-    $ref: './paths/health.yaml#/paths/~1health~1ready'
+    $ref: "./paths/health.yaml#/paths/~1health~1ready"
   /health/services:
-    $ref: './paths/health.yaml#/paths/~1health~1services'
+    $ref: "./paths/health.yaml#/paths/~1health~1services"
   /services:
-    $ref: './paths/services.yaml#/paths/~1services'
+    $ref: "./paths/services.yaml#/paths/~1services"
   /services/{serviceName}/status:
-    $ref: './paths/services.yaml#/paths/~1services~1{serviceName}~1status'
+    $ref: "./paths/services.yaml#/paths/~1services~1{serviceName}~1status"
   /services/{serviceName}/metrics:
-    $ref: './paths/services.yaml#/paths/~1services~1{serviceName}~1metrics'
+    $ref: "./paths/services.yaml#/paths/~1services~1{serviceName}~1metrics"
   # Proxy paths for each service
   /auth/{proxy+}:
-    $ref: './paths/proxy.yaml#/paths/~1auth~1{proxy+}'
+    $ref: "./paths/proxy.yaml#/paths/~1auth~1{proxy+}"
   /inventory/{proxy+}:
-    $ref: './paths/proxy.yaml#/paths/~1inventory~1{proxy+}'
+    $ref: "./paths/proxy.yaml#/paths/~1inventory~1{proxy+}"
   /orders/{proxy+}:
-    $ref: './paths/proxy.yaml#/paths/~1orders~1{proxy+}'
+    $ref: "./paths/proxy.yaml#/paths/~1orders~1{proxy+}"
   /analytics/{proxy+}:
-    $ref: './paths/proxy.yaml#/paths/~1analytics~1{proxy+}'
+    $ref: "./paths/proxy.yaml#/paths/~1analytics~1{proxy+}"
 components:
   securitySchemes:
     bearerAuth:
@@ -51,8 +51,8 @@ components:
       scheme: bearer
       bearerFormat: JWT
   parameters:
-    $ref: './components/parameters.yaml#/components/parameters'
+    $ref: "./components/parameters.yaml#/components/parameters"
   schemas:
-    $ref: './components/schemas/index.yaml#/components/schemas'
+    $ref: "./components/schemas/index.yaml#/components/schemas"
   responses:
-    $ref: './components/responses.yaml#/components/responses'
+    $ref: "./components/responses.yaml#/components/responses"

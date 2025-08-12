@@ -169,7 +169,7 @@ export async function down(client: PoolClient): Promise<void> {
   await client.query('DROP TABLE IF EXISTS permissions CASCADE;');
   await client.query('DROP TABLE IF EXISTS roles CASCADE;');
   await client.query('DROP TABLE IF EXISTS users CASCADE;');
-  
+
   // Drop function
   await client.query('DROP FUNCTION IF EXISTS update_updated_at() CASCADE;');
 }

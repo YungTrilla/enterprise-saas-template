@@ -1,6 +1,6 @@
 /**
  * Tenant Limits Middleware
- * 
+ *
  * Enforces tenant limits and quotas to prevent resource abuse
  * and ensure fair usage across all tenants.
  */
@@ -10,8 +10,17 @@ import { ITenantLimits, ITenantUsage } from '../types/tenant';
 
 export interface TenantLimitsOptions {
   updateUsage?: boolean;
-  updateUsageFunction?: (req: Request, resource: keyof ITenantLimits, amount: number) => Promise<void>;
-  onLimitExceeded?: (req: Request, resource: keyof ITenantLimits, current: number, limit: number) => void;
+  updateUsageFunction?: (
+    req: Request,
+    resource: keyof ITenantLimits,
+    amount: number
+  ) => Promise<void>;
+  onLimitExceeded?: (
+    req: Request,
+    resource: keyof ITenantLimits,
+    current: number,
+    limit: number
+  ) => void;
   grace?: {
     enabled: boolean;
     percentage: number; // Allow up to this percentage over limit
@@ -30,7 +39,7 @@ export function checkTenantLimit(
     updateUsage = false,
     updateUsageFunction,
     onLimitExceeded,
-    grace = { enabled: false, percentage: 0 }
+    grace = { enabled: false, percentage: 0 },
   } = options;
 
   return async (req: Request, res: Response, next: NextFunction) => {
@@ -40,22 +49,22 @@ export function checkTenantLimit(
           success: false,
           error: {
             code: 'TENANT_CONTEXT_MISSING',
-            message: 'Tenant context is required for limit check'
+            message: 'Tenant context is required for limit check',
           },
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       }
 
       const { limits, usage } = req.tenantContext;
       const currentUsage = usage[resource];
       const limit = limits[resource];
-      const wouldExceed = (currentUsage + amount) > limit;
+      const wouldExceed = currentUsage + amount > limit;
 
       // Check if grace period applies
       let allowWithGrace = false;
       if (grace.enabled && wouldExceed) {
-        const graceLimit = limit + (limit * grace.percentage / 100);
-        allowWithGrace = (currentUsage + amount) <= graceLimit;
+        const graceLimit = limit + (limit * grace.percentage) / 100;
+        allowWithGrace = currentUsage + amount <= graceLimit;
       }
 
       if (wouldExceed && !allowWithGrace) {
@@ -75,10 +84,10 @@ export function checkTenantLimit(
               limit,
               requested: amount,
               wouldBe: currentUsage + amount,
-              remaining: Math.max(0, limit - currentUsage)
-            }
+              remaining: Math.max(0, limit - currentUsage),
+            },
           },
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       }
 
@@ -117,9 +126,9 @@ export function checkTenantLimits(
           success: false,
           error: {
             code: 'TENANT_CONTEXT_MISSING',
-            message: 'Tenant context is required for limit check'
+            message: 'Tenant context is required for limit check',
           },
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       }
 
@@ -137,7 +146,7 @@ export function checkTenantLimits(
         const { resource, amount } = check;
         const currentUsage = usage[resource];
         const limit = limits[resource];
-        const wouldExceed = (currentUsage + amount) > limit;
+        const wouldExceed = currentUsage + amount > limit;
 
         if (wouldExceed) {
           violations.push({
@@ -145,7 +154,7 @@ export function checkTenantLimits(
             current: currentUsage,
             limit,
             requested: amount,
-            wouldBe: currentUsage + amount
+            wouldBe: currentUsage + amount,
           });
         }
       }
@@ -156,9 +165,9 @@ export function checkTenantLimits(
           error: {
             code: 'MULTIPLE_LIMITS_EXCEEDED',
             message: 'Multiple resource limits would be exceeded',
-            details: { violations }
+            details: { violations },
           },
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       }
 
@@ -175,7 +184,7 @@ export function checkTenantLimits(
 export function trackApiUsage(options: TenantLimitsOptions = {}) {
   return checkTenantLimit('apiCalls', 1, {
     ...options,
-    updateUsage: true
+    updateUsage: true,
   });
 }
 
@@ -185,7 +194,7 @@ export function trackApiUsage(options: TenantLimitsOptions = {}) {
 export function trackStorageUsage(sizeInBytes: number, options: TenantLimitsOptions = {}) {
   return checkTenantLimit('storage', sizeInBytes, {
     ...options,
-    updateUsage: true
+    updateUsage: true,
   });
 }
 
@@ -196,11 +205,11 @@ export function trackBandwidthUsage(options: TenantLimitsOptions = {}) {
   return async (req: Request, res: Response, next: NextFunction) => {
     // Estimate request size
     const requestSize = estimateRequestSize(req);
-    
+
     // Track request bandwidth
     const checkRequest = checkTenantLimit('bandwidth', requestSize, options);
     await new Promise<void>((resolve, reject) => {
-      checkRequest(req, res, (error) => {
+      checkRequest(req, res, error => {
         if (error) reject(error);
         else resolve();
       });
@@ -208,14 +217,14 @@ export function trackBandwidthUsage(options: TenantLimitsOptions = {}) {
 
     // Track response bandwidth
     const originalSend = res.send;
-    res.send = function(body: any) {
+    res.send = function (body: any) {
       const responseSize = estimateResponseSize(body);
-      
+
       // Track response bandwidth (async, don't block response)
       if (options.updateUsageFunction) {
         options.updateUsageFunction(req, 'bandwidth', responseSize).catch(console.error);
       }
-      
+
       return originalSend.call(this, body);
     };
 
@@ -271,27 +280,27 @@ export function isApproachingLimit(usage: number, limit: number, threshold: numb
  */
 function estimateRequestSize(req: Request): number {
   let size = 0;
-  
+
   // Headers
   if (req.headers) {
     size += JSON.stringify(req.headers).length;
   }
-  
+
   // Body
   if (req.body) {
     size += JSON.stringify(req.body).length;
   }
-  
+
   // Query parameters
   if (req.query) {
     size += JSON.stringify(req.query).length;
   }
-  
+
   // URL
   if (req.url) {
     size += req.url.length;
   }
-  
+
   return size;
 }
 
@@ -300,15 +309,15 @@ function estimateRequestSize(req: Request): number {
  */
 function estimateResponseSize(body: any): number {
   if (!body) return 0;
-  
+
   if (typeof body === 'string') {
     return body.length;
   }
-  
+
   if (Buffer.isBuffer(body)) {
     return body.length;
   }
-  
+
   try {
     return JSON.stringify(body).length;
   } catch {

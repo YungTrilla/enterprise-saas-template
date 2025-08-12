@@ -29,7 +29,7 @@ async function startNotificationService() {
 }
 
 // Start the service
-startNotificationService().catch((error) => {
+startNotificationService().catch(error => {
   console.error('Failed to start notification service:', error);
   process.exit(1);
 });

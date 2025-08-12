@@ -306,9 +306,9 @@ describe('AuthCoreService', () => {
 
       mockSessionService.revokeSession.mockRejectedValue(new Error('Session error'));
 
-      await expect(
-        authCoreService.logout(userId, sessionId, correlationId)
-      ).rejects.toThrow('Session error');
+      await expect(authCoreService.logout(userId, sessionId, correlationId)).rejects.toThrow(
+        'Session error'
+      );
     });
   });
 
@@ -360,9 +360,9 @@ describe('AuthCoreService', () => {
         throw new Error('Invalid token');
       });
 
-      await expect(
-        authCoreService.refreshToken('invalid-token', correlationId)
-      ).rejects.toThrow('Invalid refresh token');
+      await expect(authCoreService.refreshToken('invalid-token', correlationId)).rejects.toThrow(
+        'Invalid refresh token'
+      );
     });
 
     it('should reject refresh for inactive session', async () => {
@@ -376,9 +376,9 @@ describe('AuthCoreService', () => {
       } as any);
       mockSessionService.getActiveSession.mockResolvedValue(null);
 
-      await expect(
-        authCoreService.refreshToken(refreshToken, correlationId)
-      ).rejects.toThrow('Session not found or inactive');
+      await expect(authCoreService.refreshToken(refreshToken, correlationId)).rejects.toThrow(
+        'Session not found or inactive'
+      );
     });
   });
 });

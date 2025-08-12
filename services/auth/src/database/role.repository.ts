@@ -13,8 +13,8 @@ export class RoleRepository {
   }
 
   private async executeQuery<T = unknown>(
-    query: string, 
-    values: unknown[] = [], 
+    query: string,
+    values: unknown[] = [],
     correlationId?: CorrelationId
   ): Promise<T[]> {
     const client = await this.pool.connect();
@@ -22,9 +22,9 @@ export class RoleRepository {
       const result = await client.query(query, values);
       return result.rows;
     } catch (error) {
-      this.logger.error('Query execution failed', { 
-        error: (error as Error).message, 
-        correlationId 
+      this.logger.error('Query execution failed', {
+        error: (error as Error).message,
+        correlationId,
       });
       throw error;
     } finally {
@@ -57,11 +57,7 @@ export class RoleRepository {
     await this.executeQuery(query, [userId, roleId, assignedBy], correlationId);
   }
 
-  async removeRole(
-    userId: string,
-    roleId: string,
-    correlationId?: CorrelationId
-  ): Promise<void> {
+  async removeRole(userId: string, roleId: string, correlationId?: CorrelationId): Promise<void> {
     const query = 'DELETE FROM user_roles WHERE user_id = $1 AND role_id = $2';
     await this.executeQuery(query, [userId, roleId], correlationId);
   }

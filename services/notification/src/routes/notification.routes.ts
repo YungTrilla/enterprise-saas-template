@@ -28,7 +28,11 @@ const bulkNotificationSchema = Joi.object({
 const templateSchema = Joi.object({
   name: Joi.string().required(),
   type: Joi.string().valid('email', 'sms', 'push').required(),
-  subject: Joi.string().when('type', { is: 'email', then: Joi.required(), otherwise: Joi.optional() }),
+  subject: Joi.string().when('type', {
+    is: 'email',
+    then: Joi.required(),
+    otherwise: Joi.optional(),
+  }),
   body: Joi.string().required(),
   variables: Joi.array().items(Joi.string()).default([]),
   isActive: Joi.boolean().default(true),
@@ -75,7 +79,7 @@ router.get('/templates/:id', notificationController.getTemplate);
 
 router.put(
   '/templates/:id',
-  validateRequest({ body: templateSchema.fork(['name', 'type'], (schema) => schema.optional()) }),
+  validateRequest({ body: templateSchema.fork(['name', 'type'], schema => schema.optional()) }),
   notificationController.updateTemplate
 );
 

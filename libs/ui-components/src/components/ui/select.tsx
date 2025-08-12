@@ -75,9 +75,7 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>(
 
     // Filter options based on search
     const filteredOptions = searchable
-      ? options.filter((option) =>
-          option.label.toLowerCase().includes(searchQuery.toLowerCase())
-        )
+      ? options.filter(option => option.label.toLowerCase().includes(searchQuery.toLowerCase()))
       : options;
 
     // Get display text
@@ -85,12 +83,12 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>(
       if (selectedValues.length === 0) return placeholder;
       if (multiple) {
         if (selectedValues.length === 1) {
-          const option = options.find((opt) => opt.value === selectedValues[0]);
+          const option = options.find(opt => opt.value === selectedValues[0]);
           return option?.label || selectedValues[0];
         }
         return `${selectedValues.length} selected`;
       }
-      const option = options.find((opt) => opt.value === selectedValues[0]);
+      const option = options.find(opt => opt.value === selectedValues[0]);
       return option?.label || selectedValues[0];
     };
 
@@ -98,7 +96,7 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>(
     const handleSelect = (optionValue: string) => {
       if (multiple) {
         const newValues = selectedValues.includes(optionValue)
-          ? selectedValues.filter((v) => v !== optionValue)
+          ? selectedValues.filter(v => v !== optionValue)
           : [...selectedValues, optionValue];
         onChange?.(newValues);
       } else {
@@ -117,10 +115,7 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>(
     // Close dropdown when clicking outside
     useEffect(() => {
       const handleClickOutside = (event: MouseEvent) => {
-        if (
-          containerRef.current &&
-          !containerRef.current.contains(event.target as Node)
-        ) {
+        if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
           setIsOpen(false);
           setSearchQuery('');
         }
@@ -138,7 +133,7 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>(
     }, [isOpen, searchable]);
 
     return (
-      <div ref={containerRef} className="relative">
+      <div ref={containerRef} className='relative'>
         <div
           ref={ref}
           className={cn(
@@ -152,22 +147,17 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>(
           <span className={cn('truncate', !selectedValues.length && 'text-muted-foreground')}>
             {getDisplayText()}
           </span>
-          <div className="flex items-center gap-1">
+          <div className='flex items-center gap-1'>
             {clearable && selectedValues.length > 0 && !disabled && (
               <button
-                type="button"
+                type='button'
                 onClick={handleClear}
-                className="rounded-sm hover:bg-muted p-0.5"
+                className='rounded-sm hover:bg-muted p-0.5'
               >
-                <X className="h-3.5 w-3.5" />
+                <X className='h-3.5 w-3.5' />
               </button>
             )}
-            <ChevronDown
-              className={cn(
-                'h-4 w-4 transition-transform',
-                isOpen && 'rotate-180'
-              )}
-            />
+            <ChevronDown className={cn('h-4 w-4 transition-transform', isOpen && 'rotate-180')} />
           </div>
         </div>
 
@@ -180,26 +170,27 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>(
             style={{ maxHeight }}
           >
             {searchable && (
-              <div className="border-b p-2">
+              <div className='border-b p-2'>
                 <input
                   ref={inputRef}
-                  type="text"
-                  className="w-full px-2 py-1 text-sm outline-none bg-transparent"
-                  placeholder="Search..."
+                  type='text'
+                  className='w-full px-2 py-1 text-sm outline-none bg-transparent'
+                  placeholder='Search...'
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onClick={(e) => e.stopPropagation()}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  onClick={e => e.stopPropagation()}
                 />
               </div>
             )}
 
-            <div className="overflow-auto" style={{ maxHeight: `calc(${maxHeight} - ${searchable ? '48px' : '0px'})` }}>
+            <div
+              className='overflow-auto'
+              style={{ maxHeight: `calc(${maxHeight} - ${searchable ? '48px' : '0px'})` }}
+            >
               {filteredOptions.length === 0 ? (
-                <div className="px-3 py-2 text-sm text-muted-foreground">
-                  No options found
-                </div>
+                <div className='px-3 py-2 text-sm text-muted-foreground'>No options found</div>
               ) : (
-                filteredOptions.map((option) => {
+                filteredOptions.map(option => {
                   const isSelected = selectedValues.includes(option.value);
                   return (
                     <div
@@ -213,7 +204,7 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>(
                       onClick={() => !option.disabled && handleSelect(option.value)}
                     >
                       <span>{option.label}</span>
-                      {isSelected && <Check className="h-4 w-4" />}
+                      {isSelected && <Check className='h-4 w-4' />}
                     </div>
                   );
                 })

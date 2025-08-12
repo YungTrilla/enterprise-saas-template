@@ -102,11 +102,7 @@ export class RolePresetService extends BaseService {
   /**
    * Apply role preset to a user
    */
-  async applyPresetToUser(
-    userId: string,
-    presetId: string,
-    assignedBy: string
-  ): Promise<void> {
+  async applyPresetToUser(userId: string, presetId: string, assignedBy: string): Promise<void> {
     const preset = await this.getPresetById(presetId);
     if (!preset) {
       throw new ApiError('Role preset not found', 404);
@@ -118,10 +114,7 @@ export class RolePresetService extends BaseService {
       await client.query('BEGIN');
 
       // Remove existing roles for the user
-      await client.query(
-        'DELETE FROM user_roles WHERE user_id = $1',
-        [userId]
-      );
+      await client.query('DELETE FROM user_roles WHERE user_id = $1', [userId]);
 
       // Assign the base role with preset reference
       await client.query(
@@ -133,10 +126,11 @@ export class RolePresetService extends BaseService {
 
       // Update user's department if specified in preset
       if (preset.department) {
-        await client.query(
-          'UPDATE users SET department = $1, updated_by = $2 WHERE id = $3',
-          [preset.department, assignedBy, userId]
-        );
+        await client.query('UPDATE users SET department = $1, updated_by = $2 WHERE id = $3', [
+          preset.department,
+          assignedBy,
+          userId,
+        ]);
       }
 
       await client.query('COMMIT');
@@ -167,10 +161,7 @@ export class RolePresetService extends BaseService {
     const basePermissions = roleResult.rows[0]?.permissions || [];
 
     // Combine base permissions with additional permissions
-    const allPermissions = new Set([
-      ...basePermissions,
-      ...preset.additionalPermissions
-    ]);
+    const allPermissions = new Set([...basePermissions, ...preset.additionalPermissions]);
 
     return Array.from(allPermissions);
   }
@@ -187,7 +178,7 @@ export class RolePresetService extends BaseService {
       baseRoleId: row.base_role_id,
       additionalPermissions: row.additional_permissions || [],
       department: row.department,
-      isActive: row.is_active
+      isActive: row.is_active,
     };
   }
 }

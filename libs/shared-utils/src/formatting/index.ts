@@ -19,7 +19,7 @@ export function formatCurrency(
       currency,
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
-      ...options
+      ...options,
     }).format(amount);
   } catch (error) {
     // Fallback formatting
@@ -39,7 +39,7 @@ export function formatPercentage(
     return new Intl.NumberFormat(locale, {
       style: 'percent',
       minimumFractionDigits: decimalPlaces,
-      maximumFractionDigits: decimalPlaces
+      maximumFractionDigits: decimalPlaces,
     }).format(value / 100);
   } catch (error) {
     return `${value.toFixed(decimalPlaces)}%`;
@@ -56,7 +56,7 @@ export function formatLargeNumber(
 ): string {
   const abs = Math.abs(num);
   const sign = num < 0 ? '-' : '';
-  
+
   if (abs >= 1e9) {
     return `${sign}${(abs / 1e9).toFixed(precision)}B`;
   } else if (abs >= 1e6) {
@@ -64,7 +64,7 @@ export function formatLargeNumber(
   } else if (abs >= 1e3) {
     return `${sign}${(abs / 1e3).toFixed(precision)}K`;
   }
-  
+
   try {
     return new Intl.NumberFormat(locale).format(num);
   } catch (error) {
@@ -77,11 +77,11 @@ export function formatLargeNumber(
  */
 export function formatFileSize(bytes: number, precision: number = 2): string {
   if (bytes === 0) return '0 Bytes';
-  
+
   const k = 1024;
   const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  
+
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(precision))} ${sizes[i]}`;
 }
 
@@ -96,7 +96,7 @@ export function formatDecimal(
   try {
     return new Intl.NumberFormat(locale, {
       minimumFractionDigits: precision,
-      maximumFractionDigits: precision
+      maximumFractionDigits: precision,
     }).format(num);
   } catch (error) {
     return num.toFixed(precision);
@@ -112,7 +112,7 @@ export function formatDecimal(
  */
 export function toTitleCase(str: string): string {
   if (typeof str !== 'string') return '';
-  
+
   return str
     .toLowerCase()
     .split(' ')
@@ -125,7 +125,7 @@ export function toTitleCase(str: string): string {
  */
 export function toKebabCase(str: string): string {
   if (typeof str !== 'string') return '';
-  
+
   return str
     .replace(/([a-z])([A-Z])/g, '$1-$2')
     .replace(/[\s_]+/g, '-')
@@ -137,7 +137,7 @@ export function toKebabCase(str: string): string {
  */
 export function toCamelCase(str: string): string {
   if (typeof str !== 'string') return '';
-  
+
   return str
     .replace(/(?:^\w|[A-Z]|\b\w)/g, (word, index) => {
       return index === 0 ? word.toLowerCase() : word.toUpperCase();
@@ -150,7 +150,7 @@ export function toCamelCase(str: string): string {
  */
 export function toSnakeCase(str: string): string {
   if (typeof str !== 'string') return '';
-  
+
   return str
     .replace(/([a-z])([A-Z])/g, '$1_$2')
     .replace(/[\s-]+/g, '_')
@@ -162,44 +162,34 @@ export function toSnakeCase(str: string): string {
  */
 export function toPascalCase(str: string): string {
   if (typeof str !== 'string') return '';
-  
-  return str
-    .replace(/(?:^\w|[A-Z]|\b\w)/g, word => word.toUpperCase())
-    .replace(/\s+/g, '');
+
+  return str.replace(/(?:^\w|[A-Z]|\b\w)/g, word => word.toUpperCase()).replace(/\s+/g, '');
 }
 
 /**
  * Truncate text with ellipsis
  */
-export function truncateText(
-  text: string,
-  maxLength: number,
-  ellipsis: string = '...'
-): string {
+export function truncateText(text: string, maxLength: number, ellipsis: string = '...'): string {
   if (typeof text !== 'string') return '';
   if (text.length <= maxLength) return text;
-  
+
   return text.substring(0, maxLength - ellipsis.length).trim() + ellipsis;
 }
 
 /**
  * Truncate text at word boundary
  */
-export function truncateAtWord(
-  text: string,
-  maxLength: number,
-  ellipsis: string = '...'
-): string {
+export function truncateAtWord(text: string, maxLength: number, ellipsis: string = '...'): string {
   if (typeof text !== 'string') return '';
   if (text.length <= maxLength) return text;
-  
+
   const truncated = text.substring(0, maxLength - ellipsis.length);
   const lastSpace = truncated.lastIndexOf(' ');
-  
+
   if (lastSpace > 0) {
     return truncated.substring(0, lastSpace).trim() + ellipsis;
   }
-  
+
   return truncated.trim() + ellipsis;
 }
 
@@ -208,13 +198,13 @@ export function truncateAtWord(
  */
 export function getInitials(name: string, maxInitials: number = 2): string {
   if (typeof name !== 'string') return '';
-  
+
   const words = name.trim().split(/\s+/);
   const initials = words
     .slice(0, maxInitials)
     .map(word => word.charAt(0).toUpperCase())
     .join('');
-  
+
   return initials;
 }
 
@@ -223,7 +213,7 @@ export function getInitials(name: string, maxInitials: number = 2): string {
  */
 export function capitalizeWords(str: string): string {
   if (typeof str !== 'string') return '';
-  
+
   return str.replace(/\b\w/g, char => char.toUpperCase());
 }
 
@@ -232,7 +222,7 @@ export function capitalizeWords(str: string): string {
  */
 export function normalizeWhitespace(str: string): string {
   if (typeof str !== 'string') return '';
-  
+
   return str.replace(/\s+/g, ' ').trim();
 }
 
@@ -243,15 +233,12 @@ export function normalizeWhitespace(str: string): string {
 /**
  * Format phone number with standard formatting
  */
-export function formatPhoneNumber(
-  phone: string,
-  format: 'US' | 'INTERNATIONAL' = 'US'
-): string {
+export function formatPhoneNumber(phone: string, format: 'US' | 'INTERNATIONAL' = 'US'): string {
   if (typeof phone !== 'string') return '';
-  
+
   // Remove all non-digit characters
   const digits = phone.replace(/\D/g, '');
-  
+
   if (format === 'US' && digits.length === 10) {
     return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
   } else if (format === 'US' && digits.length === 11 && digits.startsWith('1')) {
@@ -259,7 +246,7 @@ export function formatPhoneNumber(
   } else if (format === 'INTERNATIONAL') {
     return `+${digits}`;
   }
-  
+
   return phone; // Return original if no formatting rules match
 }
 
@@ -274,16 +261,14 @@ export function formatAddress(address: {
   country?: string;
 }): string {
   const parts: string[] = [];
-  
+
   if (address.street) parts.push(address.street);
-  
-  const cityStateZip = [address.city, address.state, address.postalCode]
-    .filter(Boolean)
-    .join(' ');
+
+  const cityStateZip = [address.city, address.state, address.postalCode].filter(Boolean).join(' ');
   if (cityStateZip) parts.push(cityStateZip);
-  
+
   if (address.country && address.country !== 'US') parts.push(address.country);
-  
+
   return parts.join(', ');
 }
 
@@ -294,14 +279,11 @@ export function formatAddress(address: {
 /**
  * Format date in user-friendly format
  */
-export function formatDate(
-  date: string | Date,
-  formatString: string = 'MMM dd, yyyy'
-): string {
+export function formatDate(date: string | Date, formatString: string = 'MMM dd, yyyy'): string {
   try {
     const dateObj = typeof date === 'string' ? parseISO(date) : date;
     if (!isValid(dateObj)) return 'Invalid Date';
-    
+
     return dateFnsFormat(dateObj, formatString);
   } catch (error) {
     return 'Invalid Date';
@@ -321,10 +303,7 @@ export function formatDateTime(
 /**
  * Format time only
  */
-export function formatTime(
-  date: string | Date,
-  formatString: string = 'hh:mm a'
-): string {
+export function formatTime(date: string | Date, formatString: string = 'hh:mm a'): string {
   return formatDate(date, formatString);
 }
 
@@ -335,7 +314,7 @@ export function formatRelativeTime(date: string | Date): string {
   try {
     const dateObj = typeof date === 'string' ? parseISO(date) : date;
     if (!isValid(dateObj)) return 'Invalid Date';
-    
+
     const now = new Date();
     const diffInMs = now.getTime() - dateObj.getTime();
     const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
@@ -343,7 +322,7 @@ export function formatRelativeTime(date: string | Date): string {
     const diffInDays = Math.floor(diffInHours / 24);
     const diffInMonths = Math.floor(diffInDays / 30);
     const diffInYears = Math.floor(diffInDays / 365);
-    
+
     if (diffInMinutes < 1) return 'Just now';
     if (diffInMinutes < 60) return `${diffInMinutes} minute${diffInMinutes === 1 ? '' : 's'} ago`;
     if (diffInHours < 24) return `${diffInHours} hour${diffInHours === 1 ? '' : 's'} ago`;
@@ -364,7 +343,7 @@ export function formatRelativeTime(date: string | Date): string {
  */
 export function formatSku(sku: string): string {
   if (typeof sku !== 'string') return '';
-  
+
   return sku.toUpperCase().replace(/[^A-Z0-9-]/g, '');
 }
 
@@ -393,7 +372,7 @@ export function formatAvailabilityStatus(
   reserved: number = 0
 ): string {
   const inUse = total - available;
-  
+
   if (available === 0) return 'Out of Stock';
   if (available === total) return 'Fully Available';
   if (reserved > 0) return `${available} Available (${reserved} Reserved)`;
@@ -428,7 +407,7 @@ export function formatErrorMessage(error: any): string {
  */
 export function formatValidationErrors(errors: Array<{ field: string; message: string }>): string {
   if (!Array.isArray(errors) || errors.length === 0) return '';
-  
+
   return errors
     .map(error => `${toTitleCase(error.field.replace(/[._]/g, ' '))}: ${error.message}`)
     .join('; ');

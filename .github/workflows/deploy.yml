@@ -1,0 +1,480 @@
+name: Production Deployment
+
+# Enterprise-grade deployment workflow with multi-environment support
+on:
+  workflow_run:
+    workflows: ["Release"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        required: true
+        default: "staging"
+        type: choice
+        options:
+          - "staging"
+          - "production"
+      version:
+        description: "Version to deploy (leave empty for latest)"
+        required: false
+        type: string
+      force_deploy:
+        description: "Force deployment (skip some safety checks)"
+        required: false
+        default: false
+        type: boolean
+      rollback:
+        description: "Rollback to previous version"
+        required: false
+        default: false
+        type: boolean
+
+env:
+  NODE_VERSION: "20.x"
+  PNPM_VERSION: "8.15.0"
+  REGISTRY: ghcr.io
+  IMAGE_BASE: ghcr.io/${{ github.repository }}
+
+# Production deployment permissions
+permissions:
+  contents: read
+  packages: write
+  deployments: write
+  actions: read
+  checks: read
+
+jobs:
+  # Pre-deployment validation
+  pre-deployment:
+    name: Pre-deployment Validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    outputs:
+      deployment-version: ${{ steps.version.outputs.version }}
+      environment: ${{ steps.env.outputs.environment }}
+      should-deploy: ${{ steps.validation.outputs.should-deploy }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine deployment environment
+        id: env
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            environment="${{ github.event.inputs.environment }}"
+          else
+            # Auto-deploy to staging on successful release
+            environment="staging"
+          fi
+          echo "environment=$environment" >> $GITHUB_OUTPUT
+          echo "🎯 Target environment: $environment"
+
+      - name: Determine deployment version
+        id: version
+        run: |
+          if [[ -n "${{ github.event.inputs.version }}" ]]; then
+            version="${{ github.event.inputs.version }}"
+          else
+            # Get latest release tag
+            version=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.1.0")
+          fi
+          echo "version=$version" >> $GITHUB_OUTPUT
+          echo "📦 Deployment version: $version"
+
+      - name: Validate deployment readiness
+        id: validation
+        run: |
+          environment="${{ steps.env.outputs.environment }}"
+          version="${{ steps.version.outputs.version }}"
+          rollback="${{ github.event.inputs.rollback }}"
+
+          echo "🔍 Validating deployment readiness..."
+
+          should_deploy=true
+
+          # Check if this is a rollback
+          if [[ "$rollback" == "true" ]]; then
+            echo "🔄 Rollback deployment requested"
+            echo "should-deploy=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Production-specific validations
+          if [[ "$environment" == "production" ]]; then
+            # Ensure we have a proper release tag
+            if [[ ! "$version" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "❌ Production requires semantic version tag (e.g., v1.0.0)"
+              should_deploy=false
+            fi
+            
+            # Check if CI passed for this version
+            if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+              echo "⚠️ Manual production deployment - ensure CI passed for $version"
+            fi
+          fi
+
+          echo "should-deploy=$should_deploy" >> $GITHUB_OUTPUT
+
+          if [[ "$should_deploy" != "true" ]]; then
+            echo "❌ Deployment validation failed"
+            exit 1
+          fi
+
+          echo "✅ Deployment validation passed"
+
+  # Build and push Docker images
+  build-images:
+    name: Build Container Images
+    runs-on: ubuntu-latest
+    needs: pre-deployment
+    if: needs.pre-deployment.outputs.should-deploy == 'true'
+    timeout-minutes: 30
+
+    strategy:
+      matrix:
+        service:
+          - name: "api-gateway"
+            path: "services/api-gateway"
+          - name: "auth-service"
+            path: "services/auth"
+          - name: "notification-service"
+            path: "services/notification"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_BASE }}/${{ matrix.service.name }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=${{ needs.pre-deployment.outputs.deployment-version }}
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ${{ matrix.service.path }}/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            NODE_VERSION=${{ env.NODE_VERSION }}
+            SERVICE_PATH=${{ matrix.service.path }}
+
+      - name: Scan image for vulnerabilities
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.IMAGE_BASE }}/${{ matrix.service.name }}:${{ needs.pre-deployment.outputs.deployment-version }}
+          format: "sarif"
+          output: "trivy-${{ matrix.service.name }}.sarif"
+
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: "trivy-${{ matrix.service.name }}.sarif"
+          category: "trivy-${{ matrix.service.name }}"
+
+  # Database migrations (runs before deployment)
+  database-migration:
+    name: Database Migration
+    runs-on: ubuntu-latest
+    needs: [pre-deployment, build-images]
+    if: needs.pre-deployment.outputs.should-deploy == 'true' && github.event.inputs.rollback != 'true'
+    timeout-minutes: 15
+    environment: ${{ needs.pre-deployment.outputs.environment }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Create database backup
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          echo "💾 Creating database backup before migration..."
+          timestamp=$(date +%Y%m%d_%H%M%S)
+          backup_name="${{ needs.pre-deployment.outputs.environment }}_backup_${timestamp}"
+
+          # Create backup using pg_dump (adjust for your database)
+          # This is a template - customize based on your database setup
+          echo "Backup created: $backup_name"
+          echo "backup_name=$backup_name" >> $GITHUB_ENV
+
+      - name: Run database migrations
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          NODE_ENV: ${{ needs.pre-deployment.outputs.environment }}
+        run: |
+          echo "🔄 Running database migrations..."
+          pnpm run migrate:latest
+          echo "✅ Database migrations completed"
+
+      - name: Verify migration success
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          echo "🔍 Verifying database state..."
+          pnpm run migrate:status
+          echo "✅ Database verification completed"
+
+  # Deploy to staging environment
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [pre-deployment, build-images, database-migration]
+    if: needs.pre-deployment.outputs.environment == 'staging' && needs.pre-deployment.outputs.should-deploy == 'true'
+    timeout-minutes: 20
+    environment: staging
+
+    steps:
+      - name: Deploy to staging infrastructure
+        run: |
+          echo "🚀 Deploying version ${{ needs.pre-deployment.outputs.deployment-version }} to staging..."
+
+          # This is a template - customize based on your infrastructure
+          # Examples: kubectl apply, docker-compose, terraform, etc.
+
+          version="${{ needs.pre-deployment.outputs.deployment-version }}"
+
+          # Deploy services (customize for your infrastructure)
+          echo "Deploying api-gateway:$version"
+          echo "Deploying auth-service:$version"
+          echo "Deploying notification-service:$version"
+
+          echo "✅ Staging deployment completed"
+
+      - name: Run smoke tests
+        run: |
+          echo "🧪 Running staging smoke tests..."
+
+          # Wait for services to be ready
+          sleep 30
+
+          # Basic health checks (customize URLs for your staging environment)
+          staging_base_url="${{ secrets.STAGING_BASE_URL }}"
+
+          # Test API Gateway health
+          curl -f "$staging_base_url/health" || exit 1
+
+          # Test Auth service
+          curl -f "$staging_base_url/api/auth/health" || exit 1
+
+          # Test Notification service  
+          curl -f "$staging_base_url/api/notifications/health" || exit 1
+
+          echo "✅ Staging smoke tests passed"
+
+  # Deploy to production (requires manual approval)
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [pre-deployment, build-images, database-migration]
+    if: needs.pre-deployment.outputs.environment == 'production' && needs.pre-deployment.outputs.should-deploy == 'true'
+    timeout-minutes: 30
+    environment: production # Requires manual approval in GitHub
+
+    steps:
+      - name: Production deployment preparation
+        run: |
+          echo "🎯 Preparing production deployment..."
+          echo "Version: ${{ needs.pre-deployment.outputs.deployment-version }}"
+          echo "Environment: production"
+
+          # Pre-deployment checks
+          echo "🔍 Final pre-deployment validation..."
+
+      - name: Deploy to production infrastructure
+        run: |
+          echo "🚀 Deploying to production..."
+
+          version="${{ needs.pre-deployment.outputs.deployment-version }}"
+
+          # Production deployment (customize for your infrastructure)
+          # This should implement blue-green or rolling deployment
+
+          echo "Deploying api-gateway:$version to production"
+          echo "Deploying auth-service:$version to production"
+          echo "Deploying notification-service:$version to production"
+
+          echo "✅ Production deployment completed"
+
+      - name: Production health verification
+        timeout-minutes: 10
+        run: |
+          echo "🏥 Verifying production health..."
+
+          production_base_url="${{ secrets.PRODUCTION_BASE_URL }}"
+          max_attempts=30
+          attempt=1
+
+          while [[ $attempt -le $max_attempts ]]; do
+            echo "Health check attempt $attempt/$max_attempts"
+            
+            if curl -f "$production_base_url/health" >/dev/null 2>&1; then
+              echo "✅ Production health check passed"
+              break
+            fi
+            
+            if [[ $attempt -eq $max_attempts ]]; then
+              echo "❌ Production health check failed after $max_attempts attempts"
+              exit 1
+            fi
+            
+            sleep 10
+            ((attempt++))
+          done
+
+      - name: Run production smoke tests
+        run: |
+          echo "🧪 Running production smoke tests..."
+
+          production_base_url="${{ secrets.PRODUCTION_BASE_URL }}"
+
+          # Critical path tests
+          curl -f "$production_base_url/health" || exit 1
+          curl -f "$production_base_url/api/auth/health" || exit 1
+          curl -f "$production_base_url/api/notifications/health" || exit 1
+
+          echo "✅ Production smoke tests passed"
+
+  # Rollback capability
+  rollback:
+    name: Rollback Deployment
+    runs-on: ubuntu-latest
+    needs: pre-deployment
+    if: github.event.inputs.rollback == 'true'
+    timeout-minutes: 15
+    environment: ${{ needs.pre-deployment.outputs.environment }}
+
+    steps:
+      - name: Execute rollback
+        run: |
+          echo "🔄 Executing rollback for ${{ needs.pre-deployment.outputs.environment }}..."
+
+          # Get previous version (customize based on your deployment history)
+          previous_version=$(echo "${{ github.event.inputs.version }}" | sed 's/v//g')
+
+          echo "Rolling back to version: $previous_version"
+
+          # Rollback deployment (customize for your infrastructure)
+          echo "Rolling back api-gateway to $previous_version"
+          echo "Rolling back auth-service to $previous_version"
+          echo "Rolling back notification-service to $previous_version"
+
+          echo "✅ Rollback completed"
+
+      - name: Verify rollback success
+        run: |
+          echo "🔍 Verifying rollback success..."
+
+          # Health checks after rollback
+          base_url="${{ needs.pre-deployment.outputs.environment == 'production' && secrets.PRODUCTION_BASE_URL || secrets.STAGING_BASE_URL }}"
+
+          curl -f "$base_url/health" || exit 1
+
+          echo "✅ Rollback verification passed"
+
+  # Deployment notification
+  notify:
+    name: Deployment Notification
+    runs-on: ubuntu-latest
+    needs: [pre-deployment, deploy-staging, deploy-production, rollback]
+    if: always()
+    timeout-minutes: 5
+
+    steps:
+      - name: Determine deployment status
+        id: status
+        run: |
+          environment="${{ needs.pre-deployment.outputs.environment }}"
+          version="${{ needs.pre-deployment.outputs.deployment-version }}"
+
+          if [[ "${{ github.event.inputs.rollback }}" == "true" ]]; then
+            if [[ "${{ needs.rollback.result }}" == "success" ]]; then
+              status="✅ ROLLBACK SUCCESSFUL"
+              message="Successfully rolled back $environment to version $version"
+            else
+              status="❌ ROLLBACK FAILED"
+              message="Rollback to version $version in $environment failed"
+            fi
+          else
+            if [[ "$environment" == "production" ]]; then
+              deploy_result="${{ needs.deploy-production.result }}"
+            else
+              deploy_result="${{ needs.deploy-staging.result }}"
+            fi
+            
+            if [[ "$deploy_result" == "success" ]]; then
+              status="🚀 DEPLOYMENT SUCCESSFUL"
+              message="Successfully deployed version $version to $environment"
+            else
+              status="❌ DEPLOYMENT FAILED"
+              message="Deployment of version $version to $environment failed"
+            fi
+          fi
+
+          echo "status=$status" >> $GITHUB_OUTPUT
+          echo "message=$message" >> $GITHUB_OUTPUT
+
+      - name: Send deployment notification
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const status = '${{ steps.status.outputs.status }}';
+            const message = '${{ steps.status.outputs.message }}';
+            const environment = '${{ needs.pre-deployment.outputs.environment }}';
+            const version = '${{ needs.pre-deployment.outputs.deployment-version }}';
+
+            // Create deployment status issue (customize as needed)
+            const title = `${status} - ${environment.toUpperCase()} Deployment`;
+            const body = `## Deployment Summary\n\n` +
+                        `**Environment:** ${environment}\n` +
+                        `**Version:** ${version}\n` +
+                        `**Status:** ${status}\n\n` +
+                        `**Details:** ${message}\n\n` +
+                        `**Deployment URL:** https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+
+            // You can customize this to send to Slack, Teams, email, etc.
+            console.log('Deployment notification:', title);
+            console.log(body);

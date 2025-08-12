@@ -29,11 +29,7 @@ export class AuthMiddleware {
   private logger: CorrelatedLogger;
   private securityLogger: SecurityLogger;
 
-  constructor(
-    authService: AuthService,
-    jwtService: JwtService,
-    rbacService: RbacService
-  ) {
+  constructor(authService: AuthService, jwtService: JwtService, rbacService: RbacService) {
     this.authService = authService;
     this.jwtService = jwtService;
     this.rbacService = rbacService;
@@ -47,12 +43,12 @@ export class AuthMiddleware {
   correlationId() {
     return (req: Request, res: Response, next: NextFunction) => {
       // Get correlation ID from header or generate new one
-      req.correlationId = (req.headers['x-correlation-id'] as CorrelationId) || 
-                         uuidv4() as CorrelationId;
-      
+      req.correlationId =
+        (req.headers['x-correlation-id'] as CorrelationId) || (uuidv4() as CorrelationId);
+
       // Add to response header
       res.setHeader('x-correlation-id', req.correlationId);
-      
+
       next();
     };
   }
@@ -73,18 +69,13 @@ export class AuthMiddleware {
           if (optional) {
             return next(); // Continue without auth context
           }
-          
-          return this.handleAuthError(
-            req,
-            res,
-            'Missing or invalid authorization header',
-            401
-          );
+
+          return this.handleAuthError(req, res, 'Missing or invalid authorization header', 401);
         }
 
         // Get auth context from token
         const authContext = await this.authService.getAuthContext(token, req.correlationId);
-        
+
         // Add auth context to request
         req.auth = authContext;
 
@@ -92,14 +83,13 @@ export class AuthMiddleware {
           userId: authContext.userId,
           email: authContext.email,
           roles: authContext.roles,
-          sessionId: authContext.sessionId
+          sessionId: authContext.sessionId,
         });
 
         next();
-
       } catch (error) {
         const errorMessage = (error as Error).message;
-        
+
         this.securityLogger.logSecurityEvent(
           'INVALID_TOKEN',
           'MEDIUM',
@@ -107,7 +97,7 @@ export class AuthMiddleware {
           {
             ip: req.ip,
             userAgent: req.get('User-Agent'),
-            endpoint: req.path
+            endpoint: req.path,
           },
           req.correlationId
         );
@@ -162,7 +152,7 @@ export class AuthMiddleware {
               userRoles: req.auth.roles,
               requireAll,
               ip: req.ip,
-              endpoint: req.path
+              endpoint: req.path,
             },
             req.correlationId
           );
@@ -179,16 +169,15 @@ export class AuthMiddleware {
           userId: req.auth.userId,
           requiredRoles,
           userRoles: req.auth.roles,
-          requireAll
+          requireAll,
         });
 
         next();
-
       } catch (error) {
         this.logger.error('Role check failed', {
           userId: req.auth?.userId,
           requiredRoles,
-          error: (error as Error).message
+          error: (error as Error).message,
         });
 
         return this.handleAuthError(req, res, 'Role verification failed', 500);
@@ -199,7 +188,10 @@ export class AuthMiddleware {
   /**
    * Require specific permissions
    */
-  requirePermissions(permissionChecks: IPermissionCheck[] | IPermissionCheck, requireAll: boolean = true) {
+  requirePermissions(
+    permissionChecks: IPermissionCheck[] | IPermissionCheck,
+    requireAll: boolean = true
+  ) {
     const checks = Array.isArray(permissionChecks) ? permissionChecks : [permissionChecks];
 
     return async (req: Request, res: Response, next: NextFunction) => {
@@ -211,7 +203,7 @@ export class AuthMiddleware {
         }
 
         const permissionResults = await Promise.all(
-          checks.map(check => 
+          checks.map(check =>
             this.rbacService.hasPermission(req.auth!.userId, check, req.correlationId)
           )
         );
@@ -225,7 +217,7 @@ export class AuthMiddleware {
             .filter((result, index) => !result.allowed)
             .map((result, index) => ({
               check: checks[index],
-              reason: result.reason
+              reason: result.reason,
             }));
 
           this.securityLogger.logSecurityEvent(
@@ -238,7 +230,7 @@ export class AuthMiddleware {
               deniedChecks,
               userPermissions: req.auth.permissions,
               ip: req.ip,
-              endpoint: req.path
+              endpoint: req.path,
             },
             req.correlationId
           );
@@ -254,16 +246,15 @@ export class AuthMiddleware {
         this.logger.debug('Permission check passed', {
           userId: req.auth.userId,
           requiredPermissions: checks,
-          userPermissions: req.auth.permissions
+          userPermissions: req.auth.permissions,
         });
 
         next();
-
       } catch (error) {
         this.logger.error('Permission check failed', {
           userId: req.auth?.userId,
           requiredPermissions: checks,
-          error: (error as Error).message
+          error: (error as Error).message,
         });
 
         return this.handleAuthError(req, res, 'Permission verification failed', 500);
@@ -307,33 +298,27 @@ export class AuthMiddleware {
               userId: req.auth.userId,
               resourceUserId,
               endpoint: req.path,
-              ip: req.ip
+              ip: req.ip,
             },
             req.correlationId
           );
 
-          return this.handleAuthError(
-            req,
-            res,
-            'You can only access your own resources',
-            403
-          );
+          return this.handleAuthError(req, res, 'You can only access your own resources', 403);
         }
 
         this.logger.debug('Ownership check passed', {
           userId: req.auth.userId,
           resourceUserId,
           isOwner,
-          isAdmin
+          isAdmin,
         });
 
         next();
-
       } catch (error) {
         this.logger.error('Ownership check failed', {
           userId: req.auth?.userId,
           userIdParam,
-          error: (error as Error).message
+          error: (error as Error).message,
         });
 
         return this.handleAuthError(req, res, 'Ownership verification failed', 500);
@@ -377,7 +362,7 @@ export class AuthMiddleware {
             endpoint: req.path,
             requestCount: requestData.count,
             windowMs,
-            maxRequests
+            maxRequests,
           },
           req.correlationId
         );
@@ -387,10 +372,10 @@ export class AuthMiddleware {
           error: {
             code: 'RATE_LIMIT_EXCEEDED',
             message: message || 'Too many requests. Please try again later.',
-            retryAfter: Math.ceil((requestData.resetTime - now) / 1000)
+            retryAfter: Math.ceil((requestData.resetTime - now) / 1000),
           },
           correlationId: req.correlationId,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       }
 
@@ -412,17 +397,17 @@ export class AuthMiddleware {
       endpoint: req.path,
       method: req.method,
       ip: req.ip,
-      userAgent: req.get('User-Agent')
+      userAgent: req.get('User-Agent'),
     });
 
     return res.status(statusCode).json({
       success: false,
       error: {
         code: statusCode === 401 ? 'AUTHENTICATION_REQUIRED' : 'AUTHORIZATION_FAILED',
-        message
+        message,
       },
       correlationId: req.correlationId,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 }
@@ -449,12 +434,12 @@ export function authorize(permissions: string[]) {
   if (!authMiddlewareInstance) {
     throw new Error('Auth middleware not initialized');
   }
-  
+
   // Convert string permissions to IPermissionCheck format
   const permissionChecks = permissions.map(perm => {
     const [resource, action] = perm.split(':');
     return { resource, action };
   });
-  
+
   return authMiddlewareInstance.requirePermissions(permissionChecks);
 }

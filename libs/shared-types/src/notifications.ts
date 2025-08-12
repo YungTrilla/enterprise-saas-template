@@ -103,7 +103,7 @@ export enum NotificationType {
   SMS = 'SMS',
   PUSH = 'PUSH',
   IN_APP = 'IN_APP',
-  WEBHOOK = 'WEBHOOK'
+  WEBHOOK = 'WEBHOOK',
 }
 
 export enum NotificationStatus {
@@ -113,41 +113,52 @@ export enum NotificationStatus {
   SENT = 'SENT',
   DELIVERED = 'DELIVERED',
   FAILED = 'FAILED',
-  CANCELLED = 'CANCELLED'
+  CANCELLED = 'CANCELLED',
 }
 
 export enum NotificationPriority {
   LOW = 'LOW',
   NORMAL = 'NORMAL',
   HIGH = 'HIGH',
-  URGENT = 'URGENT'
+  URGENT = 'URGENT',
 }
 
 // Request/Response types
-export type CreateNotificationRequest = Omit<INotification, 
-  'id' | 'status' | 'sentAt' | 'deliveredAt' | 'failedAt' | 'failureReason' | 
-  'retryCount' | 'createdAt' | 'updatedAt' | 'createdBy'
+export type CreateNotificationRequest = Omit<
+  INotification,
+  | 'id'
+  | 'status'
+  | 'sentAt'
+  | 'deliveredAt'
+  | 'failedAt'
+  | 'failureReason'
+  | 'retryCount'
+  | 'createdAt'
+  | 'updatedAt'
+  | 'createdBy'
 >;
 
-export type CreateNotificationTemplateRequest = Omit<INotificationTemplate,
+export type CreateNotificationTemplateRequest = Omit<
+  INotificationTemplate,
   'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy'
 >;
 
-export type UpdateNotificationTemplateRequest = Partial<Omit<INotificationTemplate,
-  'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy'
->>;
+export type UpdateNotificationTemplateRequest = Partial<
+  Omit<INotificationTemplate, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy'>
+>;
 
-export type CreateNotificationChannelRequest = Omit<INotificationChannel,
+export type CreateNotificationChannelRequest = Omit<
+  INotificationChannel,
   'id' | 'createdAt' | 'updatedAt'
 >;
 
-export type UpdateNotificationChannelRequest = Partial<Omit<INotificationChannel,
-  'id' | 'createdAt' | 'updatedAt'
->>;
+export type UpdateNotificationChannelRequest = Partial<
+  Omit<INotificationChannel, 'id' | 'createdAt' | 'updatedAt'>
+>;
 
-export type UpdateNotificationPreferencesRequest = Partial<Omit<INotificationPreferences,
-  'id' | 'userId' | 'createdAt' | 'updatedAt'
->>;
+export type UpdateNotificationPreferencesRequest = Partial<
+  Omit<INotificationPreferences, 'id' | 'userId' | 'createdAt' | 'updatedAt'>
+>;
 
 // Bulk operations
 export interface IBulkNotificationRequest {

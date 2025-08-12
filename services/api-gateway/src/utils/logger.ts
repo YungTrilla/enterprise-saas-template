@@ -21,35 +21,33 @@ const levels = {
 const defaultLogger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
   levels,
-  format: combine(
-    errors({ stack: true }),
-    timestamp(),
-    json()
-  ),
+  format: combine(errors({ stack: true }), timestamp(), json()),
   defaultMeta: { service: 'api-gateway' },
   transports: [
     new winston.transports.Console({
-      format: process.env.NODE_ENV === 'development' 
-        ? combine(colorize(), simple())
-        : json()
-    })
-  ]
+      format: process.env.NODE_ENV === 'development' ? combine(colorize(), simple()) : json(),
+    }),
+  ],
 });
 
 // Add file transport in production
 if (process.env.NODE_ENV === 'production') {
-  defaultLogger.add(new winston.transports.File({
-    filename: 'logs/error.log',
-    level: 'error',
-    maxsize: 10485760, // 10MB
-    maxFiles: 5
-  }));
-  
-  defaultLogger.add(new winston.transports.File({
-    filename: 'logs/combined.log',
-    maxsize: 10485760, // 10MB
-    maxFiles: 5
-  }));
+  defaultLogger.add(
+    new winston.transports.File({
+      filename: 'logs/error.log',
+      level: 'error',
+      maxsize: 10485760, // 10MB
+      maxFiles: 5,
+    })
+  );
+
+  defaultLogger.add(
+    new winston.transports.File({
+      filename: 'logs/combined.log',
+      maxsize: 10485760, // 10MB
+      maxFiles: 5,
+    })
+  );
 }
 
 export interface ILogger {
@@ -67,20 +65,15 @@ export function createLogger(context: string): ILogger {
   const childLogger = defaultLogger.child({ context });
 
   return {
-    error: (message: string, meta?: any) => 
-      childLogger.error(message, sanitizeMeta(meta)),
-    
-    warn: (message: string, meta?: any) => 
-      childLogger.warn(message, sanitizeMeta(meta)),
-    
-    info: (message: string, meta?: any) => 
-      childLogger.info(message, sanitizeMeta(meta)),
-    
-    http: (message: string, meta?: any) => 
-      childLogger.http(message, sanitizeMeta(meta)),
-    
-    debug: (message: string, meta?: any) => 
-      childLogger.debug(message, sanitizeMeta(meta))
+    error: (message: string, meta?: any) => childLogger.error(message, sanitizeMeta(meta)),
+
+    warn: (message: string, meta?: any) => childLogger.warn(message, sanitizeMeta(meta)),
+
+    info: (message: string, meta?: any) => childLogger.info(message, sanitizeMeta(meta)),
+
+    http: (message: string, meta?: any) => childLogger.http(message, sanitizeMeta(meta)),
+
+    debug: (message: string, meta?: any) => childLogger.debug(message, sanitizeMeta(meta)),
   };
 }
 
@@ -102,7 +95,7 @@ function sanitizeMeta(meta: any): any {
     'apiKey',
     'privateKey',
     'creditCard',
-    'ssn'
+    'ssn',
   ];
 
   const removeSensitive = (obj: any): any => {
@@ -115,10 +108,10 @@ function sanitizeMeta(meta: any): any {
     }
 
     const cleaned: any = {};
-    
+
     for (const key in obj) {
       const lowerKey = key.toLowerCase();
-      
+
       if (sensitiveFields.some(field => lowerKey.includes(field))) {
         cleaned[key] = '[REDACTED]';
       } else if (typeof obj[key] === 'object') {
@@ -142,17 +135,12 @@ export function createHttpLogger() {
 
   return winston.createLogger({
     level: 'http',
-    format: combine(
-      timestamp(),
-      json()
-    ),
+    format: combine(timestamp(), json()),
     transports: [
       new winston.transports.Console({
-        format: process.env.NODE_ENV === 'development' 
-          ? combine(colorize(), simple())
-          : json()
-      })
-    ]
+        format: process.env.NODE_ENV === 'development' ? combine(colorize(), simple()) : json(),
+      }),
+    ],
   });
 }
 

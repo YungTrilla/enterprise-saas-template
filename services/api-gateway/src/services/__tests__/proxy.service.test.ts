@@ -35,7 +35,7 @@ describe('ProxyService', () => {
       originalUrl: '/api/v1/users',
       headers: {
         'content-type': 'application/json',
-        'authorization': 'Bearer token',
+        authorization: 'Bearer token',
         'x-correlation-id': 'test-correlation-id',
       },
       query: { page: '1' },
@@ -76,10 +76,7 @@ describe('ProxyService', () => {
         mockResponse as Response
       );
 
-      expect(mockCircuitBreaker.execute).toHaveBeenCalledWith(
-        'users',
-        expect.any(Function)
-      );
+      expect(mockCircuitBreaker.execute).toHaveBeenCalledWith('users', expect.any(Function));
 
       expect(mockedAxios.request).toHaveBeenCalledWith({
         method: 'GET',
@@ -88,7 +85,7 @@ describe('ProxyService', () => {
         data: {},
         headers: expect.objectContaining({
           'content-type': 'application/json',
-          'authorization': 'Bearer token',
+          authorization: 'Bearer token',
           'x-correlation-id': 'test-correlation-id',
         }),
         timeout: 30000,
@@ -205,7 +202,7 @@ describe('ProxyService', () => {
         'x-forwarded-proto': 'https',
         'x-forwarded-host': 'api.example.com',
         'x-real-ip': '10.0.0.2',
-        'authorization': 'Bearer token',
+        authorization: 'Bearer token',
       };
 
       const mockServiceResponse = {
@@ -250,9 +247,7 @@ describe('ProxyService', () => {
           mockResponse as Response
         );
 
-        expect(mockedAxios.request).toHaveBeenCalledWith(
-          expect.objectContaining({ method })
-        );
+        expect(mockedAxios.request).toHaveBeenCalledWith(expect.objectContaining({ method }));
       }
     });
 

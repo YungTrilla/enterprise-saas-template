@@ -119,29 +119,35 @@ export interface ServiceUrlsConfig {
   NOTIFICATION_SERVICE_URL: string;
 }
 
-export interface FullConfig extends 
-  BaseConfig,
-  DatabaseConfig,
-  RedisConfig,
-  AuthConfig,
-  SecurityConfig,
-  MonitoringConfig,
-  EmailConfig,
-  StorageConfig,
-  ServiceUrlsConfig {}
+export interface FullConfig
+  extends BaseConfig,
+    DatabaseConfig,
+    RedisConfig,
+    AuthConfig,
+    SecurityConfig,
+    MonitoringConfig,
+    EmailConfig,
+    StorageConfig,
+    ServiceUrlsConfig {}
 
 // ========================================
 // Validation Schemas
 // ========================================
 
-const environmentSchema = Joi.string().valid('development', 'test', 'staging', 'production').default('development');
+const environmentSchema = Joi.string()
+  .valid('development', 'test', 'staging', 'production')
+  .default('development');
 
 export const baseConfigSchema = Joi.object({
   NODE_ENV: environmentSchema,
   PORT: Joi.number().port().default(3000),
   SERVICE_NAME: Joi.string().required(),
-  SERVICE_VERSION: Joi.string().pattern(/^\d+\.\d+\.\d+$/).default('1.0.0'),
-  LOG_LEVEL: Joi.string().valid('error', 'warn', 'info', 'http', 'verbose', 'debug', 'silly').default('info'),
+  SERVICE_VERSION: Joi.string()
+    .pattern(/^\d+\.\d+\.\d+$/)
+    .default('1.0.0'),
+  LOG_LEVEL: Joi.string()
+    .valid('error', 'warn', 'info', 'http', 'verbose', 'debug', 'silly')
+    .default('info'),
   API_PREFIX: Joi.string().default('/api/v1'),
   CORS_ORIGINS: Joi.array().items(Joi.string().uri()).default(['http://localhost:3000']),
   ENABLE_CORS: Joi.boolean().default(true),
@@ -153,36 +159,50 @@ export const baseConfigSchema = Joi.object({
 export const databaseConfigSchema = Joi.object({
   DB_HOST: Joi.string().hostname().required(),
   DB_PORT: Joi.number().port().default(5432),
-  DB_NAME: Joi.string().pattern(/^[a-zA-Z0-9_-]+$/).min(1).max(63).required()
+  DB_NAME: Joi.string()
+    .pattern(/^[a-zA-Z0-9_-]+$/)
+    .min(1)
+    .max(63)
+    .required()
     .messages({
-      'string.pattern.base': 'Database name must contain only alphanumeric characters, underscores, and hyphens',
+      'string.pattern.base':
+        'Database name must contain only alphanumeric characters, underscores, and hyphens',
       'string.min': 'Database name must be at least 1 character',
-      'string.max': 'Database name must not exceed 63 characters'
+      'string.max': 'Database name must not exceed 63 characters',
     }),
   DB_USER: Joi.string().min(1).max(63).required(),
   DB_PASSWORD: Joi.string().min(8).required(),
   DB_SSL: Joi.boolean().default(Joi.ref('$environment') === 'production' ? true : false),
   DB_SSL_REJECT_UNAUTHORIZED: Joi.boolean().default(true),
-  DB_POOL_MIN: Joi.number().min(0).max(50).default(
-    Joi.when('$environment', {
-      is: 'production',
-      then: Joi.number().default(5),
-      otherwise: Joi.number().default(2)
-    })
-  ),
-  DB_POOL_MAX: Joi.number().min(1).max(100).default(
-    Joi.when('$environment', {
-      is: 'production',
-      then: Joi.number().default(20),
-      otherwise: Joi.number().default(10)
-    })
-  ).custom((value, helpers) => {
-    const poolMin = helpers.state.ancestors[0].DB_POOL_MIN || 2;
-    if (value <= poolMin) {
-      return helpers.error('any.invalid', { message: 'DB_POOL_MAX must be greater than DB_POOL_MIN' });
-    }
-    return value;
-  }),
+  DB_POOL_MIN: Joi.number()
+    .min(0)
+    .max(50)
+    .default(
+      Joi.when('$environment', {
+        is: 'production',
+        then: Joi.number().default(5),
+        otherwise: Joi.number().default(2),
+      })
+    ),
+  DB_POOL_MAX: Joi.number()
+    .min(1)
+    .max(100)
+    .default(
+      Joi.when('$environment', {
+        is: 'production',
+        then: Joi.number().default(20),
+        otherwise: Joi.number().default(10),
+      })
+    )
+    .custom((value, helpers) => {
+      const poolMin = helpers.state.ancestors[0].DB_POOL_MIN || 2;
+      if (value <= poolMin) {
+        return helpers.error('any.invalid', {
+          message: 'DB_POOL_MAX must be greater than DB_POOL_MIN',
+        });
+      }
+      return value;
+    }),
   DB_TIMEOUT: Joi.number().positive().min(1000).max(60000).default(30000),
   DB_CONNECTION_TIMEOUT: Joi.number().positive().min(1000).max(30000).default(10000),
   DB_IDLE_TIMEOUT: Joi.number().positive().min(5000).max(300000).default(30000),
@@ -193,7 +213,11 @@ export const databaseConfigSchema = Joi.object({
   DB_RETRY_DELAY: Joi.number().positive().min(100).max(10000).default(1000),
   DB_CONNECTION_CHECK_INTERVAL: Joi.number().positive().min(5000).max(300000).default(30000),
   DB_CREDENTIAL_ROTATION_ENABLED: Joi.boolean().default(false),
-  DB_CREDENTIAL_ROTATION_INTERVAL: Joi.number().positive().min(3600000).max(604800000).default(86400000), // 24 hours
+  DB_CREDENTIAL_ROTATION_INTERVAL: Joi.number()
+    .positive()
+    .min(3600000)
+    .max(604800000)
+    .default(86400000), // 24 hours
 });
 
 export const redisConfigSchema = Joi.object({
@@ -267,7 +291,7 @@ export class ConfigManager {
    */
   private detectEnvironment(): Environment {
     const env = process.env.NODE_ENV?.toLowerCase();
-    
+
     if (env === 'production' || env === 'prod') return 'production';
     if (env === 'staging' || env === 'stage') return 'staging';
     if (env === 'test' || env === 'testing') return 'test';
@@ -289,7 +313,7 @@ export class ConfigManager {
         `.env.${this.environment}.local`,
         `.env.${this.environment}`,
         '.env.local',
-        '.env'
+        '.env',
       ];
 
       for (const file of envFiles) {
@@ -347,7 +371,10 @@ export class ConfigManager {
       DB_RETRY_DELAY: parseInt(env.DB_RETRY_DELAY || '1000', 10),
       DB_CONNECTION_CHECK_INTERVAL: parseInt(env.DB_CONNECTION_CHECK_INTERVAL || '30000', 10),
       DB_CREDENTIAL_ROTATION_ENABLED: env.DB_CREDENTIAL_ROTATION_ENABLED === 'true',
-      DB_CREDENTIAL_ROTATION_INTERVAL: parseInt(env.DB_CREDENTIAL_ROTATION_INTERVAL || '86400000', 10),
+      DB_CREDENTIAL_ROTATION_INTERVAL: parseInt(
+        env.DB_CREDENTIAL_ROTATION_INTERVAL || '86400000',
+        10
+      ),
 
       // Redis config
       REDIS_HOST: env.REDIS_HOST || 'localhost',
@@ -470,7 +497,10 @@ export class ConfigManager {
 
     // Validate database config if DB_NAME is provided
     if (this.config.DB_NAME) {
-      const dbResult = validateWithJoi(this.config, databaseConfigSchema.options({ context: { environment: this.environment } }));
+      const dbResult = validateWithJoi(
+        this.config,
+        databaseConfigSchema.options({ context: { environment: this.environment } })
+      );
       if (!dbResult.isValid) {
         errors.push(...dbResult.errors.map(e => `Database config: ${e.message}`));
       }
@@ -481,7 +511,7 @@ export class ConfigManager {
       if (!this.config.ENCRYPTION_KEY) {
         errors.push('Security config: ENCRYPTION_KEY is required in production');
       }
-      
+
       // Database security validation for production
       if (this.config.DB_NAME) {
         if (!this.config.DB_SSL) {
@@ -494,16 +524,22 @@ export class ConfigManager {
           errors.push('Database config: Pool max should be at least 5 in production');
         }
       }
-      
+
       // Redis security validation for production
-      if (this.config.REDIS_HOST && this.config.REDIS_HOST !== 'localhost' && !this.config.REDIS_PASSWORD) {
-        errors.push('Redis config: Password is required for non-localhost connections in production');
+      if (
+        this.config.REDIS_HOST &&
+        this.config.REDIS_HOST !== 'localhost' &&
+        !this.config.REDIS_PASSWORD
+      ) {
+        errors.push(
+          'Redis config: Password is required for non-localhost connections in production'
+        );
       }
     }
 
     return {
       isValid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -511,30 +547,36 @@ export class ConfigManager {
    * Get database connection string with enhanced security parameters
    */
   getDatabaseUrl(): string {
-    const { 
-      DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD, 
-      DB_SSL, DB_SSL_REJECT_UNAUTHORIZED, DB_CONNECTION_TIMEOUT 
+    const {
+      DB_HOST,
+      DB_PORT,
+      DB_NAME,
+      DB_USER,
+      DB_PASSWORD,
+      DB_SSL,
+      DB_SSL_REJECT_UNAUTHORIZED,
+      DB_CONNECTION_TIMEOUT,
     } = this.config;
-    
+
     if (!DB_HOST || !DB_NAME || !DB_USER || !DB_PASSWORD) {
       throw new Error('Database configuration incomplete');
     }
 
     const params = new URLSearchParams();
-    
+
     if (DB_SSL) {
       params.set('sslmode', 'require');
       if (DB_SSL_REJECT_UNAUTHORIZED === false) {
         params.set('sslcert', 'disable');
       }
     }
-    
+
     if (DB_CONNECTION_TIMEOUT) {
       params.set('connect_timeout', Math.floor(DB_CONNECTION_TIMEOUT / 1000).toString());
     }
-    
+
     params.set('application_name', this.get('SERVICE_NAME') || 'abyss-service');
-    
+
     const paramString = params.toString();
     return `postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}${paramString ? '?' + paramString : ''}`;
   }
@@ -542,9 +584,25 @@ export class ConfigManager {
   /**
    * Get Redis connection config with enhanced security
    */
-  getRedisConfig(): { host: string; port: number; password?: string; db: number; connectTimeout: number; retryDelayOnFailover: number; maxRetriesPerRequest: number } {
-    const { REDIS_HOST, REDIS_PORT, REDIS_PASSWORD, REDIS_DB, REDIS_TIMEOUT, REDIS_RETRY_ATTEMPTS, REDIS_RETRY_DELAY } = this.config;
-    
+  getRedisConfig(): {
+    host: string;
+    port: number;
+    password?: string;
+    db: number;
+    connectTimeout: number;
+    retryDelayOnFailover: number;
+    maxRetriesPerRequest: number;
+  } {
+    const {
+      REDIS_HOST,
+      REDIS_PORT,
+      REDIS_PASSWORD,
+      REDIS_DB,
+      REDIS_TIMEOUT,
+      REDIS_RETRY_ATTEMPTS,
+      REDIS_RETRY_DELAY,
+    } = this.config;
+
     return {
       host: REDIS_HOST || 'localhost',
       port: REDIS_PORT || 6379,
@@ -552,7 +610,7 @@ export class ConfigManager {
       db: REDIS_DB || 0,
       connectTimeout: REDIS_TIMEOUT || 5000,
       retryDelayOnFailover: REDIS_RETRY_DELAY || 1000,
-      maxRetriesPerRequest: REDIS_RETRY_ATTEMPTS || 3
+      maxRetriesPerRequest: REDIS_RETRY_ATTEMPTS || 3,
     };
   }
 
@@ -589,10 +647,19 @@ export class ConfigManager {
     application_name: string;
   } {
     const {
-      DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD,
-      DB_SSL, DB_SSL_REJECT_UNAUTHORIZED,
-      DB_CONNECTION_TIMEOUT, DB_IDLE_TIMEOUT, DB_STATEMENT_TIMEOUT,
-      DB_POOL_MIN, DB_POOL_MAX, DB_MAX_LIFETIME
+      DB_HOST,
+      DB_PORT,
+      DB_NAME,
+      DB_USER,
+      DB_PASSWORD,
+      DB_SSL,
+      DB_SSL_REJECT_UNAUTHORIZED,
+      DB_CONNECTION_TIMEOUT,
+      DB_IDLE_TIMEOUT,
+      DB_STATEMENT_TIMEOUT,
+      DB_POOL_MIN,
+      DB_POOL_MAX,
+      DB_MAX_LIFETIME,
     } = this.config;
 
     if (!DB_HOST || !DB_NAME || !DB_USER || !DB_PASSWORD) {
@@ -605,16 +672,18 @@ export class ConfigManager {
       database: DB_NAME,
       user: DB_USER,
       password: DB_PASSWORD,
-      ssl: DB_SSL ? {
-        rejectUnauthorized: DB_SSL_REJECT_UNAUTHORIZED !== false
-      } : false,
+      ssl: DB_SSL
+        ? {
+            rejectUnauthorized: DB_SSL_REJECT_UNAUTHORIZED !== false,
+          }
+        : false,
       connectionTimeoutMillis: DB_CONNECTION_TIMEOUT || 10000,
       idleTimeoutMillis: DB_IDLE_TIMEOUT || 30000,
       statementTimeout: DB_STATEMENT_TIMEOUT || 60000,
       max: DB_POOL_MAX || (this.isProduction() ? 20 : 10),
       min: DB_POOL_MIN || (this.isProduction() ? 5 : 2),
       maxLifetimeSeconds: Math.floor((DB_MAX_LIFETIME || 3600000) / 1000),
-      application_name: this.get('SERVICE_NAME') || 'abyss-service'
+      application_name: this.get('SERVICE_NAME') || 'abyss-service',
     };
   }
 
@@ -628,12 +697,12 @@ export class ConfigManager {
     maxDelay: number;
   } {
     const { DB_RETRY_ATTEMPTS, DB_RETRY_DELAY } = this.config;
-    
+
     return {
       attempts: DB_RETRY_ATTEMPTS || 3,
       delay: DB_RETRY_DELAY || 1000,
       exponentialBackoff: true,
-      maxDelay: (DB_RETRY_DELAY || 1000) * 10
+      maxDelay: (DB_RETRY_DELAY || 1000) * 10,
     };
   }
 

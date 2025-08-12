@@ -1,0 +1,33 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 🔒 Security Vulnerability (Private)
+    url: https://github.com/your-org/enterprise-saas-template/security/advisories/new
+    about: Report sensitive security vulnerabilities privately through GitHub Security Advisories
+
+  - name: 💬 GitHub Discussions
+    url: https://github.com/your-org/enterprise-saas-template/discussions
+    about: Ask questions, share ideas, and engage with the community in discussions
+
+  - name: 📖 Documentation
+    url: https://github.com/your-org/enterprise-saas-template#readme
+    about: Read comprehensive documentation, guides, and API references
+
+  - name: 🎓 Getting Started Guide
+    url: https://github.com/your-org/enterprise-saas-template/blob/main/docs/GETTING_STARTED.md
+    about: Step-by-step guide for new users to get started with the template
+
+  - name: 🏗️ Architecture Guide
+    url: https://github.com/your-org/enterprise-saas-template/blob/main/ARCHITECTURE.md
+    about: Understand the system architecture and design decisions
+
+  - name: 🔧 Development Guide
+    url: https://github.com/your-org/enterprise-saas-template/blob/main/docs/DEVELOPMENT.md
+    about: Development workflows, best practices, and contribution guidelines
+
+  - name: 📧 Enterprise Support
+    url: mailto:enterprise@enterprise-saas-template.com
+    about: Contact our enterprise support team for business inquiries and premium support
+
+  - name: 🚨 Urgent Security Issues
+    url: mailto:security@enterprise-saas-template.com
+    about: For urgent security issues that cannot wait for GitHub Security Advisory process

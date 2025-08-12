@@ -212,25 +212,25 @@ export enum UserStatus {
   ACTIVE = 'ACTIVE',
   INACTIVE = 'INACTIVE',
   SUSPENDED = 'SUSPENDED',
-  PENDING_VERIFICATION = 'PENDING_VERIFICATION'
+  PENDING_VERIFICATION = 'PENDING_VERIFICATION',
 }
 
 export enum UserType {
   ADMIN = 'ADMIN',
   MEMBER = 'MEMBER',
-  GUEST = 'GUEST'
+  GUEST = 'GUEST',
 }
 
 export enum RoleType {
   SYSTEM = 'SYSTEM',
   CUSTOM = 'CUSTOM',
-  INHERITED = 'INHERITED'
+  INHERITED = 'INHERITED',
 }
 
 export enum PermissionScope {
   GLOBAL = 'GLOBAL',
   TENANT = 'TENANT',
-  RESOURCE = 'RESOURCE'
+  RESOURCE = 'RESOURCE',
 }
 
 // User entity interface

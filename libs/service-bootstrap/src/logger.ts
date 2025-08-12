@@ -15,35 +15,36 @@ export function createServiceLogger(config: ServiceBootstrapConfig): Logger {
       winston.format.errors({ stack: true }),
       winston.format.json()
     ),
-    defaultMeta: { 
+    defaultMeta: {
       service: serviceName,
       environment: config.environment || 'development',
-      version: config.version
+      version: config.version,
     },
     transports: [
       new winston.transports.Console({
-        format: winston.format.combine(
-          winston.format.colorize(),
-          winston.format.simple()
-        )
-      })
-    ]
+        format: winston.format.combine(winston.format.colorize(), winston.format.simple()),
+      }),
+    ],
   });
 
   // Add file transport in production
   if (config.environment === 'production') {
-    logger.add(new winston.transports.File({
-      filename: `logs/${serviceName}-error.log`,
-      level: 'error',
-      maxsize: 5242880, // 5MB
-      maxFiles: 5
-    }));
-    
-    logger.add(new winston.transports.File({
-      filename: `logs/${serviceName}-combined.log`,
-      maxsize: 5242880, // 5MB
-      maxFiles: 5
-    }));
+    logger.add(
+      new winston.transports.File({
+        filename: `logs/${serviceName}-error.log`,
+        level: 'error',
+        maxsize: 5242880, // 5MB
+        maxFiles: 5,
+      })
+    );
+
+    logger.add(
+      new winston.transports.File({
+        filename: `logs/${serviceName}-combined.log`,
+        maxsize: 5242880, // 5MB
+        maxFiles: 5,
+      })
+    );
   }
 
   return logger;

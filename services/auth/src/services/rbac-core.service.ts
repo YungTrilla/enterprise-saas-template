@@ -4,10 +4,7 @@
  */
 
 import { EntityId, CorrelationId } from '@template/shared-types';
-import {
-  IPermissionCheck,
-  IAuthorizationResult
-} from '../types/auth';
+import { IPermissionCheck, IAuthorizationResult } from '../types/auth';
 import { AuthRepository } from '../database/repository';
 import { CorrelatedLogger } from '../utils/logger';
 
@@ -33,15 +30,14 @@ export class RbacCoreService {
       this.logger.debug('Retrieved user roles', {
         userId,
         roleCount: roleNames.length,
-        roles: roleNames
+        roles: roleNames,
       });
 
       return roleNames;
-
     } catch (error) {
       this.logger.error('Failed to get user roles', {
         userId,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       throw error;
     }
@@ -58,15 +54,14 @@ export class RbacCoreService {
 
       this.logger.debug('Retrieved user permissions', {
         userId,
-        permissionCount: permissions.length
+        permissionCount: permissions.length,
       });
 
       return permissions;
-
     } catch (error) {
       this.logger.error('Failed to get user permissions', {
         userId,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       throw error;
     }
@@ -94,10 +89,11 @@ export class RbacCoreService {
       const actionWildcard = `*:${permissionCheck.action}`;
       const allWildcard = '*:*';
 
-      const hasWildcardPermission = userPermissions.some(permission =>
-        permission === resourceWildcard ||
-        permission === actionWildcard ||
-        permission === allWildcard
+      const hasWildcardPermission = userPermissions.some(
+        permission =>
+          permission === resourceWildcard ||
+          permission === actionWildcard ||
+          permission === allWildcard
       );
 
       const allowed = hasExactPermission || hasWildcardPermission;
@@ -113,27 +109,26 @@ export class RbacCoreService {
         resource: permissionCheck.resource,
         action: permissionCheck.action,
         allowed,
-        requiredPermission
+        requiredPermission,
       });
 
       return {
         allowed,
         reason: allowed ? 'Permission granted' : 'Insufficient permissions',
-        requiredPermissions: allowed ? undefined : [requiredPermission]
+        requiredPermissions: allowed ? undefined : [requiredPermission],
       };
-
     } catch (error) {
       this.logger.error('Permission check failed', {
         userId,
         resource: permissionCheck.resource,
         action: permissionCheck.action,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
 
       return {
         allowed: false,
         reason: 'Permission check error',
-        requiredPermissions: [`${permissionCheck.resource}:${permissionCheck.action}`]
+        requiredPermissions: [`${permissionCheck.resource}:${permissionCheck.action}`],
       };
     }
   }
@@ -156,16 +151,15 @@ export class RbacCoreService {
         userId,
         requiredRoles,
         userRoles,
-        hasRole
+        hasRole,
       });
 
       return hasRole;
-
     } catch (error) {
       this.logger.error('Role check failed', {
         userId,
         requiredRoles,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       return false;
     }
@@ -189,16 +183,15 @@ export class RbacCoreService {
         userId,
         requiredRoles,
         userRoles,
-        hasAllRoles
+        hasAllRoles,
       });
 
       return hasAllRoles;
-
     } catch (error) {
       this.logger.error('All roles check failed', {
         userId,
         requiredRoles,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       return false;
     }
@@ -220,9 +213,7 @@ export class RbacCoreService {
         permissionChecks.map(check => this.hasPermission(userId, check, correlationId))
       );
 
-      const allowed = requireAll
-        ? results.every(r => r.allowed)
-        : results.some(r => r.allowed);
+      const allowed = requireAll ? results.every(r => r.allowed) : results.some(r => r.allowed);
 
       const failedPermissions = results
         .filter(r => !r.allowed)
@@ -230,27 +221,24 @@ export class RbacCoreService {
 
       return {
         allowed,
-        reason: allowed 
-          ? 'Permission granted' 
-          : requireAll 
-            ? 'Missing one or more required permissions' 
+        reason: allowed
+          ? 'Permission granted'
+          : requireAll
+            ? 'Missing one or more required permissions'
             : 'None of the required permissions found',
-        requiredPermissions: allowed ? undefined : failedPermissions
+        requiredPermissions: allowed ? undefined : failedPermissions,
       };
-
     } catch (error) {
       this.logger.error('Multiple permission check failed', {
         userId,
         permissionCount: permissionChecks.length,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
 
       return {
         allowed: false,
         reason: 'Permission check error',
-        requiredPermissions: permissionChecks.map(
-          check => `${check.resource}:${check.action}`
-        )
+        requiredPermissions: permissionChecks.map(check => `${check.resource}:${check.action}`),
       };
     }
   }

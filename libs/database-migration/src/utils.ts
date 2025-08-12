@@ -18,10 +18,7 @@ export function generateMigrationName(description: string): string {
 }
 
 export async function calculateChecksum(content: string): Promise<string> {
-  return crypto
-    .createHash('sha256')
-    .update(content, 'utf8')
-    .digest('hex');
+  return crypto.createHash('sha256').update(content, 'utf8').digest('hex');
 }
 
 export function parseMigrationFilename(filename: string): {
@@ -44,17 +41,17 @@ export function parseMigrationFilename(filename: string): {
 export async function loadMigrationFile(filePath: string): Promise<IMigration> {
   const filename = path.basename(filePath);
   const parsed = parseMigrationFilename(filename);
-  
+
   if (!parsed) {
     throw new Error(`Invalid migration filename: ${filename}`);
   }
 
   const module = await import(filePath);
-  
+
   if (!module.up || typeof module.up !== 'function') {
     throw new Error(`Migration ${filename} must export an 'up' function`);
   }
-  
+
   if (!module.down || typeof module.down !== 'function') {
     throw new Error(`Migration ${filename} must export a 'down' function`);
   }
@@ -89,15 +86,15 @@ export async function createMigrationFile(
   template?: string
 ): Promise<string> {
   await fs.mkdir(migrationsPath, { recursive: true });
-  
+
   const id = generateMigrationId();
   const safeName = generateMigrationName(name);
   const filename = `${id}_${safeName}.ts`;
   const filePath = path.join(migrationsPath, filename);
-  
+
   const content = template || generateDefaultTemplate(safeName);
   await fs.writeFile(filePath, content, 'utf8');
-  
+
   return filePath;
 }
 

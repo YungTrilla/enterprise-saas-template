@@ -8,9 +8,9 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - $ref: '../components/parameters.yaml#/components/parameters/PageParam'
-        - $ref: '../components/parameters.yaml#/components/parameters/LimitParam'
-        - $ref: '../components/parameters.yaml#/components/parameters/SearchParam'
+        - $ref: "../components/parameters.yaml#/components/parameters/PageParam"
+        - $ref: "../components/parameters.yaml#/components/parameters/LimitParam"
+        - $ref: "../components/parameters.yaml#/components/parameters/SearchParam"
         - name: role
           in: query
           schema:
@@ -24,16 +24,16 @@ paths:
           schema:
             type: boolean
       responses:
-        '200':
+        "200":
           description: Users retrieved successfully
           content:
             application/json:
               schema:
-                $ref: '../components/schemas/user.yaml#/components/schemas/UserListResponse'
-        '401':
-          $ref: '../components/responses.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: '../components/responses.yaml#/components/responses/Forbidden'
+                $ref: "../components/schemas/user.yaml#/components/schemas/UserListResponse"
+        "401":
+          $ref: "../components/responses.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "../components/responses.yaml#/components/responses/Forbidden"
     post:
       tags:
         - Users
@@ -46,20 +46,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '../components/schemas/user.yaml#/components/schemas/CreateUser'
+              $ref: "../components/schemas/user.yaml#/components/schemas/CreateUser"
       responses:
-        '201':
+        "201":
           description: User created successfully
           content:
             application/json:
               schema:
-                $ref: '../components/schemas/user.yaml#/components/schemas/User'
-        '400':
-          $ref: '../components/responses.yaml#/components/responses/BadRequest'
-        '401':
-          $ref: '../components/responses.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: '../components/responses.yaml#/components/responses/Forbidden'
+                $ref: "../components/schemas/user.yaml#/components/schemas/User"
+        "400":
+          $ref: "../components/responses.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "../components/responses.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "../components/responses.yaml#/components/responses/Forbidden"
   /users/{userId}:
     get:
       tags:
@@ -69,18 +69,18 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - $ref: '../components/parameters.yaml#/components/parameters/UserIdParam'
+        - $ref: "../components/parameters.yaml#/components/parameters/UserIdParam"
       responses:
-        '200':
+        "200":
           description: User retrieved successfully
           content:
             application/json:
               schema:
-                $ref: '../components/schemas/user.yaml#/components/schemas/User'
-        '401':
-          $ref: '../components/responses.yaml#/components/responses/Unauthorized'
-        '404':
-          $ref: '../components/responses.yaml#/components/responses/NotFound'
+                $ref: "../components/schemas/user.yaml#/components/schemas/User"
+        "401":
+          $ref: "../components/responses.yaml#/components/responses/Unauthorized"
+        "404":
+          $ref: "../components/responses.yaml#/components/responses/NotFound"
     put:
       tags:
         - Users
@@ -89,28 +89,28 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - $ref: '../components/parameters.yaml#/components/parameters/UserIdParam'
+        - $ref: "../components/parameters.yaml#/components/parameters/UserIdParam"
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '../components/schemas/user.yaml#/components/schemas/UpdateUser'
+              $ref: "../components/schemas/user.yaml#/components/schemas/UpdateUser"
       responses:
-        '200':
+        "200":
           description: User updated successfully
           content:
             application/json:
               schema:
-                $ref: '../components/schemas/user.yaml#/components/schemas/User'
-        '400':
-          $ref: '../components/responses.yaml#/components/responses/BadRequest'
-        '401':
-          $ref: '../components/responses.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: '../components/responses.yaml#/components/responses/Forbidden'
-        '404':
-          $ref: '../components/responses.yaml#/components/responses/NotFound'
+                $ref: "../components/schemas/user.yaml#/components/schemas/User"
+        "400":
+          $ref: "../components/responses.yaml#/components/responses/BadRequest"
+        "401":
+          $ref: "../components/responses.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "../components/responses.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "../components/responses.yaml#/components/responses/NotFound"
     delete:
       tags:
         - Users
@@ -119,16 +119,16 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - $ref: '../components/parameters.yaml#/components/parameters/UserIdParam'
+        - $ref: "../components/parameters.yaml#/components/parameters/UserIdParam"
       responses:
-        '204':
+        "204":
           description: User deleted successfully
-        '401':
-          $ref: '../components/responses.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: '../components/responses.yaml#/components/responses/Forbidden'
-        '404':
-          $ref: '../components/responses.yaml#/components/responses/NotFound'
+        "401":
+          $ref: "../components/responses.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "../components/responses.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "../components/responses.yaml#/components/responses/NotFound"
   /users/{userId}/activate:
     post:
       tags:
@@ -138,16 +138,16 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - $ref: '../components/parameters.yaml#/components/parameters/UserIdParam'
+        - $ref: "../components/parameters.yaml#/components/parameters/UserIdParam"
       responses:
-        '200':
+        "200":
           description: User activated successfully
-        '401':
-          $ref: '../components/responses.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: '../components/responses.yaml#/components/responses/Forbidden'
-        '404':
-          $ref: '../components/responses.yaml#/components/responses/NotFound'
+        "401":
+          $ref: "../components/responses.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "../components/responses.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "../components/responses.yaml#/components/responses/NotFound"
   /users/{userId}/deactivate:
     post:
       tags:
@@ -157,13 +157,13 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - $ref: '../components/parameters.yaml#/components/parameters/UserIdParam'
+        - $ref: "../components/parameters.yaml#/components/parameters/UserIdParam"
       responses:
-        '200':
+        "200":
           description: User deactivated successfully
-        '401':
-          $ref: '../components/responses.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: '../components/responses.yaml#/components/responses/Forbidden'
-        '404':
-          $ref: '../components/responses.yaml#/components/responses/NotFound'
+        "401":
+          $ref: "../components/responses.yaml#/components/responses/Unauthorized"
+        "403":
+          $ref: "../components/responses.yaml#/components/responses/Forbidden"
+        "404":
+          $ref: "../components/responses.yaml#/components/responses/NotFound"

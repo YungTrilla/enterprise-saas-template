@@ -49,9 +49,9 @@ output:
   destination: semgrep-results.sarif
 
 # Performance configuration
-max_target_bytes: 1000000  # 1MB max file size
-timeout: 30                # 30 second timeout per rule
-timeout_threshold: 3       # Skip file after 3 timeouts
+max_target_bytes: 1000000 # 1MB max file size
+timeout: 30 # 30 second timeout per rule
+timeout_threshold: 3 # Skip file after 3 timeouts
 
 # Rule customization
 rule_config:
@@ -61,7 +61,7 @@ rule_config:
       disable: true
     javascript.lang.security.audit.crypto-js-hardcoded-secret.crypto-js-hardcoded-secret:
       disable: true
-      
+
   # Customize rule severity for template security
   javascript.lang.security.audit.hardcoded-secret.hardcoded-secret:
     severity: ERROR

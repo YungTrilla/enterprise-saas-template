@@ -5,7 +5,7 @@ import {
   ServiceBootstrapConfig,
   ServiceBootstrapResult,
   RouteSetupFunction,
-  ServiceDependencies
+  ServiceDependencies,
 } from './types';
 import { createServiceLogger } from './logger';
 import { applyStandardMiddleware, applyErrorHandlers } from './middleware';
@@ -22,17 +22,17 @@ export async function bootstrapService(
   setupRoutes: RouteSetupFunction
 ): Promise<ServiceBootstrapResult> {
   const startTime = Date.now();
-  
+
   // Load shared configuration
   await loadConfig();
-  
+
   // Create logger
   const logger = createServiceLogger(config);
   logger.info('Starting service', {
     service: config.name,
     version: config.version,
     environment: config.environment || 'development',
-    port: config.port
+    port: config.port,
   });
 
   // Create Express app
@@ -55,7 +55,7 @@ export async function bootstrapService(
     logger,
     db,
     redis,
-    config
+    config,
   };
 
   // Setup service-specific routes
@@ -80,12 +80,12 @@ export async function bootstrapService(
             port: config.port,
             host: config.host || '0.0.0.0',
             environment: config.environment || 'development',
-            startupTime: Date.now() - startTime
+            startupTime: Date.now() - startTime,
           });
           resolve();
         });
 
-        server.on('error', (error) => {
+        server.on('error', error => {
           logger.error('Server error', { error });
           reject(error);
         });
@@ -102,31 +102,20 @@ export async function bootstrapService(
     db,
     redis,
     shutdown,
-    start
+    start,
   };
 }
 
 // Re-export types and utilities
 export * from './types';
 export { createServiceLogger } from './logger';
-export { 
-  applyStandardMiddleware, 
+export {
+  applyStandardMiddleware,
   applyErrorHandlers,
   correlationIdMiddleware,
-  createRequestLogger
+  createRequestLogger,
 } from './middleware';
-export { 
-  createDatabaseConnection, 
-  checkDatabaseHealth,
-  closeDatabaseConnection
-} from './database';
-export { 
-  createRedisConnection, 
-  checkRedisHealth,
-  closeRedisConnection
-} from './redis';
-export { 
-  createHealthCheckHandler,
-  setupHealthRoutes
-} from './health';
+export { createDatabaseConnection, checkDatabaseHealth, closeDatabaseConnection } from './database';
+export { createRedisConnection, checkRedisHealth, closeRedisConnection } from './redis';
+export { createHealthCheckHandler, setupHealthRoutes } from './health';
 export { setupGracefulShutdown } from './shutdown';

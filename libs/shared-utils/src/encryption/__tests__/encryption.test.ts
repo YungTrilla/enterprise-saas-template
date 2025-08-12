@@ -20,7 +20,7 @@ import {
   createSha256Hash,
   createHmacSignature,
   verifyHmacSignature,
-  generateDataHash
+  generateDataHash,
 } from '../index';
 
 describe('Encryption Utils', () => {
@@ -28,7 +28,7 @@ describe('Encryption Utils', () => {
     it('should hash password successfully', async () => {
       const password = 'TestPassword123!';
       const hash = await hashPassword(password);
-      
+
       expect(hash).toBeDefined();
       expect(hash).not.toBe(password);
       expect(hash.length).toBeGreaterThan(50);
@@ -38,7 +38,7 @@ describe('Encryption Utils', () => {
       const password = 'TestPassword123!';
       const hash = await hashPassword(password);
       const isValid = await verifyPassword(password, hash);
-      
+
       expect(isValid).toBe(true);
     });
 
@@ -47,18 +47,24 @@ describe('Encryption Utils', () => {
       const wrongPassword = 'WrongPassword123!';
       const hash = await hashPassword(password);
       const isValid = await verifyPassword(wrongPassword, hash);
-      
+
       expect(isValid).toBe(false);
     });
 
     it('should throw error for invalid password input', async () => {
       await expect(hashPassword('')).rejects.toThrow('Password must be a non-empty string');
-      await expect(hashPassword(null as any)).rejects.toThrow('Password must be a non-empty string');
+      await expect(hashPassword(null as any)).rejects.toThrow(
+        'Password must be a non-empty string'
+      );
     });
 
     it('should throw error for invalid cost factor', async () => {
-      await expect(hashPassword('password', 5)).rejects.toThrow('Cost factor must be between 10 and 15');
-      await expect(hashPassword('password', 20)).rejects.toThrow('Cost factor must be between 10 and 15');
+      await expect(hashPassword('password', 5)).rejects.toThrow(
+        'Cost factor must be between 10 and 15'
+      );
+      await expect(hashPassword('password', 20)).rejects.toThrow(
+        'Cost factor must be between 10 and 15'
+      );
     });
 
     it('should detect when password needs rehashing', () => {
@@ -75,7 +81,7 @@ describe('Encryption Utils', () => {
     it('should encrypt and decrypt data successfully', () => {
       const encrypted = encryptData(testData, secretKey);
       const decrypted = decryptData(encrypted, secretKey);
-      
+
       expect(encrypted).toBeDefined();
       expect(encrypted).not.toBe(testData);
       expect(decrypted).toBe(testData);
@@ -83,7 +89,7 @@ describe('Encryption Utils', () => {
 
     it('should throw error when decrypting with wrong key', () => {
       const encrypted = encryptData(testData, secretKey);
-      
+
       expect(() => decryptData(encrypted, 'wrong-key')).toThrow('Decryption failed');
     });
 
@@ -92,19 +98,21 @@ describe('Encryption Utils', () => {
         id: 123,
         name: 'Test User',
         email: 'test@example.com',
-        data: { nested: true }
+        data: { nested: true },
       };
-      
+
       const encrypted = encryptObject(testObject, secretKey);
       const decrypted = decryptObject(encrypted, secretKey);
-      
+
       expect(decrypted).toEqual(testObject);
     });
 
     it('should throw error for missing data or key', () => {
       expect(() => encryptData('', secretKey)).toThrow('Data and secret key are required');
       expect(() => encryptData(testData, '')).toThrow('Data and secret key are required');
-      expect(() => decryptData('', secretKey)).toThrow('Encrypted data and secret key are required');
+      expect(() => decryptData('', secretKey)).toThrow(
+        'Encrypted data and secret key are required'
+      );
     });
   });
 
@@ -112,7 +120,7 @@ describe('Encryption Utils', () => {
     it('should generate secure token of correct length', () => {
       const token16 = generateSecureToken(16);
       const token32 = generateSecureToken(32);
-      
+
       expect(token16).toHaveLength(32); // 16 bytes = 32 hex chars
       expect(token32).toHaveLength(64); // 32 bytes = 64 hex chars
     });
@@ -122,19 +130,23 @@ describe('Encryption Utils', () => {
       for (let i = 0; i < 100; i++) {
         tokens.add(generateSecureToken());
       }
-      
+
       expect(tokens.size).toBe(100);
     });
 
     it('should throw error for invalid token length', () => {
-      expect(() => generateSecureToken(4)).toThrow('Token length must be between 8 and 128 characters');
-      expect(() => generateSecureToken(200)).toThrow('Token length must be between 8 and 128 characters');
+      expect(() => generateSecureToken(4)).toThrow(
+        'Token length must be between 8 and 128 characters'
+      );
+      expect(() => generateSecureToken(200)).toThrow(
+        'Token length must be between 8 and 128 characters'
+      );
     });
 
     it('should generate API key with correct format', () => {
       const apiKey = generateApiKey();
       expect(apiKey).toMatch(/^ak_[a-z0-9]+_[a-f0-9]{32}$/);
-      
+
       const customApiKey = generateApiKey('custom');
       expect(customApiKey).toMatch(/^custom_[a-z0-9]+_[a-f0-9]{32}$/);
     });
@@ -152,7 +164,7 @@ describe('Encryption Utils', () => {
 
     it('should generate reset token with hash and expiration', () => {
       const { token, hash, expiresAt } = generateResetToken();
-      
+
       expect(token).toHaveLength(48);
       expect(hash).toHaveLength(64); // SHA-256 hash
       expect(expiresAt).toBeInstanceOf(Date);
@@ -162,7 +174,7 @@ describe('Encryption Utils', () => {
 
     it('should verify reset token correctly', () => {
       const { token, hash } = generateResetToken();
-      
+
       expect(verifyResetToken(token, hash)).toBe(true);
       expect(verifyResetToken('wrong-token', hash)).toBe(false);
     });
@@ -178,9 +190,9 @@ describe('Encryption Utils', () => {
       const userId = 'user-123';
       const email = 'test@example.com';
       const roles = ['user', 'admin'];
-      
+
       const payload = createTokenPayload(userId, email, roles);
-      
+
       expect(payload.sub).toBe(userId);
       expect(payload.email).toBe(email);
       expect(payload.roles).toEqual(roles);
@@ -199,11 +211,11 @@ describe('Encryption Utils', () => {
         token: 'abc123xyz',
         credit_card: '1234567890123456',
         key: 'sk_test_123',
-        regular: 'normal data'
+        regular: 'normal data',
       };
-      
+
       const masked = maskSensitiveData(data);
-      
+
       expect(masked.username).toBe('johndoe');
       expect(masked.password).toBe('*********');
       expect(masked.email).toBe('john@example.com');
@@ -219,13 +231,13 @@ describe('Encryption Utils', () => {
           name: 'John',
           auth: {
             password: 'secret',
-            token: 'xyz123'
-          }
-        }
+            token: 'xyz123',
+          },
+        },
       };
-      
+
       const masked = maskSensitiveData(data);
-      
+
       expect(masked.user.name).toBe('John');
       expect(masked.user.auth).toBe('[MASKED]');
     });
@@ -249,7 +261,7 @@ describe('Encryption Utils', () => {
     it('should create SHA-256 hash', () => {
       const data = 'test data';
       const hash = createSha256Hash(data);
-      
+
       expect(hash).toHaveLength(64);
       expect(hash).toBe('916f0027a575074ce72a331777c3478d6513f786a591bd892da1a577bf2335f9');
     });
@@ -258,7 +270,7 @@ describe('Encryption Utils', () => {
       const data = 'test data';
       const key = 'secret key';
       const hmac = createHmacSignature(data, key);
-      
+
       expect(hmac).toHaveLength(64);
       expect(hmac).toBe('d51c4289e6eea49db00925bb7a948d31309550040f88bc4aba39bb3107c071be');
     });
@@ -267,7 +279,7 @@ describe('Encryption Utils', () => {
       const data = 'test data';
       const key = 'secret key';
       const signature = createHmacSignature(data, key);
-      
+
       expect(verifyHmacSignature(data, signature, key)).toBe(true);
       expect(verifyHmacSignature(data, 'wrong-signature', key)).toBe(false);
       expect(verifyHmacSignature('wrong-data', signature, key)).toBe(false);
@@ -277,7 +289,7 @@ describe('Encryption Utils', () => {
       const data = { id: 123, name: 'test', values: [1, 2, 3] };
       const hash1 = generateDataHash(data);
       const hash2 = generateDataHash({ values: [1, 2, 3], name: 'test', id: 123 }); // Different order
-      
+
       expect(hash1).toHaveLength(64);
       expect(hash1).toBe(hash2); // Should be the same despite different property order
     });

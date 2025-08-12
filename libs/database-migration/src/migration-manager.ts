@@ -7,11 +7,7 @@ import {
   IMigrationConflict,
   IMigrationLogger,
 } from './types';
-import {
-  getMigrationFiles,
-  loadMigrationFile,
-  calculateChecksum,
-} from './utils';
+import { getMigrationFiles, loadMigrationFile, calculateChecksum } from './utils';
 import { CorrelationId } from '@template/shared-types';
 
 export class MigrationManager {
@@ -24,11 +20,8 @@ export class MigrationManager {
     this.config = config;
     this.logger = config.logger || this.createDefaultLogger();
     this.migrationsTable = config.migrationsTable || 'schema_migrations';
-    
-    this.client = new DatabaseClient(
-      { connectionString: config.databaseUrl },
-      this.logger
-    );
+
+    this.client = new DatabaseClient({ connectionString: config.databaseUrl }, this.logger);
   }
 
   private createDefaultLogger(): IMigrationLogger {
@@ -47,7 +40,7 @@ export class MigrationManager {
 
   private async ensureMigrationsTable(correlationId?: CorrelationId): Promise<void> {
     const schemaPrefix = this.config.schema ? `${this.config.schema}.` : '';
-    
+
     await this.client.query(`
       CREATE TABLE IF NOT EXISTS ${schemaPrefix}${this.migrationsTable} (
         id VARCHAR(255) PRIMARY KEY,
@@ -89,7 +82,7 @@ export class MigrationManager {
   private async getPendingMigrations(correlationId?: CorrelationId): Promise<IMigration[]> {
     const migrationFiles = await getMigrationFiles(this.config.migrationsPath);
     const appliedIds = await this.getAppliedMigrationIds(correlationId);
-    
+
     const pendingFiles = migrationFiles.filter(file => {
       const migration = loadMigrationFile(file);
       return migration.then(m => !appliedIds.includes(m.id));
@@ -135,9 +128,7 @@ export class MigrationManager {
     // Check for checksum mismatches
     for (const appliedMigration of applied) {
       const migrationFiles = await getMigrationFiles(this.config.migrationsPath);
-      const matchingFile = migrationFiles.find(file => 
-        file.includes(appliedMigration.id)
-      );
+      const matchingFile = migrationFiles.find(file => file.includes(appliedMigration.id));
 
       if (!matchingFile) {
         conflicts.push({
@@ -157,9 +148,7 @@ export class MigrationManager {
     // Check for out-of-order migrations
     if (applied.length > 0 && pending.length > 0) {
       const lastAppliedTimestamp = applied[applied.length - 1].timestamp;
-      const outOfOrderPending = pending.filter(
-        p => p.timestamp < lastAppliedTimestamp
-      );
+      const outOfOrderPending = pending.filter(p => p.timestamp < lastAppliedTimestamp);
 
       for (const migration of outOfOrderPending) {
         conflicts.push({
@@ -180,18 +169,12 @@ export class MigrationManager {
     correlationId?: CorrelationId
   ): Promise<void> {
     const schemaPrefix = this.config.schema ? `${this.config.schema}.` : '';
-    
+
     await this.client.query(
       `INSERT INTO ${schemaPrefix}${this.migrationsTable} 
        (id, name, timestamp, execution_time_ms, checksum) 
        VALUES ($1, $2, $3, $4, $5);`,
-      [
-        migration.id,
-        migration.name,
-        migration.timestamp,
-        executionTime,
-        checksum,
-      ]
+      [migration.id, migration.name, migration.timestamp, executionTime, checksum]
     );
 
     this.logger.info('Migration recorded', {
@@ -201,16 +184,12 @@ export class MigrationManager {
     });
   }
 
-  async removeMigration(
-    migrationId: string,
-    correlationId?: CorrelationId
-  ): Promise<void> {
+  async removeMigration(migrationId: string, correlationId?: CorrelationId): Promise<void> {
     const schemaPrefix = this.config.schema ? `${this.config.schema}.` : '';
-    
-    await this.client.query(
-      `DELETE FROM ${schemaPrefix}${this.migrationsTable} WHERE id = $1;`,
-      [migrationId]
-    );
+
+    await this.client.query(`DELETE FROM ${schemaPrefix}${this.migrationsTable} WHERE id = $1;`, [
+      migrationId,
+    ]);
 
     this.logger.info('Migration record removed', {
       migrationId,

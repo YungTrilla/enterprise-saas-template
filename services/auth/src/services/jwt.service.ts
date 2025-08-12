@@ -40,14 +40,16 @@ export class JwtService {
         permissions,
         sessionId,
         iat: Math.floor(Date.now() / 1000),
-        exp: Math.floor(Date.now() / 1000) + this.parseExpirationTime(this.config.jwt.accessTokenExpiration),
+        exp:
+          Math.floor(Date.now() / 1000) +
+          this.parseExpirationTime(this.config.jwt.accessTokenExpiration),
         iss: this.config.jwt.issuer,
         aud: this.config.jwt.audience,
-        correlationId
+        correlationId,
       };
 
       const accessToken = jwt.sign(accessTokenPayload, this.config.jwt.secret, {
-        algorithm: 'HS256'
+        algorithm: 'HS256',
       });
 
       // Generate refresh token
@@ -56,20 +58,22 @@ export class JwtService {
         sessionId,
         tokenVersion: 1,
         iat: Math.floor(Date.now() / 1000),
-        exp: Math.floor(Date.now() / 1000) + this.parseExpirationTime(this.config.jwt.refreshTokenExpiration),
+        exp:
+          Math.floor(Date.now() / 1000) +
+          this.parseExpirationTime(this.config.jwt.refreshTokenExpiration),
         iss: this.config.jwt.issuer,
-        aud: this.config.jwt.audience
+        aud: this.config.jwt.audience,
       };
 
       const refreshToken = jwt.sign(refreshTokenPayload, this.config.jwt.secret, {
-        algorithm: 'HS256'
+        algorithm: 'HS256',
       });
 
       this.logger.info('Token pair generated successfully', {
         userId,
         sessionId,
         accessTokenExp: accessTokenPayload.exp,
-        refreshTokenExp: refreshTokenPayload.exp
+        refreshTokenExp: refreshTokenPayload.exp,
       });
 
       return {
@@ -77,14 +81,13 @@ export class JwtService {
         refreshToken,
         expiresIn: this.parseExpirationTime(this.config.jwt.accessTokenExpiration),
         tokenType: 'Bearer',
-        sessionId
+        sessionId,
       };
-
     } catch (error) {
       this.logger.error('Failed to generate token pair', {
         userId,
         sessionId,
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       throw new Error('Token generation failed');
     }
@@ -100,23 +103,22 @@ export class JwtService {
       const decoded = jwt.verify(token, this.config.jwt.secret, {
         algorithms: ['HS256'],
         issuer: this.config.jwt.issuer,
-        audience: this.config.jwt.audience
+        audience: this.config.jwt.audience,
       }) as IJwtPayload;
 
       this.logger.debug('Access token verified successfully', {
         userId: decoded.sub,
         sessionId: decoded.sessionId,
-        exp: decoded.exp
+        exp: decoded.exp,
       });
 
       return decoded;
-
     } catch (error) {
       const errorType = this.getJwtErrorType(error as Error);
-      
+
       this.logger.warn('Access token verification failed', {
         error: (error as Error).message,
-        errorType
+        errorType,
       });
 
       throw new Error(`Token verification failed: ${errorType}`);
@@ -133,24 +135,23 @@ export class JwtService {
       const decoded = jwt.verify(token, this.config.jwt.secret, {
         algorithms: ['HS256'],
         issuer: this.config.jwt.issuer,
-        audience: this.config.jwt.audience
+        audience: this.config.jwt.audience,
       }) as IRefreshTokenPayload;
 
       this.logger.debug('Refresh token verified successfully', {
         userId: decoded.sub,
         sessionId: decoded.sessionId,
         tokenVersion: decoded.tokenVersion,
-        exp: decoded.exp
+        exp: decoded.exp,
       });
 
       return decoded;
-
     } catch (error) {
       const errorType = this.getJwtErrorType(error as Error);
-      
+
       this.logger.warn('Refresh token verification failed', {
         error: (error as Error).message,
-        errorType
+        errorType,
       });
 
       throw new Error(`Refresh token verification failed: ${errorType}`);
@@ -225,11 +226,16 @@ export class JwtService {
     const unit = match[2];
 
     switch (unit) {
-      case 's': return value;
-      case 'm': return value * 60;
-      case 'h': return value * 60 * 60;
-      case 'd': return value * 60 * 60 * 24;
-      default: throw new Error(`Invalid time unit: ${unit}`);
+      case 's':
+        return value;
+      case 'm':
+        return value * 60;
+      case 'h':
+        return value * 60 * 60;
+      case 'd':
+        return value * 60 * 60 * 24;
+      default:
+        throw new Error(`Invalid time unit: ${unit}`);
     }
   }
 
@@ -251,7 +257,7 @@ export class JwtService {
       return jwt.decode(token);
     } catch (error) {
       this.logger.warn('Failed to decode token', {
-        error: (error as Error).message
+        error: (error as Error).message,
       });
       return null;
     }

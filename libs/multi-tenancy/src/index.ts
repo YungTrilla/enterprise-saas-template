@@ -1,9 +1,9 @@
 /**
  * Multi-Tenancy Library
- * 
+ *
  * Provides middleware, utilities, and services for implementing
  * multi-tenant architecture in the Enterprise SaaS Template.
- * 
+ *
  * Features:
  * - Tenant identification from subdomain, domain, or header
  * - Tenant context management throughout request lifecycle
