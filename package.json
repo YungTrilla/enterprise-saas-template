@@ -230,7 +230,7 @@
     ],
     "package.json": [
       "prettier --write",
-      "npm audit --audit-level=high || echo \"⚠️  Security vulnerabilities detected in dependencies\""
+      "pnpm audit --audit-level=high || echo \"⚠️  Security vulnerabilities detected in dependencies\""
     ],
     "*.{ts,tsx}": [
       "bash -c 'echo \"🔧 Type checking staged files...\"; tsc --noEmit --skipLibCheck || echo \"⚠️  TypeScript errors detected\"' --"
