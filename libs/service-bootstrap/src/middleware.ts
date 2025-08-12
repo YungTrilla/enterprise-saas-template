@@ -4,7 +4,7 @@ import helmet from 'helmet';
 import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import { ServiceBootstrapConfig } from './types';
-import { errorHandler, notFoundHandler, generateCorrelationId } from '@abyss/shared-utils';
+import { errorHandler, notFoundHandler, generateCorrelationId } from '@template/shared-utils';
 
 /**
  * Correlation ID middleware - adds correlation ID to all requests

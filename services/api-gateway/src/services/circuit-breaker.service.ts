@@ -3,7 +3,7 @@
  * Implements circuit breaker pattern for service resilience
  */
 
-import { CorrelationId } from '@abyss/shared-types';
+import { CorrelationId } from '@template/shared-types';
 import { createLogger } from '../utils/logger';
 
 export enum CircuitState {

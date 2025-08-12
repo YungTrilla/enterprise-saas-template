@@ -4,8 +4,8 @@
  */
 
 import winston from 'winston';
-import { getConfig, isProduction } from '@abyss/shared-config';
-import { CorrelationId } from '@abyss/shared-types';
+import { getConfig, isProduction } from '@template/shared-config';
+import { CorrelationId } from '@template/shared-types';
 
 // Log format for structured logging
 const logFormat = winston.format.combine(

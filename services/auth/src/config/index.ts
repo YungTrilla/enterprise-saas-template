@@ -3,7 +3,7 @@
  * Environment-aware configuration with security-first defaults
  */
 
-import { loadConfig, getConfig, ConfigManager, isProduction } from '@abyss/shared-config';
+import { loadConfig, getConfig, ConfigManager, isProduction } from '@template/shared-config';
 import { IAuthConfig } from '../types/auth';
 
 /**

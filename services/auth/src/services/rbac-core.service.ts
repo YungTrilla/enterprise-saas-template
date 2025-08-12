@@ -3,7 +3,7 @@
  * Handles permission checking and authorization logic
  */
 
-import { EntityId, CorrelationId } from '@abyss/shared-types';
+import { EntityId, CorrelationId } from '@template/shared-types';
 import {
   IPermissionCheck,
   IAuthorizationResult

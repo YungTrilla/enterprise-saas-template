@@ -3,7 +3,7 @@
  * Comprehensive type definitions for JWT, RBAC, and user management
  */
 
-import { EntityId, CorrelationId, IAuditFields } from '@abyss/shared-types';
+import { EntityId, CorrelationId, IAuditFields } from '@template/shared-types';
 
 // ========================================
 // User Types

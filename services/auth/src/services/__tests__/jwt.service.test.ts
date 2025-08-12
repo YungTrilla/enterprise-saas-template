@@ -4,7 +4,7 @@
 
 import { JwtService } from '../jwt.service';
 import { createMockAuthConfig, createMockUser, createMockSession, createCorrelationId } from '../../__tests__/utils/test-helpers';
-import { EntityId } from '@abyss/shared-types';
+import { EntityId } from '@template/shared-types';
 import jwt from 'jsonwebtoken';
 
 describe('JwtService', () => {

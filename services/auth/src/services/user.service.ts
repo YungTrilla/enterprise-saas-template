@@ -8,8 +8,8 @@ import {
   IBulkUserActionResult,
   IRolePreset 
 } from '../models/user.model';
-import { CorrelationId } from '@abyss/shared-types';
-import { ApiError } from '@abyss/shared-utils';
+import { CorrelationId } from '@template/shared-types';
+import { ApiError } from '@template/shared-utils';
 import { logger } from '../utils/logger';
 import { PasswordService } from './password.service';
 import { RBACService } from './rbac.service';

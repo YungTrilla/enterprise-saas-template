@@ -7,7 +7,7 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { IAuthConfig } from '../types/auth';
 import { CorrelatedLogger } from '../utils/logger';
-import { CorrelationId } from '@abyss/shared-types';
+import { CorrelationId } from '@template/shared-types';
 
 export interface IPasswordValidationResult {
   isValid: boolean;

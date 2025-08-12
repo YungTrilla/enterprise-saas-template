@@ -1,6 +1,6 @@
 import express from 'express';
 import { Server } from 'http';
-import { loadConfig } from '@abyss/shared-config';
+import { loadConfig } from '@template/shared-config';
 import {
   ServiceBootstrapConfig,
   ServiceBootstrapResult,

@@ -3,7 +3,7 @@
  * Orchestrates authentication operations across specialized services
  */
 
-import { EntityId, CorrelationId } from '@abyss/shared-types';
+import { EntityId, CorrelationId } from '@template/shared-types';
 import {
   ILoginRequest,
   ILoginResponse,

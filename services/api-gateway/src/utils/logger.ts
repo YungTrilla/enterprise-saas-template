@@ -4,7 +4,7 @@
  */
 
 import winston from 'winston';
-import { CorrelationId } from '@abyss/shared-types';
+import { CorrelationId } from '@template/shared-types';
 
 const { combine, timestamp, errors, json, colorize, simple } = winston.format;
 

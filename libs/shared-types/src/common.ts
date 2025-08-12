@@ -206,3 +206,121 @@ export interface IBulkOperationResult<T = EntityId> {
   successCount: number;
   failureCount: number;
 }
+
+// User-related types for authentication and authorization
+export enum UserStatus {
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE',
+  SUSPENDED = 'SUSPENDED',
+  PENDING_VERIFICATION = 'PENDING_VERIFICATION'
+}
+
+export enum UserType {
+  ADMIN = 'ADMIN',
+  MEMBER = 'MEMBER',
+  GUEST = 'GUEST'
+}
+
+export enum RoleType {
+  SYSTEM = 'SYSTEM',
+  CUSTOM = 'CUSTOM',
+  INHERITED = 'INHERITED'
+}
+
+export enum PermissionScope {
+  GLOBAL = 'GLOBAL',
+  TENANT = 'TENANT',
+  RESOURCE = 'RESOURCE'
+}
+
+// User entity interface
+export interface IUser extends IAuditFields {
+  email: string;
+  firstName: string;
+  lastName: string;
+  username?: string;
+  phone?: string;
+  avatar?: string;
+  status: UserStatus;
+  type: UserType;
+  emailVerified: boolean;
+  phoneVerified: boolean;
+  lastLoginAt?: Timestamp;
+  roles: string[];
+  tenantId?: EntityId;
+  preferences: IUserPreferences;
+}
+
+// Role interface
+export interface IRole extends IAuditFields {
+  name: string;
+  description?: string;
+  type: RoleType;
+  permissions: string[];
+  tenantId?: EntityId;
+  isActive: boolean;
+}
+
+// Enhanced permission interface
+export interface IPermission {
+  id: EntityId;
+  name: string;
+  resource: string;
+  action: string;
+  scope: PermissionScope;
+  description?: string;
+  conditions?: Record<string, unknown>;
+  isActive: boolean;
+}
+
+// User session interface
+export interface IUserSession {
+  id: EntityId;
+  userId: EntityId;
+  accessToken: string;
+  refreshToken: string;
+  expiresAt: Timestamp;
+  refreshExpiresAt: Timestamp;
+  ipAddress: string;
+  userAgent: string;
+  isActive: boolean;
+  createdAt: Timestamp;
+  lastUsedAt: Timestamp;
+}
+
+// User profile interface
+export interface IUserProfile {
+  userId: EntityId;
+  bio?: string;
+  location?: string;
+  website?: string;
+  company?: string;
+  department?: string;
+  position?: string;
+  timezone?: string;
+  language?: string;
+  socialLinks?: Record<string, string>;
+  contactInfo: IContactInfo;
+  address?: IAddress;
+}
+
+// User preferences interface
+export interface IUserPreferences {
+  theme: 'light' | 'dark' | 'system';
+  language: string;
+  timezone: string;
+  emailNotifications: {
+    security: boolean;
+    updates: boolean;
+    marketing: boolean;
+    system: boolean;
+  };
+  pushNotifications: {
+    enabled: boolean;
+    security: boolean;
+    updates: boolean;
+    system: boolean;
+  };
+  twoFactorEnabled: boolean;
+  sessionTimeout: number; // in minutes
+}

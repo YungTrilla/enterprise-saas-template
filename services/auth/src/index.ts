@@ -8,7 +8,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
 import rateLimit from 'express-rate-limit';
-import { createDatabaseConnection } from '@abyss/shared-config';
+import { createDatabaseConnection } from '@template/shared-config';
 import { initializeAuthConfig, getServiceInfo, getAuthDatabaseConfig, getAuthRedisConfig } from './config';
 import { AuthService } from './services/auth.service';
 import { JwtService } from './services/jwt.service';

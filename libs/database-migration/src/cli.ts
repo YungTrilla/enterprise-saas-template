@@ -6,7 +6,7 @@ import * as path from 'path';
 import { MigrationRunner } from './migration-runner';
 import { createMigrationFile } from './utils';
 import { IMigrationConfig, IMigrationLogger } from './types';
-import { generateCorrelationId } from '@abyss/shared-utils';
+import { generateCorrelationId } from '@template/shared-utils';
 
 const logger: IMigrationLogger = {
   info: (message: string, meta?: any) => {

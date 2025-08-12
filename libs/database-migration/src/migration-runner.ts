@@ -9,7 +9,7 @@ import {
   MigrationDirection,
 } from './types';
 import { calculateChecksum } from './utils';
-import { CorrelationId } from '@abyss/shared-types';
+import { CorrelationId } from '@template/shared-types';
 
 export class MigrationRunner {
   private manager: MigrationManager;

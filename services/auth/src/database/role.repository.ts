@@ -1,5 +1,5 @@
 import { Pool } from 'pg';
-import { CorrelationId } from '@abyss/shared-types';
+import { CorrelationId } from '@template/shared-types';
 import { CorrelatedLogger } from '../utils/logger';
 import { IRole, IUserRole } from '../types/auth';
 

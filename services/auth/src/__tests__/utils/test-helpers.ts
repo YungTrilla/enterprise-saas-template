@@ -4,7 +4,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { EntityId, CorrelationId } from '@abyss/shared-types';
+import { EntityId, CorrelationId } from '@template/shared-types';
 import {
   IUser,
   IRole,

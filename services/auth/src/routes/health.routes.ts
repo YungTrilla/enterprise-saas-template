@@ -4,7 +4,7 @@
  */
 
 import { Router } from 'express';
-import { checkDatabaseHealth } from '@abyss/shared-config';
+import { checkDatabaseHealth } from '@template/shared-config';
 import { getServiceInfo } from '../config';
 
 const router = Router();

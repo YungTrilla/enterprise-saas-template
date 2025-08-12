@@ -1,4 +1,4 @@
-import { CorrelationId } from '@abyss/shared-types';
+import { CorrelationId } from '@template/shared-types';
 
 export interface IMigration {
   id: string;

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { UserService } from '../services/user.service';
-import { ApiError, ApiResponse } from '@abyss/shared-utils';
+import { ApiError, ApiResponse } from '@template/shared-utils';
 import { Pool } from 'pg';
 
 interface AuthRequest extends Request {

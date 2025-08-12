@@ -7,7 +7,7 @@ import speakeasy from 'speakeasy';
 import QRCode from 'qrcode';
 import crypto from 'crypto';
 import { CorrelatedLogger } from '../utils/logger';
-import { CorrelationId, EntityId } from '@abyss/shared-types';
+import { CorrelationId, EntityId } from '@template/shared-types';
 
 export interface IMfaSetupResult {
   secret: string;

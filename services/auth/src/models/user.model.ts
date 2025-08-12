@@ -1,4 +1,4 @@
-import { BaseEntity, AuditableEntity } from '@abyss/shared-types';
+import { BaseEntity, AuditableEntity } from '@template/shared-types';
 
 export interface IUser extends BaseEntity, AuditableEntity {
   email: string;

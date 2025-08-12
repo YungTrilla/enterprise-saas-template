@@ -4,7 +4,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { EntityId, CorrelationId } from '@abyss/shared-types';
+import { EntityId, CorrelationId } from '@template/shared-types';
 import { IRole } from '../types/auth';
 import { AuthRepository } from '../database/repository';
 import { CorrelatedLogger } from '../utils/logger';

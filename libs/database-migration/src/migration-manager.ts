@@ -12,7 +12,7 @@ import {
   loadMigrationFile,
   calculateChecksum,
 } from './utils';
-import { CorrelationId } from '@abyss/shared-types';
+import { CorrelationId } from '@template/shared-types';
 
 export class MigrationManager {
   private client: DatabaseClient;

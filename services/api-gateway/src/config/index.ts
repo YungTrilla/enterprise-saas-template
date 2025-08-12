@@ -3,9 +3,9 @@
  * Central configuration for gateway service
  */
 
-import { IServiceInfo } from '@abyss/shared-types';
-import { validateEnvVar, parseBoolean, parseNumber } from '@abyss/shared-utils';
-import { getRedisConfig } from '@abyss/shared-config';
+import { IServiceInfo } from '@template/shared-types';
+import { validateEnvVar, parseBoolean, parseNumber } from '@template/shared-utils';
+import { getRedisConfig } from '@template/shared-config';
 
 export interface IGatewayConfig {
   port: number;

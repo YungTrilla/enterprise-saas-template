@@ -1,7 +1,7 @@
 import * as dotenv from 'dotenv';
 import Joi from 'joi';
 import { z } from 'zod';
-import { validateWithJoi, validateWithZod } from '@abyss/shared-utils';
+import { validateWithJoi, validateWithZod } from '@template/shared-utils';
 
 // ========================================
 // Types and Interfaces

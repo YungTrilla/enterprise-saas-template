@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { UserController } from '../controllers/user.controller';
 import { authenticate, authorize } from '../middleware/auth.middleware';
-import { validate, validateQuery, validateParams } from '@abyss/shared-utils/validation';
+import { validate, validateQuery, validateParams } from '@template/shared-utils/validation';
 import { userValidation, paramValidation, bulkValidation } from '../validation/user.validation';
 
 const router = Router();

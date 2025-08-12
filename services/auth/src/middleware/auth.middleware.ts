@@ -9,7 +9,7 @@ import { AuthService } from '../services/auth.service';
 import { JwtService } from '../services/jwt.service';
 import { RbacService } from '../services/rbac.service';
 import { IAuthContext, IPermissionCheck } from '../types/auth';
-import { CorrelationId } from '@abyss/shared-types';
+import { CorrelationId } from '@template/shared-types';
 import { CorrelatedLogger, SecurityLogger } from '../utils/logger';
 
 // Extend Express Request to include auth context

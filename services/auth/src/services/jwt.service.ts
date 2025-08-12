@@ -6,7 +6,7 @@
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import { IAuthConfig, IJwtPayload, ITokenPair, IRefreshTokenPayload } from '../types/auth';
-import { EntityId, CorrelationId } from '@abyss/shared-types';
+import { EntityId, CorrelationId } from '@template/shared-types';
 import { CorrelatedLogger } from '../utils/logger';
 
 export class JwtService {

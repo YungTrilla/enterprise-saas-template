@@ -3,7 +3,7 @@
  * Comprehensive audit logging for security and compliance
  */
 
-import { EntityId, CorrelationId } from '@abyss/shared-types';
+import { EntityId, CorrelationId } from '@template/shared-types';
 import { IAuthAuditLog, AuthAuditAction, ISecurityEvent, SecurityEventType, SecuritySeverity } from '../types/auth';
 import { CorrelatedLogger } from '../utils/logger';
 

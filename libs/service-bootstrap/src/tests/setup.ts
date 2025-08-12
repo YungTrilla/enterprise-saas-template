@@ -1,5 +1,5 @@
 // Mock modules
-jest.mock('@abyss/shared-config', () => ({
+jest.mock('@template/shared-config', () => ({
   loadConfig: jest.fn().mockResolvedValue(undefined),
   getConfig: jest.fn().mockReturnValue({
     NODE_ENV: 'test',
@@ -7,7 +7,7 @@ jest.mock('@abyss/shared-config', () => ({
   })
 }));
 
-jest.mock('@abyss/shared-utils', () => ({
+jest.mock('@template/shared-utils', () => ({
   generateCorrelationId: jest.fn(() => 'test-correlation-id'),
   errorHandler: jest.fn((err: any, req: any, res: any, next: any) => {
     res.status(err.status || 500).json({ error: err.message });

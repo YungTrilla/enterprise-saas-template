@@ -3,7 +3,7 @@
  * Manages user sessions with Redis for high performance
  */
 
-import { EntityId, CorrelationId } from '@abyss/shared-types';
+import { EntityId, CorrelationId } from '@template/shared-types';
 import { IUserSession } from '../types/auth';
 import { CorrelatedLogger } from '../utils/logger';
 

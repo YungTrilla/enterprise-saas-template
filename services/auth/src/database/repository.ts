@@ -4,8 +4,8 @@
  */
 
 import { Pool, PoolClient } from 'pg';
-import { EntityId, CorrelationId } from '@abyss/shared-types';
-import { getDatabaseConfig } from '@abyss/shared-config';
+import { EntityId, CorrelationId } from '@template/shared-types';
+import { getDatabaseConfig } from '@template/shared-config';
 import { 
   IUser, IRole, IPermission, IUserSession, IAuthAuditLog, ISecurityEvent,
   AuthAuditAction, SecurityEventType, SecuritySeverity,

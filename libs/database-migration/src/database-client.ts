@@ -1,8 +1,8 @@
 import { Pool, PoolClient, PoolConfig } from 'pg';
 import { neon, neonConfig } from '@neondatabase/serverless';
 import { INeonConfig, IMigrationLogger } from './types';
-import { retryWithBackoff } from '@abyss/shared-utils';
-import { CorrelationId } from '@abyss/shared-types';
+import { retryWithBackoff } from '@template/shared-utils';
+import { CorrelationId } from '@template/shared-types';
 
 export class DatabaseClient {
   private pool: Pool | null = null;

@@ -5,7 +5,7 @@
 
 import { Request, Response, NextFunction } from 'express';
 import axios, { AxiosRequestConfig, AxiosError } from 'axios';
-import { CorrelationId } from '@abyss/shared-types';
+import { CorrelationId } from '@template/shared-types';
 import { getServiceRegistry, IServiceRegistry } from '../config';
 import { circuitBreakerRegistry } from './circuit-breaker.service';
 import { createLogger } from '../utils/logger';

@@ -1,0 +1,49 @@
+# Enterprise SaaS Template - Modularity Checklist
+
+## 🚨 VERIFY BEFORE EVERY COMMIT
+
+### 1. Explicit Architectural Blueprints & Design
+- [ ] Detailed Modularity Prompts: Are prompts explicitly requesting modular design with constraints for individual modules?
+- [ ] Interface Definition (API-First): Have clear APIs/interface contracts (OpenAPI specs, function signatures) been defined for each module *before* generating full code?
+- [ ] Design Pattern Specification: Are specific software design patterns being used to promote modularity (publish-subscribe, dependency injection)?
+- [ ] Security Architecture Planning: Has security been designed into each module from the start (not bolted on)?
+
+### 2. Architectural Style Guidance
+- [ ] Microservices/SOA Implementation: Are distinct services developed as separate, independent components?
+- [ ] 4-Layer Architecture Within Apps: Are applications structured with distinct layers?
+  - [ ] Presentation Layer (UI): Handles user interaction only
+  - [ ] Business Logic Layer: Contains application-specific rules and workflows  
+  - [ ] Data Access Layer: Manages database/data store communication
+  - [ ] API Layer: Exposes functionality to other internal services
+- [ ] Independent Components: Are features broken into smaller components with well-defined responsibilities?
+- [ ] Event-Driven Patterns: Are event-driven approaches used for loose coupling between services?
+
+### 3. Standardization of Communication and Data
+- [ ] Inter-Service API-First Design: Do services communicate only through well-documented APIs (no direct access)?
+- [ ] Internal Component Interfaces: Are clear contracts defined between layers/components within apps?
+- [ ] Shared Libraries for Common Concerns: Are core shared libraries being developed/utilized for auth, UI themes, cross-cutting concerns?
+- [ ] Component-Based UI Architecture: Are reusable UI components developed for consistent theming?
+- [ ] Common Data Models: Are standardized data formats (JSON schemas) defined and enforced for inter-service information exchange?
+- [ ] Centralized Authentication: Is unified authentication implemented as shared service?
+
+### 4. Human Oversight and Iterative Refinement
+- [ ] Human Architectural Oversight: Has a human architect defined overall modular structure and interfaces?
+- [ ] Module-Specific AI Prompts: Are AI agent prompts narrowly focused on specific modules/boundaries?
+- [ ] AI Agent Isolation: Are AI agents prevented from accessing internals of modules they're not assigned to?
+- [ ] Modularity-Focused Code Reviews: Is code being reviewed specifically for adherence to modular design, interface contracts, and separation of concerns?
+- [ ] AI-Assisted Refactoring: Are specific prompts being used to refactor monolithic code into modular structures?
+- [ ] Iterative Modular Development: Starting coarse, then iteratively refining modularity?
+- [ ] Task Decomposition: Are complex development tasks broken down into smaller, focused assignments?
+
+### 5. Tooling and Development Environment
+- [ ] Modular Version Control: Are different modules managed with reinforced separation (separate directories, clear boundaries)?
+- [ ] Rigorous Testing Strategy: Are comprehensive tests implemented?
+  - [ ] Unit Tests: Individual modules/components tested in isolation
+  - [ ] Integration Tests: Component interactions within apps tested
+  - [ ] Contract Tests: Inter-service API communication verified
+  - [ ] Security Tests: Penetration testing, vulnerability scanning, security audits
+- [ ] Automated Interface Testing: Are automated tests implemented for each module, focusing on defined interfaces for independent functionality?
+- [ ] Minimize Direct Dependencies: Do components interact only through declared interfaces?
+- [ ] Security Tooling Integration: Dependency scanning, container scanning, SAST/DAST tools configured?
+
+## 🚨 CRITICAL: Review this checklist before every development session and commit!

@@ -24,7 +24,7 @@ module.exports = {
   },
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
-    '^@abyss/(.*)$': '<rootDir>/../../libs/$1/src',
+    '^@template/(.*)$': '<rootDir>/../../libs/$1/src',
   },
   setupFilesAfterEnv: ['<rootDir>/src/__tests__/setup.ts'],
   testTimeout: 10000,

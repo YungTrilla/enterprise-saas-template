@@ -1,0 +1,74 @@
+# Enterprise SaaS Template - House Rules
+
+## 🚨 MANDATORY RULES - ALWAYS FOLLOW THESE
+
+### Code Organization
+- Keep files under 200-300 lines; refactor if they grow larger
+- NEVER go over 500 lines in one file/module
+- Each function should be 10-30 lines
+- Each class should be 50-200 lines
+- Use explicit, descriptive variable names
+- Follow existing coding style for consistency
+- Always follow modular design for maintainability and reusability
+
+### Environment Awareness
+- Always consider dev, test, and production environments when writing code
+- Avoid hardcoding environment-specific values; use configuration files or environment variables
+
+### Security - CRITICAL SECURITY PROTOCOLS
+- Security-first mindset - security considerations in EVERY design decision
+- NEVER expose sensitive data (PII, API keys, passwords, tokens, financial data)
+- Implement defense in depth - multiple layers of security controls
+- Follow principle of least privilege - minimal access rights only
+- Input validation on ALL data - sanitize, validate, escape user inputs
+- Secure authentication/authorization - proper JWT handling, session management
+- Encrypt data at rest and in transit - TLS 1.3, database encryption
+- Security logging and monitoring - track access patterns, failed attempts
+- Regular security reviews - code audits, dependency scans, penetration testing
+- Incident response plan - clear procedures for security breaches
+
+### Performance
+- Optimize for performance where applicable
+- Avoid unnecessary computations and memory usage
+
+### Documentation
+- Document complex logic and decisions
+- Use comments to clarify intent, not to restate code
+- Update architectural documentation when making structural changes
+- Maintain implementation plans for new features
+
+### Testing
+- Comprehensive test coverage required for all new/modified code
+- Use assertions to validate assumptions and catch errors early
+- Consider edge cases in all logic
+- Follow 3-tier testing strategy (unit, integration, contract tests)
+
+### Data Handling
+- Do NOT include user-identifying information in anonymous contexts
+- Use named constants instead of magic numbers
+
+### Error Handling
+- Implement robust error handling and logging
+- Provide clear error messages and fail gracefully
+
+### Project Workflow
+- Follow implementation plan workflow for new features
+- Update progress tracking after each implementation step
+
+### Verification
+- Always verify information from context before presenting or acting on it
+- Do NOT make assumptions without evidence in code or documentation
+
+### Simplicity First
+- Make every change as simple as possible - complexity should be justified
+- Minimize impact radius - each change should touch the fewest files possible
+- Incremental improvements - prefer many small changes over one large change
+- Break down complex tasks - split into smaller, manageable pieces
+- YAGNI principle - You Aren't Gonna Need It - don't add functionality until necessary
+- Single responsibility per change - each commit should do ONE thing well
+- Prefer modification over creation - update existing code before creating new files
+- Stop and reassess if:
+  * A change touches more than 5 files
+  * A function grows beyond 30 lines
+  * You're adding more than 200 lines in one commit
+  * You need to refactor before implementing the actual change

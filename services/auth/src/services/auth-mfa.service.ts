@@ -3,7 +3,7 @@
  * Handles Multi-Factor Authentication setup and verification
  */
 
-import { EntityId, CorrelationId } from '@abyss/shared-types';
+import { EntityId, CorrelationId } from '@template/shared-types';
 import { IMfaSetupResponse, IMfaVerifyRequest, IAuthConfig } from '../types/auth';
 import { MfaService } from './mfa.service';
 import { AuditService } from './audit.service';
