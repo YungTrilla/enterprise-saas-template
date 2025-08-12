@@ -62,7 +62,7 @@ export const DropdownMenuTrigger: React.FC<DropdownMenuTriggerProps> = ({
       onClick: handleClick,
       'aria-expanded': open,
       'aria-haspopup': 'menu',
-    } as any);
+    } as React.ComponentPropsWithoutRef<typeof children.type>);
   }
 
   return (
@@ -206,7 +206,7 @@ export const DropdownMenuItem: React.FC<DropdownMenuItemProps> = ({
       onKeyDown={e => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          handleClick(e as any);
+          handleClick(e as React.MouseEvent<HTMLDivElement>);
         }
       }}
     >

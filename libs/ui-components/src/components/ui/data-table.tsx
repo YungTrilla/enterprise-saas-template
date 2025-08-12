@@ -3,8 +3,7 @@ import { cn } from '../../lib/utils';
 import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
 import { Button } from './button';
 import { Input } from './input';
-import { Badge } from './badge';
-import { Skeleton, SkeletonTableRow } from './skeleton';
+import { SkeletonTableRow } from './skeleton';
 
 export interface Column<T> {
   id: string;

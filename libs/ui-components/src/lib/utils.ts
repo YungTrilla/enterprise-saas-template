@@ -17,12 +17,12 @@ export function cn(...inputs: ClassValue[]) {
  * @param defaultValue - Default value if property doesn't exist
  * @returns The property value or default value
  */
-export function get(obj: any, path: string, defaultValue?: any) {
+export function get(obj: Record<string, unknown>, path: string, defaultValue?: unknown) {
   const travel = (regexp: RegExp) =>
     String.prototype.split
       .call(path, regexp)
       .filter(Boolean)
-      .reduce((res, key) => (res !== null && res !== undefined ? res[key] : res), obj);
+      .reduce((res: unknown, key: string) => (res !== null && res !== undefined && typeof res === 'object' && res !== null && key in res ? (res as Record<string, unknown>)[key] : res), obj);
   const result = travel(/[,[\]]+?/) || travel(/[,[\].]+?/);
   return result === undefined || result === obj ? defaultValue : result;
 }
@@ -66,7 +66,7 @@ export function truncateText(text: string, length: number): string {
  * @param wait - Wait time in milliseconds
  * @returns Debounced function
  */
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {
