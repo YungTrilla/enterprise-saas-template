@@ -1,0 +1,71 @@
+# Semgrep Configuration for Enterprise SaaS Template
+# Static Application Security Testing (SAST) rules
+
+rules:
+  # Include standard security rulesets
+  - p/owasp-top-ten
+  - p/security-audit
+  - p/javascript
+  - p/typescript
+  - p/react
+  - p/express
+  - p/postgres
+  - p/jwt
+  - p/secrets
+
+# Custom rules for Enterprise SaaS Template
+extends:
+  - auto
+
+# Path configuration
+paths:
+  include:
+    - "apps/"
+    - "libs/"
+    - "services/"
+  exclude:
+    - "node_modules/"
+    - "dist/"
+    - "build/"
+    - "coverage/"
+    - "*.test.ts"
+    - "*.spec.ts"
+    - "test-results/"
+    - "playwright-report/"
+
+# Severity configuration
+severity:
+  # Block CI on high/critical findings
+  error:
+    - ERROR
+    - WARNING
+  # Report but don't block on info
+  warning:
+    - INFO
+
+# Output configuration
+output:
+  format: sarif
+  destination: semgrep-results.sarif
+
+# Performance configuration
+max_target_bytes: 1000000  # 1MB max file size
+timeout: 30                # 30 second timeout per rule
+timeout_threshold: 3       # Skip file after 3 timeouts
+
+# Rule customization
+rule_config:
+  # Disable noisy rules that don't apply to template context
+  rules:
+    javascript.express.security.audit.express-cookie-session-no-secrets.express-cookie-session-no-secrets:
+      disable: true
+    javascript.lang.security.audit.crypto-js-hardcoded-secret.crypto-js-hardcoded-secret:
+      disable: true
+      
+  # Customize rule severity for template security
+  javascript.lang.security.audit.hardcoded-secret.hardcoded-secret:
+    severity: ERROR
+  javascript.express.security.audit.express-session-no-secret.express-session-no-secret:
+    severity: ERROR
+  typescript.react.security.audit.react-dangerouslysetinnerhtml.react-dangerouslysetinnerhtml:
+    severity: WARNING
